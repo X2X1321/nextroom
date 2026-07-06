@@ -3,6 +3,7 @@ import datetime
 import json
 import secrets
 import logging
+import threading
 import urllib.request
 import urllib.error
 
@@ -646,8 +647,22 @@ def send_message(request, slug):
 
         user_message = Message.objects.create(room=room, user=request.user, content=content)
         bot_user = get_ai_bot_user()
-        bot_content = fetch_ai_response(alias, prompt, integration)
-        bot_message = Message.objects.create(room=room, user=bot_user, content=bot_content)
+
+        from django.db import connection
+        use_async = connection.vendor != 'sqlite'
+
+        def create_bot_message():
+            try:
+                bot_content = fetch_ai_response(alias, prompt, integration)
+            except Exception as exc:
+                bot_content = f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
+            Message.objects.create(room=room, user=bot_user, content=bot_content)
+
+        if use_async:
+            thread = threading.Thread(target=create_bot_message)
+            thread.start()
+        else:
+            create_bot_message()
 
         return JsonResponse({
             'status': 'success',
@@ -657,13 +672,6 @@ def send_message(request, slug):
                 'is_me': True,
                 'content': user_message.content,
                 'timestamp': user_message.created_at.strftime('%H:%M'),
-            },
-            'bot_message': {
-                'id': bot_message.id,
-                'username': bot_message.user.username,
-                'is_me': False,
-                'content': bot_message.content,
-                'timestamp': bot_message.created_at.strftime('%H:%M'),
             }
         })
 

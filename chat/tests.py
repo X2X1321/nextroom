@@ -97,4 +97,5 @@ class RoomAIAccessTests(TestCase):
             )
 
         self.assertEqual(response.status_code, 200)
-        self.assertIn('bot_message', response.json())
+        self.assertIn('status', response.json())
+        self.assertTrue(Message.objects.filter(content='room-agent-response').exists())
