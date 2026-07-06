@@ -4,6 +4,7 @@ import json
 import secrets
 import logging
 import threading
+import os
 import urllib.request
 import urllib.error
 
@@ -20,8 +21,6 @@ from django.utils.text import slugify
 from django.db.models import Q, Count
 
 from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES
-
-logger = logging.getLogger(__name__)
 
 AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES}
 
@@ -61,10 +60,6 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
         raise ValueError(f'Unknown AI provider: {provider}')
     model = model or config['default_model']
     url = f"{config['base_url']}/chat/completions"
-    headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Content-Type': 'application/json',
-    }
     payload = {
         'model': model,
         'messages': [{'role': 'user', 'content': prompt}],
@@ -72,7 +67,11 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
         'temperature': 0.8,
     }
     data = json.dumps(payload).encode('utf-8')
-    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    req = urllib.request.Request(url, data=data, method='POST')
+    req.add_header('Authorization', f'Bearer {api_key}')
+    req.add_header('Content-Type', 'application/json')
+    req.add_header('User-Agent', 'NextRoom/1.0 (+https://nextroom.vercel.app)')
+    req.add_header('Accept', 'application/json')
     try:
         with urllib.request.urlopen(req, timeout=30) as response:
             body = response.read().decode('utf-8')
@@ -127,12 +126,8 @@ def yookassa_request(method, endpoint, payload=None):
     if not api_key:
         raise ValueError('YOOKASSA_SECRET_KEY is not configured in settings.')
 
-    shop_id = getattr(settings, 'YOOKASSA_SHOP_ID', None)
-    if not shop_id:
-        raise ValueError('YOOKASSA_SHOP_ID is not configured in settings.')
-
     url = f'{YOO_KASSA_API_URL}/{endpoint.lstrip("/")}'
-    auth_token = base64.b64encode(f'{shop_id}:{api_key}'.encode()).decode()
+    auth_token = base64.b64encode(f'{api_key}:'.encode()).decode()
     headers = {
         'Authorization': f'Basic {auth_token}',
         'Content-Type': 'application/json',
@@ -146,23 +141,13 @@ def yookassa_request(method, endpoint, payload=None):
     request_obj = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(request_obj, timeout=30) as response:
-            body = response.read().decode('utf-8')
-            try:
-                parsed = json.loads(body)
-            except Exception:
-                raise ValueError(f'Yookassa returned non-JSON response: {body[:500]}')
-            logger.info('Yookassa %s %s -> %s', method, url, parsed)
-            return parsed
+            return json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         error_body = e.read().decode('utf-8')
         try:
-            error_data = json.loads(error_body)
+            return json.loads(error_body)
         except Exception:
-            error_data = {'raw': error_body[:500]}
-        logger.error('Yookassa %s %s failed: %s %s', method, url, e.code, error_data)
-        raise ValueError(
-            f'Yookassa API error {e.code}: {error_data}'
-        ) from e
+            raise
 
 
 def parse_ai_command(content):
@@ -183,6 +168,27 @@ def fetch_ai_response(alias, prompt, integration):
         return fetch_chat_completion(alias, prompt, integration.api_key)
     except Exception as exc:
         return f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
+
+
+def fetch_openai_response(prompt, api_key):
+    url = 'https://api.openai.com/v1/chat/completions'
+    payload = {
+        'model': 'gpt-3.5-turbo',
+        'messages': [{'role': 'user', 'content': prompt}],
+        'max_tokens': 400,
+        'temperature': 0.8,
+    }
+    headers = {
+        'Authorization': f'Bearer {api_key}',
+        'Content-Type': 'application/json',
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    with urllib.request.urlopen(req, timeout=30) as response:
+        result = json.loads(response.read().decode('utf-8'))
+    if 'choices' in result and result['choices']:
+        return result['choices'][0]['message']['content'].strip()
+    raise ValueError('Неверный ответ от OpenAI API.')
 
 
 def create_yookassa_payment(request):
@@ -206,10 +212,7 @@ def create_yookassa_payment(request):
             'user_id': request.user.id,
         }
     }
-    payment = yookassa_request('POST', 'payments', payment_body)
-    if not isinstance(payment, dict):
-        raise ValueError(f'Unexpected Yookassa response: {payment}')
-    return payment
+    return yookassa_request('POST', 'payments', payment_body)
 
 
 def update_premium_status(profile, months=1):
@@ -452,6 +455,7 @@ def add_ai_integration(request):
     messages.success(request, f'Интеграция @{provider} сохранена.')
     return redirect('profile')
 
+@login_required
 def create_yookassa_subscription(request):
     if request.method != 'POST':
         return HttpResponseBadRequest('Invalid request method')
@@ -461,17 +465,11 @@ def create_yookassa_subscription(request):
         messages.error(request, f'Не удалось создать платеж: {str(exc)}')
         return redirect('profile')
 
-    payment_id = payment.get('id')
-    confirmation = payment.get('confirmation') or {}
-    confirmation_url = confirmation.get('confirmation_url')
-    if payment_id and confirmation_url:
-        request.session['pending_yookassa_payment'] = payment_id
-        return redirect(confirmation_url)
+    if 'confirmation' in payment and 'confirmation_url' in payment['confirmation']:
+        request.session['pending_yookassa_payment'] = payment.get('id')
+        return redirect(payment['confirmation']['confirmation_url'])
 
-    messages.error(
-        request,
-        f'Не удалось получить ссылку на оплату. payment_id={payment_id}, status={payment.get("status")}, confirmation={confirmation}'
-    )
+    messages.error(request, 'Не удалось получить ссылку на оплату.')
     return redirect('profile')
 
 @login_required
@@ -487,17 +485,12 @@ def confirm_subscription(request):
         messages.error(request, f'Ошибка проверки платежа: {str(exc)}')
         return redirect('profile')
 
-    if not isinstance(payment, dict):
-        messages.error(request, f'Некорректный ответ Юкассы: {payment}')
-        return redirect('profile')
-
     if payment.get('status') == 'succeeded':
         profile = get_user_profile(request.user)
         update_premium_status(profile)
         messages.success(request, 'Подписка Premium успешно активирована на 30 дней!')
-        return redirect('profile')
-
-    messages.error(request, f'Платеж не подтвержден. Статус: {payment.get("status")}. ID: {payment_id}')
+    else:
+        messages.error(request, 'Платеж не подтвержден. Попробуйте снова.')
     return redirect('profile')
 
 @login_required
@@ -655,13 +648,15 @@ def send_message(request, slug):
     if alias in AI_COMMAND_ALIASES:
         integration = get_room_ai_integration_for_user(request.user, room, alias)
         if not integration:
-            return JsonResponse({'error': f'Для использования @{alias} добавьте ключ API в личном кабинете или включите модель для комнаты.'}, status=400)
+            if alias == 'groq' and getattr(settings, 'GROQ_API_URL', None):
+                api_key = os.environ.get('GROQ_API_KEY', '')
+                if api_key:
+                    integration = type('GlobalGroqIntegration', (), {'api_key': api_key})()
+            if not integration:
+                return JsonResponse({'error': f'Для использования @{alias} добавьте ключ API в личном кабинете или включите модель для комнаты.'}, status=400)
 
         user_message = Message.objects.create(room=room, user=request.user, content=content)
         bot_user = get_ai_bot_user()
-
-        from django.db import connection
-        use_async = connection.vendor != 'sqlite'
 
         def create_bot_message():
             try:
@@ -670,6 +665,8 @@ def send_message(request, slug):
                 bot_content = f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
             Message.objects.create(room=room, user=bot_user, content=bot_content)
 
+        from django.db import connection
+        use_async = connection.vendor != 'sqlite'
         if use_async:
             thread = threading.Thread(target=create_bot_message)
             thread.start()
