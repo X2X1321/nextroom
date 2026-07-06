@@ -59,6 +59,21 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
     if not config:
         raise ValueError(f'Unknown AI provider: {provider}')
     model = model or config['default_model']
+
+    if provider == 'groq':
+        try:
+            from groq import Groq
+            client = Groq(api_key=api_key)
+            completion = client.chat.completions.create(
+                model=model,
+                messages=[{'role': 'user', 'content': prompt}],
+                max_tokens=400,
+                temperature=0.8,
+            )
+            return completion.choices[0].message.content.strip()
+        except Exception as exc:
+            raise ValueError(f'Groq API error: {str(exc)}') from exc
+
     url = f"{config['base_url']}/chat/completions"
     payload = {
         'model': model,
@@ -87,14 +102,13 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
             message = message.get('message') or message.get('code') or message
         raise ValueError(f'AI API error {exc.code}: {message}') from exc
     if 'choices' in result and result['choices']:
-        message = result['choices'][0]['message']
-        content = message.get('content', '').strip()
+        content = result['choices'][0]['message'].get('content', '').strip()
         if content:
             return content
-        reasoning = message.get('reasoning', '').strip()
+        reasoning = result['choices'][0]['message'].get('reasoning', '').strip()
         if reasoning:
             return reasoning
-        return str(message)
+        return str(result['choices'][0]['message'])
     raise ValueError('Неверный ответ от AI API.')
 
 
