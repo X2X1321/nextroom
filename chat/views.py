@@ -33,7 +33,7 @@ AI_PROVIDERS = {
     },
     'groq': {
         'base_url': 'https://api.groq.com/openai/v1',
-        'default_model': 'llama-3.1-8b-instant',
+        'default_model': 'llama-3.3-70b-versatile',
     },
     'grok': {
         'base_url': 'https://api.x.ai/v1',
@@ -87,7 +87,14 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
             message = message.get('message') or message.get('code') or message
         raise ValueError(f'AI API error {exc.code}: {message}') from exc
     if 'choices' in result and result['choices']:
-        return result['choices'][0]['message']['content'].strip()
+        message = result['choices'][0]['message']
+        content = message.get('content', '').strip()
+        if content:
+            return content
+        reasoning = message.get('reasoning', '').strip()
+        if reasoning:
+            return reasoning
+        return str(message)
     raise ValueError('Неверный ответ от AI API.')
 
 
