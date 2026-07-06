@@ -115,56 +115,40 @@
             </a>
 
             {% if user.is_authenticated %}
-            <span class="hidden sm:inline-flex items-center gap-2 text-sm text-slate-400">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                {{ user.username }}
-            </span>
-            {% endif %}
-
-            <!-- Mobile hamburger -->
-            <button id="mobile-menu-toggle" class="sm:hidden inline-flex items-center justify-center rounded-lg p-2 text-slate-300 hover:text-white transition" aria-label="Open menu">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
-            </button>
-
             <!-- Navigation Links -->
             <nav class="hidden sm:flex sm:items-center gap-3 sm:gap-4">
-                {% if user.is_authenticated %}
-                <span class="hidden sm:inline-flex items-center gap-2 text-sm text-slate-400">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    {{ user.username }}
-                </span>
-                <a href="{% url 'dashboard' %}" 
-                    class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-                    <span class="relative z-10">Панель комнат</span>
-                </a>
-                <a href="{% url 'profile' %}" 
-                    class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-                    <span class="relative z-10">Мой кабинет</span>
-                </a>
-                <a href="{% url 'logout' %}" 
-                    class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-red-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-red-900/40 transition duration-300"></span>
-                    <span class="relative z-10">Выйти</span>
-                </a>
+                    <a href="{% url 'dashboard' %}" 
+                        class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                        <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                        <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                        <span class="relative z-10">Панель комнат</span>
+                    </a>
+                    <a href="{% url 'profile' %}" 
+                        class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                        <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                        <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                        <span class="relative z-10">Мой кабинет</span>
+                    </a>
+                    <a href="{% url 'logout' %}" 
+                        class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                        <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-red-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                        <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-red-900/40 transition duration-300"></span>
+                        <span class="relative z-10">Выйти</span>
+                    </a>
                 {% else %}
-                <a href="{% url 'login' %}" 
-                    class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-                    <span class="relative z-10">Войти</span>
-                </a>
-                
-                <a href="{% url 'register' %}" 
-                    class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-                    <span class="relative z-10">Создать аккаунт</span>
-                </a>
+                    <a href="{% url 'login' %}" 
+                        class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                        <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                        <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                        <span class="relative z-10">Войти</span>
+                    </a>
+                    
+                    <a href="{% url 'register' %}" 
+                        class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                        <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                        <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                        <span class="relative z-10">Создать аккаунт</span>
+                    </a>
                 {% endif %}
             </nav>
         </div>
