@@ -694,14 +694,10 @@ def send_message(request, slug):
     if alias in AI_COMMAND_ALIASES:
         integration = get_room_ai_integration_for_user(request.user, room, alias)
         if not integration:
-            if alias == 'groq' and getattr(settings, 'GROQ_API_URL', None):
-                api_key = os.environ.get('GROQ_API_KEY', '')
-                if api_key:
-                    integration = type('GlobalGroqIntegration', (), {'api_key': api_key})()
+            if alias == 'groq' and getattr(settings, 'GROQ_API_KEY', None):
+                integration = type('GlobalGroqIntegration', (), {'api_key': settings.GROQ_API_KEY})()
             if alias == 'cerebras' and getattr(settings, 'CEREBRAS_API_KEY', None):
-                api_key = getattr(settings, 'CEREBRAS_API_KEY', '')
-                if api_key:
-                    integration = type('GlobalCerebrasIntegration', (), {'api_key': api_key})()
+                integration = type('GlobalCerebrasIntegration', (), {'api_key': settings.CEREBRAS_API_KEY})()
             if not integration:
                 return JsonResponse({'error': f'Для использования @{alias} добавьте ключ API в личном кабинете или включите модель для комнаты.'}, status=400)
 
