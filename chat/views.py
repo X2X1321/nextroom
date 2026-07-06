@@ -62,8 +62,12 @@ def yookassa_request(method, endpoint, payload=None):
     if not api_key:
         raise ValueError('YOOKASSA_SECRET_KEY is not configured in settings.')
 
+    shop_id = getattr(settings, 'YOOKASSA_SHOP_ID', None)
+    if not shop_id:
+        raise ValueError('YOOKASSA_SHOP_ID is not configured in settings.')
+
     url = f'{YOO_KASSA_API_URL}/{endpoint.lstrip("/")}'
-    auth_token = base64.b64encode(f'{api_key}:'.encode()).decode()
+    auth_token = base64.b64encode(f'{shop_id}:{api_key}'.encode()).decode()
     headers = {
         'Authorization': f'Basic {auth_token}',
         'Content-Type': 'application/json',
