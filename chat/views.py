@@ -34,7 +34,7 @@ AI_PROVIDERS = {
     },
     'groq': {
         'base_url': 'https://api.groq.com/openai/v1',
-        'default_model': 'openai/gpt-oss-120b',
+        'default_model': 'llama-3.3-70b-versatile',
     },
     'grok': {
         'base_url': 'https://api.x.ai/v1',
@@ -73,8 +73,17 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
     }
     data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request(url, data=data, headers=headers, method='POST')
-    with urllib.request.urlopen(req, timeout=30) as response:
-        result = json.loads(response.read().decode('utf-8'))
+    try:
+        with urllib.request.urlopen(req, timeout=30) as response:
+            body = response.read().decode('utf-8')
+            result = json.loads(body)
+    except urllib.error.HTTPError as exc:
+        try:
+            body = exc.read().decode('utf-8')
+            detail = json.loads(body)
+        except Exception:
+            detail = {'raw': body[:500] if 'body' in dir() else str(exc)}
+        raise ValueError(f'AI API error {exc.code}: {detail.get("error", detail)}') from exc
     if 'choices' in result and result['choices']:
         return result['choices'][0]['message']['content'].strip()
     raise ValueError('Неверный ответ от AI API.')
