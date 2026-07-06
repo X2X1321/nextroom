@@ -148,7 +148,13 @@ def create_yookassa_payment(request):
             'user_id': request.user.id,
         }
     }
-    return yookassa_request('POST', 'payments', payment_body)
+    try:
+        response = yookassa_request('POST', 'payments', payment_body)
+    except Exception as exc:  # pragma: no cover - defensive
+        raise ValueError(f'Yookassa API error: {exc}') from exc
+    if not isinstance(response, dict):
+        raise ValueError(f'Unexpected Yookassa response: {response}')
+    return response
 
 
 def update_premium_status(profile, months=1):
@@ -391,7 +397,6 @@ def add_ai_integration(request):
     messages.success(request, f'Интеграция @{provider} сохранена.')
     return redirect('profile')
 
-@login_required
 def create_yookassa_subscription(request):
     if request.method != 'POST':
         return HttpResponseBadRequest('Invalid request method')
@@ -404,10 +409,6 @@ def create_yookassa_subscription(request):
     payment_id = payment.get('id')
     confirmation_url = payment.get('confirmation', {}).get('confirmation_url')
     if payment_id and confirmation_url:
-        if '?' in confirmation_url:
-            confirmation_url = f'{confirmation_url}&payment_id={payment_id}'
-        else:
-            confirmation_url = f'{confirmation_url}?payment_id={payment_id}'
         request.session['pending_yookassa_payment'] = payment_id
         return redirect(confirmation_url)
 
