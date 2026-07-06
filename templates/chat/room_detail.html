@@ -3,9 +3,9 @@
 {% block title %}{{ room.name }} — NextRoom{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 w-full flex-grow flex flex-col h-[calc(100vh-4rem-3.5rem)] overflow-hidden">
+<div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 w-full flex-grow flex flex-col h-[calc(100vh-5rem)] overflow-hidden">
     <!-- Breadcrumb / Header navigation -->
-    <div class="flex items-center justify-between mb-4 shrink-0">
+    <div class="flex items-center justify-between mb-3 sm:mb-4 shrink-0">
         <a href="{% url 'dashboard' %}" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition group">
             <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             Назад в панель
@@ -25,18 +25,22 @@
                     Открытая
                 </span>
             {% endif %}
+
+            <!-- Mobile sidebar toggle -->
+            <button id="mobile-sidebar-toggle" class="sm:hidden inline-flex items-center justify-center rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition bg-slate-900 border border-slate-800">
+                О комнате
+            </button>
         </div>
     </div>
 
     <!-- Main Layout Container: Sidebar + Chatbox -->
-    <div class="flex flex-col md:flex-row flex-grow gap-6 overflow-hidden min-h-0">
+    <div class="flex flex-col md:flex-row flex-grow gap-4 sm:gap-6 overflow-hidden min-h-0">
         
         <!-- SIDEBAR: Room info & stats -->
-        <aside class="w-full md:w-80 flex flex-col gap-4 shrink-0 overflow-y-auto pb-4 md:pb-0">
-            <!-- Room general details -->
-            <div class="glass-panel p-5 rounded-2xl flex flex-col gap-4">
+        <aside id="room-sidebar" class="w-full md:w-80 flex flex-col gap-4 shrink-0 overflow-y-auto pb-4 md:pb-0 hidden md:flex">
+            <div class="glass-panel p-4 sm:p-5 rounded-2xl flex flex-col gap-4">
                 <div>
-                    <h1 class="text-2xl font-black text-white leading-tight truncate" title="{{ room.name }}">{{ room.name }}</h1>
+                    <h1 class="text-xl sm:text-2xl font-black text-white leading-tight truncate" title="{{ room.name }}">{{ room.name }}</h1>
                     <span class="text-xs text-slate-500 block mt-1">
                         Автор: <span class="text-slate-400 font-medium">{{ room.creator.username }}</span>
                     </span>
@@ -135,15 +139,15 @@
             </div>
 
             <!-- Messages List Container -->
-            <div id="messages-container" class="flex-grow overflow-y-auto p-6 space-y-4 flex flex-col justify-start">
+            <div id="messages-container" class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4 flex flex-col justify-start">
                 {% for msg in chat_messages %}
                     <!-- Message Bubble wrapper -->
-                    <div class="flex flex-col max-w-[80%] {% if msg.user == user %}self-end items-end{% else %}self-start items-start{% endif %}" data-message-id="{{ msg.id }}">
+                    <div class="flex flex-col max-w-[85%] sm:max-w-[80%] {% if msg.user == user %}self-end items-end{% else %}self-start items-start{% endif %}" data-message-id="{{ msg.id }}">
                         <span class="text-[10px] text-slate-500 mb-1 px-1 font-medium">
                             {% if msg.user == user %}Вы{% else %}{{ msg.user.username }}{% endif %}
                         </span>
                         
-                        <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
+                        <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
                             {{ msg.content|linebreaksbr }}
                         </div>
                         
@@ -155,7 +159,7 @@
             </div>
 
             <!-- Chat input form -->
-            <div class="p-3 sm:p-4 border-t border-slate-900 bg-slate-950/40">
+            <div class="p-3 sm:p-4 border-t border-slate-900 bg-slate-950/40 shrink-0">
     <form id="chat-form" class="flex gap-2 sm:gap-3 items-end">
         {% csrf_token %}
         <div class="flex-grow relative">
@@ -177,6 +181,29 @@
         </main>
     </div>
 </div>
+
+<script>
+    const sidebarToggle = document.getElementById('mobile-sidebar-toggle');
+    const sidebar = document.getElementById('room-sidebar');
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            const isHidden = sidebar.classList.contains('hidden');
+            sidebar.classList.toggle('hidden', !isHidden);
+            sidebar.classList.toggle('absolute', isHidden);
+            sidebar.classList.toggle('inset-0', isHidden);
+            sidebar.classList.toggle('z-30', isHidden);
+            sidebar.classList.toggle('bg-slate-950/95', isHidden);
+            sidebar.classList.toggle('backdrop-blur-md', isHidden);
+            sidebar.classList.toggle('p-4', isHidden);
+            sidebar.classList.toggle('md:relative', !isHidden);
+            sidebar.classList.toggle('md:inset-auto', !isHidden);
+            sidebar.classList.toggle('md:z-auto', !isHidden);
+            sidebar.classList.toggle('md:bg-transparent', !isHidden);
+            sidebar.classList.toggle('md:backdrop-blur-none', !isHidden);
+            sidebarToggle.textContent = isHidden ? 'Скрыть' : 'О комнате';
+        });
+    }
+</script>
 {% endblock %}
 
 {% block extra_js %}
