@@ -2,6 +2,7 @@ import base64
 import datetime
 import json
 import secrets
+import logging
 import urllib.request
 import urllib.error
 
@@ -18,6 +19,8 @@ from django.utils.text import slugify
 from django.db.models import Q, Count
 
 from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES
+
+logger = logging.getLogger(__name__)
 
 AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES}
 
@@ -74,13 +77,23 @@ def yookassa_request(method, endpoint, payload=None):
     request_obj = urllib.request.Request(url, data=data, headers=headers, method=method)
     try:
         with urllib.request.urlopen(request_obj, timeout=30) as response:
-            return json.loads(response.read().decode('utf-8'))
+            body = response.read().decode('utf-8')
+            try:
+                parsed = json.loads(body)
+            except Exception:
+                raise ValueError(f'Yookassa returned non-JSON response: {body[:500]}')
+            logger.info('Yookassa %s %s -> %s', method, url, parsed)
+            return parsed
     except urllib.error.HTTPError as e:
         error_body = e.read().decode('utf-8')
         try:
-            return json.loads(error_body)
+            error_data = json.loads(error_body)
         except Exception:
-            raise
+            error_data = {'raw': error_body[:500]}
+        logger.error('Yookassa %s %s failed: %s %s', method, url, e.code, error_data)
+        raise ValueError(
+            f'Yookassa API error {e.code}: {error_data}'
+        ) from e
 
 
 def parse_ai_command(content):
@@ -148,13 +161,10 @@ def create_yookassa_payment(request):
             'user_id': request.user.id,
         }
     }
-    try:
-        response = yookassa_request('POST', 'payments', payment_body)
-    except Exception as exc:  # pragma: no cover - defensive
-        raise ValueError(f'Yookassa API error: {exc}') from exc
-    if not isinstance(response, dict):
-        raise ValueError(f'Unexpected Yookassa response: {response}')
-    return response
+    payment = yookassa_request('POST', 'payments', payment_body)
+    if not isinstance(payment, dict):
+        raise ValueError(f'Unexpected Yookassa response: {payment}')
+    return payment
 
 
 def update_premium_status(profile, months=1):
@@ -407,12 +417,16 @@ def create_yookassa_subscription(request):
         return redirect('profile')
 
     payment_id = payment.get('id')
-    confirmation_url = payment.get('confirmation', {}).get('confirmation_url')
+    confirmation = payment.get('confirmation') or {}
+    confirmation_url = confirmation.get('confirmation_url')
     if payment_id and confirmation_url:
         request.session['pending_yookassa_payment'] = payment_id
         return redirect(confirmation_url)
 
-    messages.error(request, 'Не удалось получить ссылку на оплату.')
+    messages.error(
+        request,
+        f'Не удалось получить ссылку на оплату. payment_id={payment_id}, status={payment.get("status")}, confirmation={confirmation}'
+    )
     return redirect('profile')
 
 @login_required
@@ -428,12 +442,17 @@ def confirm_subscription(request):
         messages.error(request, f'Ошибка проверки платежа: {str(exc)}')
         return redirect('profile')
 
+    if not isinstance(payment, dict):
+        messages.error(request, f'Некорректный ответ Юкассы: {payment}')
+        return redirect('profile')
+
     if payment.get('status') == 'succeeded':
         profile = get_user_profile(request.user)
         update_premium_status(profile)
         messages.success(request, 'Подписка Premium успешно активирована на 30 дней!')
-    else:
-        messages.error(request, 'Платеж не подтвержден. Попробуйте снова.')
+        return redirect('profile')
+
+    messages.error(request, f'Платеж не подтвержден. Статус: {payment.get("status")}. ID: {payment_id}')
     return redirect('profile')
 
 @login_required
