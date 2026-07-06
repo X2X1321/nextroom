@@ -166,16 +166,19 @@ def landing(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     
-    # Calculate some stats for the landing page
-    active_rooms = Room.objects.filter(messages__isnull=False).distinct().count()
-    online_users = User.objects.filter(last_login__gte=timezone.now() - datetime.timedelta(minutes=5), is_active=True).distinct().count()
-    total_messages = Message.objects.count()
-    total_rooms = Room.objects.count()
-    
-    # Top 3 active rooms based on message count
-    featured_rooms = Room.objects.annotate(
-        msg_count=Count('messages')
-    ).filter(is_private=False).order_by('-msg_count')[:3]
+    active_rooms = 0
+    online_users = 0
+    total_messages = 0
+    total_rooms = 0
+    featured_rooms = []
+    try:
+        active_rooms = Room.objects.filter(messages__isnull=False).distinct().count()
+        online_users = User.objects.filter(last_login__gte=timezone.now() - datetime.timedelta(minutes=5), is_active=True).distinct().count()
+        total_messages = Message.objects.count()
+        total_rooms = Room.objects.count()
+        featured_rooms = Room.objects.annotate(msg_count=Count('messages')).filter(is_private=False).order_by('-msg_count')[:3]
+    except Exception:
+        pass
 
     context = {
         'active_rooms': active_rooms,

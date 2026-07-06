@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
+from django.core.exceptions import ImproperlyConfigured
+
 import os
 import urllib.parse
 from pathlib import Path
@@ -85,7 +87,6 @@ DATABASES = {
 }
 
 
-# Database URL configuration (Vercel / Neon / PostgreSQL)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     url = urllib.parse.urlparse(DATABASE_URL)
@@ -101,6 +102,10 @@ if DATABASE_URL:
             'sslmode': 'require',
         },
     }
+elif not (BASE_DIR / 'db.sqlite3').exists() and os.environ.get('VERCEL'):
+    raise ImproperlyConfigured(
+        'DATABASE_URL is not configured. Set DATABASE_URL to your Neon/PostgreSQL database URL in Vercel environment variables.'
+    )
 
 
 # Password validation
