@@ -14,3 +14,9 @@ from django.core.asgi import get_asgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nextroom_project.settings')
 
 application = get_asgi_application()
+
+from django.core.management import call_command
+try:
+    call_command('migrate', '--run-syncdb', verbosity=0)
+except Exception:
+    pass
