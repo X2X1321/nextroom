@@ -51,6 +51,10 @@ AI_PROVIDERS = {
         'base_url': 'https://api.anthropic.com/v1',
         'default_model': 'claude-3-5-sonnet-20240620',
     },
+    'cerebras': {
+        'base_url': 'https://api.cerebras.ai/v1',
+        'default_model': 'zai-glm-4.7',
+    },
 }
 
 
@@ -73,6 +77,27 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
             return completion.choices[0].message.content.strip()
         except Exception as exc:
             raise ValueError(f'Groq API error: {str(exc)}') from exc
+
+    if provider == 'cerebras':
+        try:
+            from cerebras.cloud.sdk import Cerebras
+            client = Cerebras(api_key=api_key)
+            stream = client.chat.completions.create(
+                messages=[{'role': 'user', 'content': prompt}],
+                model=model,
+                max_completion_tokens=400,
+                temperature=0.8,
+                top_p=1,
+                stream=True,
+            )
+            content = ''
+            for chunk in stream:
+                delta = chunk.choices[0].delta
+                text = delta.content or delta.reasoning or ''
+                content += text
+            return content.strip()
+        except Exception as exc:
+            raise ValueError(f'Cerebras API error: {str(exc)}') from exc
 
     url = f"{config['base_url']}/chat/completions"
     payload = {
@@ -673,6 +698,10 @@ def send_message(request, slug):
                 api_key = os.environ.get('GROQ_API_KEY', '')
                 if api_key:
                     integration = type('GlobalGroqIntegration', (), {'api_key': api_key})()
+            if alias == 'cerebras' and getattr(settings, 'CEREBRAS_API_KEY', None):
+                api_key = getattr(settings, 'CEREBRAS_API_KEY', '')
+                if api_key:
+                    integration = type('GlobalCerebrasIntegration', (), {'api_key': api_key})()
             if not integration:
                 return JsonResponse({'error': f'Для использования @{alias} добавьте ключ API в личном кабинете или включите модель для комнаты.'}, status=400)
 

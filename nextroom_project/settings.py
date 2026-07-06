@@ -160,6 +160,9 @@ LOGIN_URL = 'login'
 # Groq AI gateway settings
 GROQ_API_URL = os.environ.get('GROQ_API_URL', 'https://api.groq.com/openai/v1')
 
+# Cerebras AI gateway settings
+CEREBRAS_API_KEY = os.environ.get('CEREBRAS_API_KEY', '')
+
 # Yookassa payment gateway settings
 YOOKASSA_SHOP_ID = '1293287'
 YOOKASSA_SECRET_KEY = 'live_LUlJpXlfNoNruDN9BVI2V0ixagw3sce7FAX4d3dcSIE'

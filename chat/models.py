@@ -15,6 +15,7 @@ AI_PROVIDER_CHOICES = [
     ('deepseek', 'DeepSeek'),
     ('qwen', 'Qwen'),
     ('claude', 'Claude'),
+    ('cerebras', 'Cerebras'),
 ]
 
 SUBSCRIPTION_PLANS = [
