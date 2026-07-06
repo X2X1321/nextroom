@@ -209,5 +209,17 @@
     </footer>
 
     {% block extra_js %}{% endblock %}
+
+    <script>
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileMenuToggle && mobileMenu) {
+            mobileMenuToggle.addEventListener('click', () => {
+                const isHidden = mobileMenu.classList.contains('hidden');
+                mobileMenu.classList.toggle('hidden', !isHidden);
+                mobileMenuToggle.setAttribute('aria-expanded', String(isHidden));
+            });
+        }
+    </script>
 </body>
 </html>
