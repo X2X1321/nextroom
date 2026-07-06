@@ -26,6 +26,58 @@ AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES
 
 YOO_KASSA_API_URL = 'https://api.yookassa.ru/v3'
 
+AI_PROVIDERS = {
+    'gpt': {
+        'base_url': 'https://api.openai.com/v1',
+        'default_model': 'gpt-3.5-turbo',
+    },
+    'groq': {
+        'base_url': 'https://api.groq.com/openai/v1',
+        'default_model': 'openai/gpt-oss-120b',
+    },
+    'grok': {
+        'base_url': 'https://api.x.ai/v1',
+        'default_model': 'grok-beta',
+    },
+    'deepseek': {
+        'base_url': 'https://api.deepseek.com/v1',
+        'default_model': 'deepseek-chat',
+    },
+    'qwen': {
+        'base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1',
+        'default_model': 'qwen-turbo',
+    },
+    'claude': {
+        'base_url': 'https://api.anthropic.com/v1',
+        'default_model': 'claude-3-5-sonnet-20240620',
+    },
+}
+
+
+def fetch_chat_completion(provider, prompt, api_key, model=None):
+    config = AI_PROVIDERS.get(provider)
+    if not config:
+        raise ValueError(f'Unknown AI provider: {provider}')
+    model = model or config['default_model']
+    url = f"{config['base_url']}/chat/completions"
+    headers = {
+        'Authorization': f'Bearer {api_key}',
+        'Content-Type': 'application/json',
+    }
+    payload = {
+        'model': model,
+        'messages': [{'role': 'user', 'content': prompt}],
+        'max_tokens': 400,
+        'temperature': 0.8,
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
+    with urllib.request.urlopen(req, timeout=30) as response:
+        result = json.loads(response.read().decode('utf-8'))
+    if 'choices' in result and result['choices']:
+        return result['choices'][0]['message']['content'].strip()
+    raise ValueError('Неверный ответ от AI API.')
+
 
 def get_user_profile(user):
     profile, _ = UserProfile.objects.get_or_create(user=user)
@@ -114,34 +166,10 @@ def fetch_ai_response(alias, prompt, integration):
     if not prompt:
         return f'Пожалуйста, укажите запрос после команды @{alias}. Например: @{alias} расскажи анекдот.'
 
-    if alias == 'gpt':
-        try:
-            return fetch_openai_response(prompt, integration.api_key)
-        except Exception as exc:
-            return f'Ошибка при обращении к ChatGPT: {str(exc)}'
-
-    return f'Интеграция с {AI_COMMAND_ALIASES.get(alias, alias).title()} настроена, но внешнее API пока обрабатывается локально. Запрос: {prompt}'
-
-
-def fetch_openai_response(prompt, api_key):
-    url = 'https://api.openai.com/v1/chat/completions'
-    payload = {
-        'model': 'gpt-3.5-turbo',
-        'messages': [{'role': 'user', 'content': prompt}],
-        'max_tokens': 400,
-        'temperature': 0.8,
-    }
-    headers = {
-        'Authorization': f'Bearer {api_key}',
-        'Content-Type': 'application/json',
-    }
-    data = json.dumps(payload).encode('utf-8')
-    req = urllib.request.Request(url, data=data, headers=headers, method='POST')
-    with urllib.request.urlopen(req, timeout=30) as response:
-        result = json.loads(response.read().decode('utf-8'))
-    if 'choices' in result and result['choices']:
-        return result['choices'][0]['message']['content'].strip()
-    raise ValueError('Неверный ответ от OpenAI API.')
+    try:
+        return fetch_chat_completion(alias, prompt, integration.api_key)
+    except Exception as exc:
+        return f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
 
 
 def create_yookassa_payment(request):

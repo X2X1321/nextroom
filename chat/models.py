@@ -10,6 +10,7 @@ from django.utils.text import slugify
 
 AI_PROVIDER_CHOICES = [
     ('gpt', 'ChatGPT'),
+    ('groq', 'Groq'),
     ('grok', 'Grok'),
     ('deepseek', 'DeepSeek'),
     ('qwen', 'Qwen'),
