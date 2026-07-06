@@ -401,9 +401,15 @@ def create_yookassa_subscription(request):
         messages.error(request, f'Не удалось создать платеж: {str(exc)}')
         return redirect('profile')
 
-    if 'confirmation' in payment and 'confirmation_url' in payment['confirmation']:
-        request.session['pending_yookassa_payment'] = payment.get('id')
-        return redirect(payment['confirmation']['confirmation_url'])
+    payment_id = payment.get('id')
+    confirmation_url = payment.get('confirmation', {}).get('confirmation_url')
+    if payment_id and confirmation_url:
+        if '?' in confirmation_url:
+            confirmation_url = f'{confirmation_url}&payment_id={payment_id}'
+        else:
+            confirmation_url = f'{confirmation_url}?payment_id={payment_id}'
+        request.session['pending_yookassa_payment'] = payment_id
+        return redirect(confirmation_url)
 
     messages.error(request, 'Не удалось получить ссылку на оплату.')
     return redirect('profile')
