@@ -80,8 +80,9 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
 
     if provider == 'cerebras':
         try:
+            import httpx
             from cerebras.cloud.sdk import Cerebras
-            client = Cerebras(api_key=api_key)
+            client = Cerebras(api_key=api_key, http_client=httpx.Client())
             stream = client.chat.completions.create(
                 messages=[{'role': 'user', 'content': prompt}],
                 model=model,
