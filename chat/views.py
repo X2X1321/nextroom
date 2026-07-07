@@ -227,7 +227,13 @@ def sanitize_ai_response(text: str) -> str:
     text = re.sub(r'<environment_details>.*?</environment_details>', '', text, flags=re.DOTALL)
     text = re.sub(r'\*\*', '', text)
     text = re.sub(r'```', '', text)
-    return text.strip()
+    text = re.sub(r'Current time:.*?\n', '', text)
+    text = re.sub(r'Working directory:.*?\n', '', text)
+    text = re.sub(r'Workspace root folder:.*?\n', '', text)
+    text = re.sub(r'Active file:.*?\n', '', text)
+    text = re.sub(r'Visible files:.*?\n', '', text)
+    text = re.sub(r'Open tabs:.*?\n', '', text)
+    return re.sub(r'\n{2,}', '\n', text).strip()
 
 
 def fetch_openai_response(prompt, api_key):
