@@ -1,12 +1,13 @@
 import base64
 import datetime
 import json
-import secrets
 import logging
-import threading
 import os
-import urllib.request
+import re
+import secrets
+import threading
 import urllib.error
+import urllib.request
 
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
@@ -212,9 +213,17 @@ def fetch_ai_response(alias, prompt, integration):
         return f'Пожалуйста, укажите запрос после команды @{alias}. Например: @{alias} расскажи анекдот.'
 
     try:
-        return fetch_chat_completion(alias, prompt, integration.api_key)
+        text = fetch_chat_completion(alias, prompt, integration.api_key)
     except Exception as exc:
         return f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
+    return sanitize_ai_response(text)
+
+
+def sanitize_ai_response(text: str) -> str:
+    text = re.sub(r'<environment_details>.*?</environment_details>', '', text, flags=re.DOTALL)
+    text = re.sub(r'\*\*', '', text)
+    text = re.sub(r'```', '', text)
+    return text.strip()
 
 
 def fetch_openai_response(prompt, api_key):
