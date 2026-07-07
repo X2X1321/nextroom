@@ -83,17 +83,31 @@
         <aside class="flex flex-col gap-4">
             <div id="ai-panel" class="glass-panel rounded-3xl p-6">
                 <h2 class="text-lg font-bold text-white mb-4">Управление нейросетями</h2>
+                <form action="{% url 'profile' %}" method="POST" class="space-y-4">
+                    {% csrf_token %}
+                    <div>
+                        <label for="custom_prompt" class="block text-sm font-medium text-slate-300">Промпт для модели</label>
+                        <textarea id="custom_prompt" name="custom_prompt" rows="3" placeholder="Опишите, как должна общаться модель в чате." class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">{{ profile.custom_prompt }}</textarea>
+                    </div>
+                    <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                        <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                        <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                        <span class="relative z-10">Сохранить промпт</span>
+                    </button>
+                </form>
+
                 {% if profile.is_premium %}
-                <form action="{% url 'add_ai_integration' %}" method="POST" class="space-y-4">
+                <form action="{% url 'add_ai_integration' %}" method="POST" class="mt-6 space-y-4">
                     {% csrf_token %}
                     <div>
                         <label for="provider" class="block text-sm font-medium text-slate-300">Модель нейросети</label>
                         <select id="provider" name="provider" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">Выберите модель</option>
-                            {% for value, label in available_providers %}
-                                <option value="{{ value }}">{{ label }}</option>
+                            {% for provider, label, model_name in available_providers %}
+                                <option value="{{ provider }}" data-model="{{ model_name }}">{{ model_name }}</option>
                             {% endfor %}
                         </select>
+                        <input type="hidden" name="model_name" id="model_name" value="">
                     </div>
                     <div>
                         <label for="api_key" class="block text-sm font-medium text-slate-300">API ключ</label>
@@ -105,18 +119,6 @@
                         <span class="relative z-10">Сохранить ключ</span>
                     </button>
                 </form>
-                {% else %}
-                <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 space-y-4">
-                    <p class="text-sm text-slate-400">Добавление API ключей доступно только для пользователей Premium.</p>
-                    <form action="{% url 'create_yookassa_subscription' %}" method="POST" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                        {% csrf_token %}
-                        <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-                            <span class="relative z-10">Обновить до Premium</span>
-                        </button>
-                    </form>
-                </div>
                 {% endif %}
                 <div class="mt-6 space-y-3">
                     {% for integration in integrations %}
@@ -193,3 +195,15 @@
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    const providerSelect = document.getElementById('provider');
+    const modelNameInput = document.getElementById('model_name');
+    if (providerSelect && modelNameInput) {
+        providerSelect.addEventListener('change', () => {
+            const selected = providerSelect.options[providerSelect.selectedIndex];
+            modelNameInput.value = selected.getAttribute('data-model') || '';
+        });
+    }
+</script>

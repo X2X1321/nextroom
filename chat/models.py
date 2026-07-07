@@ -65,6 +65,7 @@ class UserProfile(models.Model):
     premium_until = models.DateTimeField(null=True, blank=True)
     api_keys = JSONField(default=dict, blank=True)
     visited_rooms = models.ManyToManyField(Room, related_name='visited_by', blank=True)
+    custom_prompt = models.TextField(blank=True, help_text='Дополнительные правила для нейросети в чате.')
 
     def __str__(self):
         return f'{self.user.username} profile'
@@ -90,6 +91,7 @@ class AIIntegration(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='integrations')
     provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)
     api_key = models.CharField(max_length=255)
+    model_name = models.CharField(max_length=120, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
