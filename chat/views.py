@@ -64,6 +64,10 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
     if not config:
         raise ValueError(f'Unknown AI provider: {provider}')
     model = model or config['default_model']
+    messages = [
+        {'role': 'system', 'content': 'Ты полезный ассистент. Отвечай по существу, кратко, на русском языке. Не используй markdown, спецсимволы или служебные теги. Максимум 2–3 коротких абзаца.'},
+        {'role': 'user', 'content': prompt},
+    ]
 
     if provider == 'groq':
         try:
@@ -71,8 +75,8 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
             client = Groq(api_key=api_key)
             completion = client.chat.completions.create(
                 model=model,
-                messages=[{'role': 'user', 'content': prompt}],
-                max_tokens=400,
+                messages=messages,
+                max_tokens=220,
                 temperature=0.8,
             )
             return completion.choices[0].message.content.strip()
@@ -85,9 +89,9 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
             from cerebras.cloud.sdk import Cerebras
             client = Cerebras(api_key=api_key, http_client=httpx.Client())
             stream = client.chat.completions.create(
-                messages=[{'role': 'user', 'content': prompt}],
+                messages=messages,
                 model=model,
-                max_tokens=400,
+                max_tokens=220,
                 temperature=0.8,
                 top_p=1,
                 stream=True,
@@ -104,8 +108,8 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
     url = f"{config['base_url']}/chat/completions"
     payload = {
         'model': model,
-        'messages': [{'role': 'user', 'content': prompt}],
-        'max_tokens': 400,
+        'messages': messages,
+        'max_tokens': 220,
         'temperature': 0.8,
     }
     data = json.dumps(payload).encode('utf-8')
