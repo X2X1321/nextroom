@@ -94,7 +94,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
             content = ''
             for chunk in stream:
                 delta = chunk.choices[0].delta
-                text = delta.content or delta.reasoning or ''
+                text = getattr(delta, 'content', None) or getattr(delta, 'reasoning', None) or ''
                 content += text
             return content.strip()
         except Exception as exc:
