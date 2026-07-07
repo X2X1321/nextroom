@@ -65,7 +65,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None):
         raise ValueError(f'Unknown AI provider: {provider}')
     model = model or config['default_model']
     messages = [
-        {'role': 'system', 'content': 'Ты полезный ассистент. Отвечай по существу, кратко, на русском языке. Не используй markdown, спецсимволы или служебные теги. Максимум 2–3 коротких абзаца.'},
+        {'role': 'system', 'content': 'Отвечай только на русском. Без размышлений, без служебных тегов, без markdown и спецсимволов. Если пользователь пишет привет или похоже на привет — отвечай только фразой: Привет! Чем я могу вам помочь сегодня? Без добавлений, без кавычек, без звездочек, без тегов.'},
         {'role': 'user', 'content': prompt},
     ]
 
