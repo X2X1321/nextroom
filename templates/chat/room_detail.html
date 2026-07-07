@@ -138,17 +138,6 @@
                 <p class="text-xs text-slate-500 mt-0.5">Напишите что-нибудь, чтобы начать диалог!</p>
             </div>
 
-            <!-- Typing indicator -->
-            <div id="typing-indicator" class="hidden px-4 sm:px-6 py-2">
-                <div class="flex items-center gap-2">
-                    <div class="flex items-center gap-1 px-3 py-2 rounded-2xl glass-panel">
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                        <div class="typing-dot"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Messages List Container -->
             <div id="messages-container" class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4 flex flex-col justify-start">
                 {% for msg in chat_messages %}
@@ -247,19 +236,6 @@
             }
         }
         updateNoMessagesAlert();
-
-        function showTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (!indicator) return;
-            indicator.classList.remove('hidden');
-            indicator.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        }
-
-        function hideTypingIndicator() {
-            const indicator = document.getElementById('typing-indicator');
-            if (!indicator) return;
-            indicator.classList.add('hidden');
-        }
 
         // Scroll to bottom
         function scrollToBottom() {
@@ -390,10 +366,6 @@
 
             const isAICommand = content.trim().startsWith('@');
 
-            if (isAICommand) {
-                showTypingIndicator();
-            }
-
             fetch("{% url 'send_message' room.slug %}", {
                 method: 'POST',
                 headers: {
@@ -426,9 +398,6 @@
                 console.error('Ошибка сети при отправке сообщения: ', err);
             })
             .finally(() => {
-                if (isAICommand) {
-                    hideTypingIndicator();
-                }
             });
         });
 
