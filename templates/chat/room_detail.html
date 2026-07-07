@@ -67,10 +67,10 @@
                             <form action="{% url 'manage_room_ai_integrations' room.slug %}" method="POST" class="mt-3 space-y-2">
                                 {% csrf_token %}
                                 {% if available_room_providers %}
-                                    {% for provider in available_room_providers %}
+                                    {% for provider, model_name in available_room_providers %}
                                         <label class="flex items-center gap-2 rounded-lg border border-slate-800/70 bg-slate-950/60 px-2.5 py-2 text-sm text-slate-300">
                                             <input type="checkbox" name="providers" value="{{ provider }}" class="h-4 w-4 rounded border-slate-700 bg-slate-950 text-indigo-500 focus:ring-indigo-500" {% if provider in enabled_room_providers %}checked{% endif %}>
-                                            <span>@{{ provider }}</span>
+                                            <span>{{ model_name }}</span>
                                         </label>
                                     {% endfor %}
                                 {% else %}
@@ -93,7 +93,11 @@
                             <p class="text-[11px] font-semibold uppercase tracking-[0.24em] text-indigo-300">Модели комнаты</p>
                             <div class="mt-2 flex flex-wrap gap-2">
                                 {% for provider in enabled_room_providers %}
-                                    <span class="rounded-full border border-indigo-500/20 bg-slate-950/40 px-2.5 py-1 text-[11px] text-slate-200">@{{ provider }}</span>
+                                    {% for p, model_name in available_room_providers %}
+                                        {% if p == provider %}
+                                            <span class="rounded-full border border-indigo-500/20 bg-slate-950/40 px-2.5 py-1 text-[11px] text-slate-200">{{ model_name }}</span>
+                                        {% endif %}
+                                    {% endfor %}
                                 {% endfor %}
                             </div>
                         </div>

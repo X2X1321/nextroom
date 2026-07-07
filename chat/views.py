@@ -512,6 +512,7 @@ def profile(request):
         'visited_rooms': visited_rooms,
         'integrations': integrations,
         'available_providers': available_providers,
+        'custom_prompt': profile.custom_prompt,
     }
     return render(request, 'chat/profile.html', context)
 
@@ -660,7 +661,7 @@ def room_detail(request, slug):
     enabled_room_providers = list(room.ai_integrations.values_list('provider', flat=True))
     available_room_providers = []
     if request.user == room.creator:
-        available_room_providers = [integration.provider for integration in profile.integrations.all()]
+        available_room_providers = [(integration.provider, integration.model_name or integration.provider) for integration in profile.integrations.all()]
 
     context = {
         'room': room,
