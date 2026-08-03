@@ -171,25 +171,29 @@
                                 {% if msg.content %}
                                     {{ msg.content|linebreaksbr }}
                                 {% endif %}
+                                {% if msg.image %}
+                                    <img src="{{ msg.image.url }}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onclick="window.open('{{ msg.image.url }}', '_blank')" onload="this.style.opacity=1" onerror="this.style.display='none'">
+                                {% endif %}
                                 {% if msg.get_image_urls %}
                                     {% for img_url in msg.get_image_urls %}
                                         <img src="{{ img_url }}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onclick="window.open('{{ img_url }}', '_blank')" onload="this.style.opacity=1" onerror="this.style.display='none'">
                                     {% endfor %}
+                                {% endif %}
+                                {% if msg.voice %}
+                                    <audio controls src="{{ msg.voice.url }}" class="mt-2 w-full max-w-xs"></audio>
                                 {% endif %}
                             </div>
                             <div class="absolute -bottom-2 {% if msg.user == user %}left-0{% else %}right-0{% endif %} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-20">
                                 <button onclick="copyMessageText({{ msg.id }})" class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Копировать текст">
                                     <span class="material-symbols-outlined text-sm">copy_all</span>
                                 </button>
-                                {% if msg.get_image_urls %}
-                                    {% for img_url in msg.get_image_urls %}
-                                        <a href="{{ img_url }}" download class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Скачать изображение">
-                                            ⬇️
-                                        </a>
-                                    {% endfor %}
+                                {% if msg.image or msg.get_image_urls %}
+                                    <a href="{{ msg.image.url|default:msg.get_image_urls.0 }}" download class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение">
+                                        <span class="material-symbols-outlined text-sm">download</span>
+                                    </a>
                                 {% endif %}
-                                <button class="reaction-picker-btn bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" onclick="toggleReactionPicker(this, {{ msg.id }})" title="Реакция">
-                                    +
+                                <button class="reaction-picker-btn bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" onclick="toggleReactionPicker(this, {{ msg.id }})" title="Реакция">
+                                    <span class="material-symbols-outlined text-sm">add</span>
                                 </button>
                             </div>
                         </div>
@@ -217,6 +221,21 @@
             <div class="p-3 sm:p-4 border-t border-slate-900 bg-slate-950/40 shrink-0">
     <form id="chat-form" class="flex gap-2 sm:gap-3 items-end">
         {% csrf_token %}
+        <input type="file" id="image-input" accept="image/*" class="hidden">
+        <button type="button" id="image-btn" class="h-10 w-10 sm:h-9 sm:w-9 rounded-xl text-slate-300 hover:text-white transition duration-300 group flex items-center justify-center">
+            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-0.5 translate-y-0.5 bg-indigo-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/60 border border-slate-700/40 group-hover:bg-indigo-900/20 group-hover:border-indigo-500/30 transition duration-300"></span>
+            <span class="relative z-10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-sm">image</span>
+            </span>
+        </button>
+        <button type="button" id="voice-btn" class="h-10 w-10 sm:h-9 sm:w-9 rounded-xl text-slate-300 hover:text-white transition duration-300 group flex items-center justify-center">
+            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-0.5 translate-y-0.5 bg-indigo-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/60 border border-slate-700/40 group-hover:bg-indigo-900/20 group-hover:border-indigo-500/30 transition duration-300"></span>
+            <span class="relative z-10 flex items-center justify-center">
+                <span class="material-symbols-outlined text-sm">mic</span>
+            </span>
+        </button>
         <div class="flex-grow relative">
             <textarea id="message-input" rows="1" max-rows="4" required placeholder="Напишите сообщение..."
                 class="block w-full rounded-xl py-3 pl-4 pr-12 sm:pr-14 text-sm sm:text-base glass-input placeholder-slate-600 resize-none max-h-32 min-h-[48px] sm:min-h-[44px] leading-relaxed transition-all scrollbar-none"></textarea>
@@ -391,6 +410,14 @@
                 imagesHTML += `<img src="${url}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onload="this.style.opacity=1" onerror="this.style.display='none'">`;
             });
 
+            let mediaHTML = '';
+            if (msg.image_url && !imagesHTML) {
+                mediaHTML += `<img src="${msg.image_url}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onload="this.style.opacity=1" onerror="this.style.display='none'">`;
+            }
+            if (msg.voice_url) {
+                mediaHTML += `<audio controls src="${msg.voice_url}" class="mt-2 w-full max-w-xs"></audio>`;
+            }
+
             bubbleWrapper.innerHTML = `
                 <span class="text-[10px] text-slate-550 mb-1 px-1 font-medium">
                     ${isMe ? 'Вы' : escapeHTML(msg.username)}
@@ -399,14 +426,16 @@
                     <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
                         ${safeContent}
                         ${imagesHTML}
+                        ${mediaHTML}
                     </div>
                     <div class="absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-20">
-                        <button onclick="copyMessageText(${msg.id})" class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Копировать текст">
-                            📋
+                        <button onclick="copyMessageText(${msg.id})" class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Копировать текст">
+                            <span class="material-symbols-outlined text-sm">copy_all</span>
                         </button>
-                        ${imageMatches.length > 0 ? `<a href="${imageMatches[0]}" download class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Скачать изображение">⬇️</a>` : ''}
-                        <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
-                            +
+                        ${msg.image_url && !imageMatches.length ? `<a href="${msg.image_url}" download class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-sm">download</span></a>` : ''}
+                        ${imageMatches.length > 0 ? `<a href="${imageMatches[0]}" download class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-sm">download</span></a>` : ''}
+                        <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
+                            <span class="material-symbols-outlined text-sm">add</span>
                         </button>
                     </div>
                 </div>
@@ -533,6 +562,102 @@
             .catch(err => {
                 // Silently handle error or network loss
                 console.warn('Ошибка опроса сообщений: ', err);
+            });
+        }
+
+        // Image upload handler
+        const imageInput = document.getElementById('image-input');
+        const imageBtn = document.getElementById('image-btn');
+        if (imageBtn && imageInput) {
+            imageBtn.addEventListener('click', () => imageInput.click());
+            imageInput.addEventListener('change', () => {
+                const file = imageInput.files[0];
+                if (!file) return;
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('content', '');
+                const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                fetch("{% url 'send_message' room.slug %}", {
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrf },
+                    body: formData,
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        renderMessage(data.message);
+                        lastMessageId = Math.max(lastMessageId, data.message.id);
+                        updateNoMessagesAlert();
+                        scrollToBottom();
+                        pollMessages();
+                    } else {
+                        console.error('Ошибка отправки изображения: ', data.error);
+                    }
+                })
+                .catch(err => console.error('Ошибка сети при отправке изображения: ', err))
+                .finally(() => {
+                    imageInput.value = '';
+                });
+            });
+        }
+
+        // Voice recording handler
+        const voiceBtn = document.getElementById('voice-btn');
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        if (voiceBtn) {
+            voiceBtn.addEventListener('click', async () => {
+                if (!isRecording) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder = new MediaRecorder(stream);
+                        audioChunks = [];
+                        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                        mediaRecorder.onstop = () => {
+                            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                            const formData = new FormData();
+                            formData.append('voice', blob);
+                            formData.append('content', '');
+                            const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            fetch("{% url 'send_message' room.slug %}", {
+                                method: 'POST',
+                                headers: { 'X-CSRFToken': csrf },
+                                body: formData,
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.status === 'success') {
+                                    renderMessage(data.message);
+                                    lastMessageId = Math.max(lastMessageId, data.message.id);
+                                    updateNoMessagesAlert();
+                                    scrollToBottom();
+                                    pollMessages();
+                                } else {
+                                    console.error('Ошибка отправки голосового: ', data.error);
+                                }
+                            })
+                            .catch(err => console.error('Ошибка сети при отправке голосового: ', err));
+                            stream.getTracks().forEach(track => track.stop());
+                        };
+                        mediaRecorder.start();
+                        isRecording = true;
+                        voiceBtn.classList.add('text-red-400');
+                        setTimeout(() => {
+                            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                                mediaRecorder.stop();
+                                isRecording = false;
+                                voiceBtn.classList.remove('text-red-400');
+                            }
+                        }, 10000);
+                    } catch (err) {
+                        console.error('Ошибка доступа к микрофону: ', err);
+                    }
+                } else if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    mediaRecorder.stop();
+                    isRecording = false;
+                    voiceBtn.classList.remove('text-red-400');
+                }
             });
         }
 

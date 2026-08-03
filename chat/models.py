@@ -130,9 +130,17 @@ class RoomInvitation(models.Model):
         return f'Invite {self.invite_code} for {self.room.name}'
 
 class Message(models.Model):
+    MESSAGE_TYPES = [
+        ('text', 'Text'),
+        ('image', 'Image'),
+        ('voice', 'Voice'),
+    ]
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='messages')
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')
-    content = models.TextField(verbose_name="Message Content")
+    content = models.TextField(verbose_name="Message Content", blank=True)
+    message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text')
+    image = models.ImageField(upload_to='chat_images/', blank=True, null=True)
+    voice = models.FileField(upload_to='chat_voices/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -151,6 +159,8 @@ class Message(models.Model):
         return summary
 
     def get_image_urls(self):
+        if self.image:
+            return [self.image.url]
         if not self.content:
             return []
         url_pattern = re.compile(r'(https?://\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?)', re.IGNORECASE)

@@ -768,11 +768,12 @@ def get_messages(request, slug):
         
     messages_data = []
     for msg in queryset:
-        messages_data.append({
+        msg_data = {
             'id': msg.id,
             'username': msg.user.username,
             'is_me': msg.user == request.user,
             'content': msg.content,
+            'message_type': msg.message_type,
             'timestamp': msg.created_at.strftime('%H:%M'),
             'reactions': {
                 r['emoji']: {
@@ -781,7 +782,12 @@ def get_messages(request, slug):
                 }
                 for r in msg.get_reactions_summary()
             }
-        })
+        }
+        if msg.image:
+            msg_data['image_url'] = msg.image.url
+        if msg.voice:
+            msg_data['voice_url'] = msg.voice.url
+        messages_data.append(msg_data)
         
     return JsonResponse({'messages': messages_data})
 
@@ -798,18 +804,32 @@ def send_message(request, slug):
     is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
     if not is_authorized:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
-        
-    try:
-        data = json.loads(request.body)
-        content = data.get('content', '').strip()
-    except json.JSONDecodeError:
+    
+    content = ''
+    message_type = 'text'
+    image = None
+    voice = None
+    
+    if request.content_type and 'multipart/form-data' in request.content_type:
         content = request.POST.get('content', '').strip()
-        
-    if not content:
+        if 'image' in request.FILES:
+            image = request.FILES['image']
+            message_type = 'image'
+        if 'voice' in request.FILES:
+            voice = request.FILES['voice']
+            message_type = 'voice'
+    else:
+        try:
+            data = json.loads(request.body)
+            content = data.get('content', '').strip()
+        except json.JSONDecodeError:
+            content = request.POST.get('content', '').strip()
+    
+    if not content and not image and not voice:
         return JsonResponse({'error': 'Message content cannot be empty'}, status=400)
 
     alias, prompt = parse_ai_command(content)
-    if alias in AI_COMMAND_ALIASES:
+    if alias in AI_COMMAND_ALIASES and message_type == 'text':
         integration = get_room_ai_integration_for_user(request.user, room, alias)
         if not integration:
             if alias == 'groq' and getattr(settings, 'GROQ_API_KEY', None):
@@ -819,7 +839,7 @@ def send_message(request, slug):
             if not integration:
                 return JsonResponse({'error': f'Для использования @{alias} добавьте ключ API в личном кабинете или включите модель для комнаты.'}, status=400)
 
-        user_message = Message.objects.create(room=room, user=request.user, content=content)
+        user_message = Message.objects.create(room=room, user=request.user, content=content, message_type='text')
         bot_user = get_ai_bot_user()
 
         def create_bot_message():
@@ -828,7 +848,7 @@ def send_message(request, slug):
             except Exception as exc:
                 bot_content = f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
                 tokens_used = 0
-            Message.objects.create(room=room, user=bot_user, content=bot_content)
+            Message.objects.create(room=room, user=bot_user, content=bot_content, message_type='text')
             if tokens_used:
                 try:
                     profile = integration.profile or get_user_profile(request.user)
@@ -851,6 +871,7 @@ def send_message(request, slug):
                 'username': user_message.user.username,
                 'is_me': True,
                 'content': user_message.content,
+                'message_type': user_message.message_type,
                 'timestamp': user_message.created_at.strftime('%H:%M'),
                 'reactions': {emoji: {'count': 0, 'reactors': []} for emoji in ['❤️', '🔥', '😂', '🎉']}
             }
@@ -859,20 +880,30 @@ def send_message(request, slug):
     message = Message.objects.create(
         room=room,
         user=request.user,
-        content=content
+        content=content,
+        message_type=message_type,
+        image=image,
+        voice=voice
     )
     
-    return JsonResponse({
+    response_data = {
         'status': 'success',
         'message': {
             'id': message.id,
             'username': message.user.username,
             'is_me': True,
             'content': message.content,
+            'message_type': message.message_type,
             'timestamp': message.created_at.strftime('%H:%M'),
             'reactions': {emoji: {'count': 0, 'reactors': []} for emoji in ['❤️', '🔥', '😂', '🎉']}
         }
-    })
+    }
+    if message.image:
+        response_data['message']['image_url'] = message.image.url
+    if message.voice:
+        response_data['message']['voice_url'] = message.voice.url
+    
+    return JsonResponse(response_data)
 
 
 @login_required
