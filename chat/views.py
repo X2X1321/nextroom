@@ -519,10 +519,10 @@ def profile(request):
     visited_rooms = profile.visited_rooms.all()
     integrations = profile.integrations.all()
     available_providers = [
-        ('groq', 'Groq', 'llama-3.1-8b-instant'),
-        ('qwen', 'Qwen', 'qwen/qwen3-32b'),
-        ('openai', 'OpenAI', 'openai/gpt-oss-120b'),
-        ('openai', 'OpenAI', 'openai/gpt-oss-20b'),
+        ('groq', 'Groq', 'llama-3.3-70b-versatile'),
+        ('qwen', 'Qwen', 'qwen-turbo'),
+        ('deepseek', 'DeepSeek', 'deepseek-chat'),
+        ('claude', 'Claude', 'claude-3-5-sonnet-20240620'),
     ]
 
     if request.method == 'POST':
@@ -608,11 +608,19 @@ def create_yookassa_subscription(request):
         messages.error(request, f'Не удалось создать платеж: {str(exc)}')
         return redirect('profile')
 
-    if 'confirmation' in payment and 'confirmation_url' in payment['confirmation']:
+    if isinstance(payment, dict) and payment.get('status') == 'failed':
+        message = payment.get('error', {}).get('message') or payment.get('description') or 'Платеж не прошел.'
+        messages.error(request, f'Ошибка платежа: {message}')
+        return redirect('profile')
+
+    if isinstance(payment, dict) and 'confirmation' in payment and 'confirmation_url' in payment['confirmation']:
         request.session['pending_yookassa_payment'] = payment.get('id')
         return redirect(payment['confirmation']['confirmation_url'])
 
-    messages.error(request, 'Не удалось получить ссылку на оплату.')
+    detail = ''
+    if isinstance(payment, dict):
+        detail = payment.get('error', {}).get('message') or payment.get('description') or str(payment)
+    messages.error(request, f'Не удалось получить ссылку на оплату. {detail}')
     return redirect('profile')
 
 @login_required
@@ -991,10 +999,10 @@ def ai_management(request):
     profile = get_user_profile(request.user)
     integrations = profile.integrations.all()
     available_providers = [
-        ('groq', 'Groq', 'llama-3.1-8b-instant'),
-        ('qwen', 'Qwen', 'qwen/qwen3-32b'),
-        ('openai', 'OpenAI', 'openai/gpt-oss-120b'),
-        ('openai', 'OpenAI', 'openai/gpt-oss-20b'),
+        ('groq', 'Groq', 'llama-3.3-70b-versatile'),
+        ('qwen', 'Qwen', 'qwen-turbo'),
+        ('deepseek', 'DeepSeek', 'deepseek-chat'),
+        ('claude', 'Claude', 'claude-3-5-sonnet-20240620'),
     ]
 
     if request.method == 'POST':
