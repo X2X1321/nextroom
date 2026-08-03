@@ -136,8 +136,32 @@ class Message(models.Model):
     class Meta:
         ordering = ['created_at']
 
+    def get_reactions_summary(self):
+        reactions_list = list(self.reactions.all())
+        summary = []
+        for emoji in ['❤️', '🔥', '😂', '🎉']:
+            reactors = [r.user.username for r in reactions_list if r.reaction == emoji]
+            summary.append({
+                'emoji': emoji,
+                'count': len(reactors),
+                'reactors': reactors,
+            })
+        return summary
+
     def __str__(self):
         return f"{self.user.username}: {self.content[:30]} in {self.room.name}"
+
+class MessageReaction(models.Model):
+    message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='message_reactions')
+    reaction = models.CharField(max_length=5)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('message', 'user', 'reaction')
+
+    def __str__(self):
+        return f"{self.user.username} reacted {self.reaction} to message {self.message.id}"
 
 @receiver(post_save, sender=User)
 def create_profile_for_new_user(sender, instance, created, **kwargs):

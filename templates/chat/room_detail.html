@@ -6,10 +6,18 @@
 <div class="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8 w-full flex-grow flex flex-col h-[calc(100vh-5rem)] overflow-hidden">
     <!-- Breadcrumb / Header navigation -->
     <div class="flex items-center justify-between mb-3 sm:mb-4 shrink-0">
-        <a href="{% url 'dashboard' %}" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition group">
-            <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-            Назад в панель
-        </a>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition group">
+                <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                Назад в панель
+            </a>
+            <a href="{% url 'room_stats' room.slug %}" class="inline-flex items-center gap-1.5 text-sm text-indigo-400 hover:text-indigo-300 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                Статистика
+            </a>
+        </div>
         <div class="flex items-center gap-2">
             <span class="inline-flex items-center rounded-md bg-indigo-400/10 px-2.5 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20">
                 {{ room.get_category_display }}
@@ -55,6 +63,13 @@
                         <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 10.742a3 3 0 000 4.516l2.92 2.92a3 3 0 004.517 0l2.92-2.92a3 3 0 000-4.516l-1.042-1.043m-10.74 0L7.75 9.75a3 3 0 00-4.517 0L.313 12.67a3 3 0 000 4.516l2.92 2.92a3 3 0 004.517 0l1.043-1.042M13.5 10.5l-3 3"/></svg>
                         <span>Пригласить друзей</span>
                     </button>
+                    
+                    <a href="{% url 'room_stats' room.slug %}" class="w-full rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-850 py-2.5 px-4 text-xs font-semibold text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span>Статистика комнаты</span>
+                    </a>
                     
                     {% if room.creator == user %}
                         <div class="mt-3 rounded-xl border border-slate-800/80 bg-slate-900/60 p-3">
@@ -151,8 +166,26 @@
                             {% if msg.user == user %}Вы{% else %}{{ msg.user.username }}{% endif %}
                         </span>
                         
-                        <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
-                            {{ msg.content|linebreaksbr }}
+                        <div class="relative group">
+                            <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
+                                {{ msg.content|linebreaksbr }}
+                            </div>
+                            <!-- Reaction picker trigger -->
+                            <button class="reaction-picker-btn absolute -bottom-2 {% if msg.user == user %}left-0{% else %}right-0{% endif %} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, {{ msg.id }})">
+                                +
+                            </button>
+                        </div>
+
+                        <!-- Reactions display -->
+                        <div class="reactions-container flex flex-wrap gap-1 mt-1 px-1" data-msg-id="{{ msg.id }}">
+                            {% for r in msg.get_reactions_summary %}
+                                {% if r.count > 0 %}
+                                    <button class="reaction-badge inline-flex items-center gap-0.5 rounded-full border border-slate-800 bg-slate-900/80 px-2 py-0.5 text-[11px] transition hover:border-indigo-500/40 hover:bg-slate-800 cursor-pointer" onclick="toggleReaction({{ msg.id }}, '{{ r.emoji }}')" title="{{ r.reactors|join:', ' }}">
+                                        <span>{{ r.emoji }}</span>
+                                        <span class="text-slate-300 font-semibold">{{ r.count }}</span>
+                                    </button>
+                                {% endif %}
+                            {% endfor %}
                         </div>
                         
                         <span class="text-[9px] text-slate-550 mt-1 px-1">
@@ -294,10 +327,34 @@
             });
         });
 
+        // Build reactions HTML from reactions object
+        function buildReactionsHTML(msgId, reactions) {
+            if (!reactions) return '';
+            let html = '';
+            const emojis = ['❤️', '🔥', '😂', '🎉'];
+            for (const emoji of emojis) {
+                const data = reactions[emoji];
+                if (data && data.count > 0) {
+                    const title = data.reactors ? data.reactors.join(', ') : '';
+                    html += `<button class="reaction-badge inline-flex items-center gap-0.5 rounded-full border border-slate-800 bg-slate-900/80 px-2 py-0.5 text-[11px] transition hover:border-indigo-500/40 hover:bg-slate-800 cursor-pointer" onclick="toggleReaction(${msgId}, '${emoji}')" title="${escapeHTML(title)}">
+                        <span>${emoji}</span>
+                        <span class="text-slate-300 font-semibold">${data.count}</span>
+                    </button>`;
+                }
+            }
+            return html;
+        }
+
         // Append message to UI helper
         function renderMessage(msg) {
             // Check if already in container
-            if (messagesContainer.querySelector(`[data-message-id="${msg.id}"]`)) {
+            const existing = messagesContainer.querySelector(`[data-message-id="${msg.id}"]`);
+            if (existing) {
+                // Update reactions on existing message
+                const reactionsContainer = existing.querySelector('.reactions-container');
+                if (reactionsContainer && msg.reactions) {
+                    reactionsContainer.innerHTML = buildReactionsHTML(msg.id, msg.reactions);
+                }
                 return;
             }
 
@@ -307,13 +364,22 @@
             bubbleWrapper.setAttribute('data-message-id', msg.id);
 
             const safeContent = escapeHTML(msg.content).replace(/\n/g, '<br>');
+            const reactionsHTML = buildReactionsHTML(msg.id, msg.reactions);
 
             bubbleWrapper.innerHTML = `
                 <span class="text-[10px] text-slate-550 mb-1 px-1 font-medium">
                     ${isMe ? 'Вы' : escapeHTML(msg.username)}
                 </span>
-                <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
-                    ${safeContent}
+                <div class="relative group">
+                    <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
+                        ${safeContent}
+                    </div>
+                    <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
+                        +
+                    </button>
+                </div>
+                <div class="reactions-container flex flex-wrap gap-1 mt-1 px-1" data-msg-id="${msg.id}">
+                    ${reactionsHTML}
                 </div>
                 <span class="text-[9px] text-slate-550 mt-1 px-1">
                     ${msg.timestamp}
@@ -450,6 +516,108 @@
                 pollInterval = setInterval(pollMessages, 2000);
             }
         });
+    });
+
+    // --- Global reaction functions (accessible from onclick handlers) ---
+
+    let activeReactionPicker = null;
+
+    function toggleReactionPicker(btn, msgId) {
+        // Close any existing picker
+        if (activeReactionPicker) {
+            activeReactionPicker.remove();
+            activeReactionPicker = null;
+        }
+
+        const picker = document.createElement('div');
+        picker.className = 'reaction-picker absolute z-30 flex gap-1 bg-slate-900 border border-slate-700 rounded-xl px-2 py-1.5 shadow-xl animate-fade-in';
+        picker.style.bottom = '100%';
+        picker.style.marginBottom = '4px';
+
+        const emojis = ['❤️', '🔥', '😂', '🎉'];
+        emojis.forEach(emoji => {
+            const emojiBtn = document.createElement('button');
+            emojiBtn.className = 'text-base hover:scale-125 transition-transform duration-150 px-0.5';
+            emojiBtn.textContent = emoji;
+            emojiBtn.onclick = (e) => {
+                e.stopPropagation();
+                toggleReaction(msgId, emoji);
+                picker.remove();
+                activeReactionPicker = null;
+            };
+            picker.appendChild(emojiBtn);
+        });
+
+        btn.parentElement.appendChild(picker);
+        activeReactionPicker = picker;
+
+        // Auto-close after 4 seconds
+        setTimeout(() => {
+            if (activeReactionPicker === picker) {
+                picker.remove();
+                activeReactionPicker = null;
+            }
+        }, 4000);
+    }
+
+    function toggleReaction(msgId, emoji) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch(`/message/${msgId}/react/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken
+            },
+            body: JSON.stringify({ reaction: emoji })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                updateReactionsUI(msgId, data.reactions);
+            }
+        })
+        .catch(err => console.error('Ошибка реакции:', err));
+    }
+
+    function updateReactionsUI(msgId, reactions) {
+        const msgEl = document.querySelector(`[data-message-id="${msgId}"]`);
+        if (!msgEl) return;
+
+        let container = msgEl.querySelector('.reactions-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.className = 'reactions-container flex flex-wrap gap-1 mt-1 px-1';
+            container.setAttribute('data-msg-id', msgId);
+            const bubbleDiv = msgEl.querySelector('.relative.group');
+            if (bubbleDiv) {
+                bubbleDiv.after(container);
+            }
+        }
+
+        let html = '';
+        const emojis = ['❤️', '🔥', '😂', '🎉'];
+        function escapeHTMLGlobal(str) {
+            return str.replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":"&#39;",'"':'&quot;'}[tag] || tag));
+        }
+        for (const em of emojis) {
+            const data = reactions[em];
+            if (data && data.count > 0) {
+                const title = data.reactors ? data.reactors.join(', ') : '';
+                html += `<button class="reaction-badge inline-flex items-center gap-0.5 rounded-full border border-slate-800 bg-slate-900/80 px-2 py-0.5 text-[11px] transition hover:border-indigo-500/40 hover:bg-slate-800 cursor-pointer" onclick="toggleReaction(${msgId}, '${em}')" title="${escapeHTMLGlobal(title)}">
+                    <span>${em}</span>
+                    <span class="text-slate-300 font-semibold">${data.count}</span>
+                </button>`;
+            }
+        }
+        container.innerHTML = html;
+    }
+
+    // Close reaction picker on click outside
+    document.addEventListener('click', (e) => {
+        if (activeReactionPicker && !e.target.closest('.reaction-picker') && !e.target.closest('.reaction-picker-btn')) {
+            activeReactionPicker.remove();
+            activeReactionPicker = null;
+        }
     });
 </script>
 {% endblock %}

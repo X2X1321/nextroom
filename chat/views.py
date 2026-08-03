@@ -21,7 +21,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import Q, Count
 
-from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES
+from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction
 
 AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES}
 
@@ -661,7 +661,7 @@ def room_detail(request, slug):
         profile.visited_rooms.add(room)
 
     # Retrieve last 100 messages
-    chat_messages = room.messages.all().select_related('user')[:100]
+    chat_messages = room.messages.all().select_related('user').prefetch_related('reactions__user')[:100]
     
     # Get active/recent participants in this room
     recent_members = User.objects.filter(
@@ -703,7 +703,7 @@ def get_messages(request, slug):
     after_id = request.GET.get('after_id')
     
     # Query messages
-    queryset = room.messages.all().select_related('user')
+    queryset = room.messages.all().select_related('user').prefetch_related('reactions__user')
     if after_id:
         queryset = queryset.filter(id__gt=int(after_id))
         
@@ -715,6 +715,13 @@ def get_messages(request, slug):
             'is_me': msg.user == request.user,
             'content': msg.content,
             'timestamp': msg.created_at.strftime('%H:%M'),
+            'reactions': {
+                r['emoji']: {
+                    'count': r['count'],
+                    'reactors': r['reactors']
+                }
+                for r in msg.get_reactions_summary()
+            }
         })
         
     return JsonResponse({'messages': messages_data})
@@ -779,6 +786,7 @@ def send_message(request, slug):
                 'is_me': True,
                 'content': user_message.content,
                 'timestamp': user_message.created_at.strftime('%H:%M'),
+                'reactions': {emoji: {'count': 0, 'reactors': []} for emoji in ['❤️', '🔥', '😂', '🎉']}
             }
         })
 
@@ -796,5 +804,108 @@ def send_message(request, slug):
             'is_me': True,
             'content': message.content,
             'timestamp': message.created_at.strftime('%H:%M'),
+            'reactions': {emoji: {'count': 0, 'reactors': []} for emoji in ['❤️', '🔥', '😂', '🎉']}
         }
     })
+
+
+@login_required
+def toggle_message_reaction(request, message_id):
+    """JSON API endpoint to toggle a reaction on a message."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    message = get_object_or_404(Message, id=message_id)
+    room = message.room
+
+    # Verify access to private room
+    session_key = f'room_auth_{room.id}'
+    is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
+    if not is_authorized:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    try:
+        data = json.loads(request.body)
+        reaction = data.get('reaction', '').strip()
+    except json.JSONDecodeError:
+        reaction = request.POST.get('reaction', '').strip()
+
+    allowed_reactions = ['❤️', '🔥', '😂', '🎉']
+    if reaction not in allowed_reactions:
+        return JsonResponse({'error': 'Invalid reaction'}, status=400)
+
+    reaction_obj, created = MessageReaction.objects.get_or_create(
+        message=message,
+        user=request.user,
+        reaction=reaction
+    )
+
+    if not created:
+        reaction_obj.delete()
+        action = 'removed'
+    else:
+        action = 'added'
+
+    # Get updated reactions summary for this message
+    reactions_summary = {}
+    for emoji in allowed_reactions:
+        count = MessageReaction.objects.filter(message=message, reaction=emoji).count()
+        reactors = list(MessageReaction.objects.filter(message=message, reaction=emoji).values_list('user__username', flat=True))
+        reactions_summary[emoji] = {
+            'count': count,
+            'reactors': reactors
+        }
+
+    return JsonResponse({
+        'status': 'success',
+        'action': action,
+        'reactions': reactions_summary
+    })
+
+
+@login_required
+def room_stats(request, slug):
+    """View to display statistics of the room (message count per user, top user, etc.)."""
+    room = get_object_or_404(Room, slug=slug)
+
+    # Verify access to private room
+    session_key = f'room_auth_{room.id}'
+    is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
+    if not is_authorized:
+        return HttpResponseForbidden("У вас нет доступа к этой комнате.")
+
+    # Calculate statistics
+    # Count messages grouped by user
+    user_counts = User.objects.filter(
+        messages__room=room
+    ).annotate(
+        message_count=Count('messages')
+    ).order_by('-message_count')
+
+    # Convert to list of dictionaries for easier display
+    participants = []
+    top_user = None
+    
+    for user_stat in user_counts:
+        stat_dict = {
+            'username': user_stat.username,
+            'count': user_stat.message_count,
+            'is_me': user_stat == request.user,
+            'is_creator': user_stat == room.creator
+        }
+        participants.append(stat_dict)
+
+    if participants:
+        top_user = participants[0]
+
+    # Total message count in room
+    total_messages = room.messages.count()
+
+    context = {
+        'room': room,
+        'total_messages': total_messages,
+        'participants': participants,
+        'top_user': top_user,
+    }
+    return render(request, 'chat/room_stats.html', context)
+

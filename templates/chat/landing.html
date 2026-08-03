@@ -52,64 +52,70 @@
             или единомышленниками.
         </p>
 
-       <div class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full">
-    <!-- Основная кнопка -->
-    <a href="{% url 'register' %}"
-       class="button w-full max-w-xs sm:w-auto px-8 py-4 bg-indigo-500 rounded-xl cursor-pointer select-none
+        <div
+            class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full">
+            <!-- Основная кнопка -->
+            <a href="{% url 'register' %}" class="button w-full max-w-xs sm:w-auto px-8 py-4 bg-indigo-500 rounded-xl cursor-pointer select-none
               active:translate-y-1.5 active:[box-shadow:0_0px_0_0_#4f46e5]
               transition-all duration-200 [box-shadow:0_8px_0_0_#4338ca]
               border-b-[2px] border-indigo-400
               hover:bg-indigo-400 hover:-translate-y-0.5 hover:[box-shadow:0_10px_0_0_#4338ca]
               active:hover:translate-y-1.5 active:hover:[box-shadow:0_0px_0_0_#4f46e5]">
-        <span class='flex flex-col justify-center items-center h-full text-white font-semibold text-base'>
-            Начать общение бесплатно
-        </span>
-    </a>
+                <span class='flex flex-col justify-center items-center h-full text-white font-semibold text-base'>
+                    Начать общение бесплатно
+                </span>
+            </a>
 
-    <!-- Вторая кнопка "Войти" -->
-    <a href="{% url 'login' %}"
-       class="button w-full max-w-xs sm:w-auto px-8 py-4 bg-indigo-500 rounded-xl cursor-pointer select-none
+            <!-- Вторая кнопка "Войти" -->
+            <a href="{% url 'login' %}" class="button w-full max-w-xs sm:w-auto px-8 py-4 bg-indigo-500 rounded-xl cursor-pointer select-none
               active:translate-y-1.5 active:[box-shadow:0_0px_0_0_#4f46e5]
               transition-all duration-200 [box-shadow:0_8px_0_0_#4338ca]
               border-b-[2px] border-indigo-400
               hover:bg-indigo-400 hover:-translate-y-0.5 hover:[box-shadow:0_10px_0_0_#4338ca]
               active:hover:translate-y-1.5 active:hover:[box-shadow:0_0px_0_0_#4f46e5]">
-        <span class='flex flex-col justify-center items-center h-full text-white font-semibold text-base'>
-            Войти в аккаунт
-    </a>
-</div>
+                <span class='flex flex-col justify-center items-center h-full text-white font-semibold text-base'>
+                    Войти в аккаунт
+            </a>
+        </div>
     </div>
 
     <!-- Platform Stats -->
-    <div class="mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full animate-fade-in" style="animation-delay: 0.2s;">
+    <div class="mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full animate-fade-in"
+        style="animation-delay: 0.2s;">
         <dl class="grid grid-cols-1 gap-4 sm:gap-6 text-center sm:grid-cols-3">
             <div class="flex flex-col gap-y-2 p-5 sm:p-6 rounded-2xl glass-panel">
-                <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl" data-target="{{ active_rooms|default:0 }}">0</dd>
+                <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+                    data-target="{{ active_rooms|default:0 }}">0</dd>
                 <dt class="text-sm font-medium leading-6 text-slate-400">Активных комнат</dt>
             </div>
             <div class="flex flex-col gap-y-2 p-5 sm:p-6 rounded-2xl glass-panel">
-                <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl" data-target="{{ online_users|default:0 }}">0</dd>
+                <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+                    data-target="{{ online_users|default:0 }}">0</dd>
                 <dt class="text-sm font-medium leading-6 text-slate-400">Пользователей онлайн</dt>
             </div>
             <div class="flex flex-col gap-y-2 p-5 sm:p-6 rounded-2xl glass-panel">
-                <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl" data-target="{{ total_messages|default:0 }}">0</dd>
+                <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
+                    data-target="{{ total_messages|default:0 }}">0</dd>
                 <dt class="text-sm font-medium leading-6 text-slate-400">Отправлено сообщений</dt>
             </div>
         </dl>
     </div>
 
     <!-- AI Integration Section -->
-    <div class="mx-auto mt-16 sm:mt-24 max-w-5xl px-4 sm:px-6 lg:px-8 w-full animate-fade-in" style="animation-delay: 0.3s;">
+    <div class="mx-auto mt-16 sm:mt-24 max-w-5xl px-4 sm:px-6 lg:px-8 w-full animate-fade-in"
+        style="animation-delay: 0.3s;">
         <!-- Header -->
         <div class="text-center mb-10 sm:mb-14">
-            <span class="inline-flex items-center rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-300 mb-4 animate-pulse">
+            <span
+                class="inline-flex items-center rounded-full border border-indigo-500/30 bg-indigo-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-indigo-300 mb-4 animate-pulse">
                 Нейросети в NextRoom
             </span>
             <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-4">
                 Интеграция с искусственным интеллектом
             </h2>
             <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto">
-                Общайтесь с ведущими языковыми моделями прямо в ваших комнатах. Подключайте собственные API ключи и используйте умных ассистентов в совместных обсуждениях.
+                Общайтесь с ведущими языковыми моделями прямо в ваших комнатах. Подключайте собственные API ключи и
+                используйте умных ассистентов в совместных обсуждениях.
             </p>
         </div>
 
@@ -118,27 +124,25 @@
             <!-- Left Card: How to use API -->
             <div class="glass-panel p-6 sm:p-8 rounded-3xl premium-card flex flex-col justify-between">
                 <div>
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-5">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 mb-5">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
                         </svg>
                     </div>
                     <h3 class="text-lg sm:text-xl font-bold text-white mb-3">Как настроить API-интеграцию</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed mb-4">
-                        Функционал доступен для пользователей с <span class="text-indigo-400 font-semibold">Premium-подпиской</span> (всего 199 ₽/мес).
-                    </p>
                     <ul class="space-y-3 text-xs sm:text-sm text-slate-300">
                         <li class="flex items-start gap-2">
-                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-[10px] font-bold text-indigo-300 border border-indigo-500/20">1</span>
-                            <span>Перейдите в <strong>Личный кабинет</strong> и откройте вкладку управления нейросетями.</span>
+                            <span>Перейдите в <strong>Личный кабинет</strong> и откройте вкладку управления
+                                нейросетями.</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-[10px] font-bold text-indigo-300 border border-indigo-500/20">2</span>
                             <span>Выберите нужного AI-провайдера и укажите ваш личный <strong>API-ключ</strong>.</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-indigo-500/15 text-[10px] font-bold text-indigo-300 border border-indigo-500/20">3</span>
-                            <span>В настройках любой созданной вами комнаты отметьте галочками модели, которые вы хотите сделать доступными для участников.</span>
+                            <span>В настройках любой созданной вами комнаты отметьте галочками модели, которые вы хотите
+                                сделать доступными для участников.</span>
                         </li>
                     </ul>
                 </div>
@@ -147,27 +151,32 @@
             <!-- Right Card: How to Chat -->
             <div class="glass-panel p-6 sm:p-8 rounded-3xl premium-card flex flex-col justify-between">
                 <div>
-                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 mb-5">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                     </div>
                     <h3 class="text-lg sm:text-xl font-bold text-white mb-3">Как общаться с моделями</h3>
                     <p class="text-slate-400 text-sm leading-relaxed mb-4">
-                        После того как владелец комнаты подключил нейросеть, любой участник чата может обратиться к ней напрямую.
+                        После того как владелец комнаты подключил нейросеть, любой участник чата может обратиться к ней
+                        напрямую.
                     </p>
                     <ul class="space-y-3 text-xs sm:text-sm text-slate-300">
                         <li class="flex items-start gap-2">
-                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[10px] font-bold text-emerald-300 border border-emerald-500/20">A</span>
-                            <span>Начните сообщение с упоминания модели через <strong>@</strong> (например, <code class="text-emerald-300 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono">@gpt</code> или <code class="text-emerald-300 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono">@deepseek</code>).</span>
+                            <span>Начните сообщение с упоминания модели через <strong>@</strong> (например, <code
+                                    class="text-emerald-300 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono">@gpt</code>
+                                или <code
+                                    class="text-emerald-300 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20 font-mono">@deepseek</code>).</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[10px] font-bold text-emerald-300 border border-emerald-500/20">B</span>
-                            <span>Введите ваш вопрос или задачу после упоминания (например: <span class="italic text-slate-300">"@gpt напиши функцию сортировки"</span>).</span>
+                            <span>Введите ваш вопрос или задачу после упоминания (например: <span
+                                    class="italic text-slate-300">"@gpt какая сегодня погода"</span>).</span>
                         </li>
                         <li class="flex items-start gap-2">
-                            <span class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-[10px] font-bold text-emerald-300 border border-emerald-500/20">C</span>
-                            <span>Нейросеть мгновенно обработает ваш запрос и отправит ответ прямо в общий диалог комнаты.</span>
+                            <span>Нейросеть мгновенно обработает ваш запрос и отправит ответ прямо в общий диалог
+                                комнаты.</span>
                         </li>
                     </ul>
                 </div>
@@ -176,15 +185,18 @@
 
         <!-- Available Models List -->
         <div class="mb-16">
-            <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-6 sm:mb-8">Доступные нейросети на данный момент</h3>
+            <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-6 sm:mb-8">Доступные нейросети на данный
+                момент</h3>
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
-                
+
                 <!-- ChatGPT -->
-                <div class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-bold text-white text-sm">ChatGPT</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 font-mono">@gpt</span>
+                            <span
+                                class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-500/15 text-indigo-300 font-mono">@gpt</span>
                         </div>
                         <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
                             Популярная универсальная модель от OpenAI для текста, кода и перевода.
@@ -193,11 +205,13 @@
                 </div>
 
                 <!-- Claude -->
-                <div class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-bold text-white text-sm">Claude</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-300 font-mono">@claude</span>
+                            <span
+                                class="text-[10px] px-2 py-0.5 rounded-md bg-orange-500/15 text-orange-300 font-mono">@claude</span>
                         </div>
                         <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
                             Передовая модель от Anthropic, известная качеством ответов и логикой.
@@ -206,11 +220,13 @@
                 </div>
 
                 <!-- DeepSeek -->
-                <div class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-bold text-white text-sm">DeepSeek</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono">@deepseek</span>
+                            <span
+                                class="text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/15 text-cyan-300 font-mono">@deepseek</span>
                         </div>
                         <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
                             Высокоэффективная модель, превосходно справляющаяся с точными науками.
@@ -219,11 +235,13 @@
                 </div>
 
                 <!-- Grok -->
-                <div class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-bold text-white text-sm">Grok</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-slate-500/15 text-slate-300 font-mono">@grok</span>
+                            <span
+                                class="text-[10px] px-2 py-0.5 rounded-md bg-slate-500/15 text-slate-300 font-mono">@grok</span>
                         </div>
                         <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
                             Умный ассистент от xAI с оригинальным характером и широким кругозором.
@@ -232,11 +250,13 @@
                 </div>
 
                 <!-- Qwen -->
-                <div class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-bold text-white text-sm">Qwen</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300 font-mono">@qwen</span>
+                            <span
+                                class="text-[10px] px-2 py-0.5 rounded-md bg-purple-500/15 text-purple-300 font-mono">@qwen</span>
                         </div>
                         <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
                             Многоязычная модель от Alibaba, отлично адаптированная для локальных языков.
@@ -245,11 +265,13 @@
                 </div>
 
                 <!-- Groq -->
-                <div class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-bold text-white text-sm">Groq</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-red-500/15 text-red-300 font-mono">@groq</span>
+                            <span
+                                class="text-[10px] px-2 py-0.5 rounded-md bg-red-500/15 text-red-300 font-mono">@groq</span>
                         </div>
                         <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
                             Модель, запущенная на чипах LPU для невероятно быстрого отклика в реальном времени.
@@ -258,11 +280,13 @@
                 </div>
 
                 <!-- Cerebras -->
-                <div class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
                     <div>
                         <div class="flex items-center justify-between mb-2">
                             <span class="font-bold text-white text-sm">Cerebras</span>
-                            <span class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 font-mono">@cerebras</span>
+                            <span
+                                class="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-300 font-mono">@cerebras</span>
                         </div>
                         <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
                             Сверхбыстрое вычисление на специализированном оборудовании Cerebras CS-3.
@@ -271,7 +295,8 @@
                 </div>
 
                 <!-- custom block or placeholder for more to align grid -->
-                <div class="glass-panel p-4 rounded-2xl border border-dashed border-slate-800 flex items-center justify-center text-center">
+                <div
+                    class="glass-panel p-4 rounded-2xl border border-dashed border-slate-800 flex items-center justify-center text-center">
                     <div>
                         <span class="text-xs font-semibold text-slate-500 block mb-1">И другие</span>
                         <p class="text-[10px] text-slate-600 leading-normal">
@@ -284,26 +309,32 @@
         </div>
 
         <!-- Capabilities Vertical Flow Section -->
-        <div class="mx-auto max-w-xl glass-panel p-6 sm:p-8 rounded-3xl border border-indigo-500/15 relative overflow-hidden mb-16">
+        <div
+            class="mx-auto max-w-xl glass-panel p-6 sm:p-8 rounded-3xl border border-indigo-500/15 relative overflow-hidden mb-16">
             <!-- Background glow -->
             <div class="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-indigo-500/10 blur-2xl"></div>
-            
+
             <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-8 relative z-10">
                 Что умеет делать нейросеть в чате
             </h3>
-            
+
             <div class="relative flex flex-col items-center gap-6">
                 <!-- Vertical Line -->
-                <div class="absolute top-8 bottom-8 w-0.5 bg-gradient-to-b from-indigo-500 via-purple-500 to-emerald-500 opacity-40"></div>
+                <div
+                    class="absolute top-8 bottom-8 w-0.5 bg-gradient-to-b from-indigo-500 via-purple-500 to-emerald-500 opacity-40">
+                </div>
 
                 <!-- Step 1: Writes Code -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-sm group w-full">
-                    <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-indigo-500 flex items-center justify-center text-indigo-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-indigo-500/20">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-900 border-2 border-indigo-500 flex items-center justify-center text-indigo-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-indigo-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                         </svg>
                     </div>
-                    <div class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
+                    <div
+                        class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
                         <h4 class="font-bold text-white text-sm">Пишет код</h4>
                         <p class="text-xs text-slate-400 mt-1 leading-normal">
                             Поможет написать алгоритм, найти ошибку или оптимизировать готовый скрипт на любом языке.
@@ -316,12 +347,15 @@
 
                 <!-- Step 2: Translates -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-sm group w-full">
-                    <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-indigo-400 flex items-center justify-center text-indigo-300 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-indigo-400/20">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-900 border-2 border-indigo-400 flex items-center justify-center text-indigo-300 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-indigo-400/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 11.37 7.31 16.5 3 19"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 11.37 7.31 16.5 3 19" />
                         </svg>
                     </div>
-                    <div class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
+                    <div
+                        class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
                         <h4 class="font-bold text-white text-sm">Переводит</h4>
                         <p class="text-xs text-slate-400 mt-1 leading-normal">
                             Синхронно переведет фразы и тексты, помогая общаться с иностранными собеседниками.
@@ -334,12 +368,15 @@
 
                 <!-- Step 3: Explains Topics -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-sm group w-full">
-                    <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-purple-500 flex items-center justify-center text-purple-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-purple-500/20">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-900 border-2 border-purple-500 flex items-center justify-center text-purple-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-purple-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h0a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h0a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                         </svg>
                     </div>
-                    <div class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
+                    <div
+                        class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
                         <h4 class="font-bold text-white text-sm">Объясняет темы</h4>
                         <p class="text-xs text-slate-400 mt-1 leading-normal">
                             Простыми словами разложит сложные научные, технические или философские понятия.
@@ -352,12 +389,15 @@
 
                 <!-- Step 4: Generates Ideas -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-sm group w-full">
-                    <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-pink-500 flex items-center justify-center text-pink-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-pink-500/20">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-900 border-2 border-pink-500 flex items-center justify-center text-pink-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-pink-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
                     </div>
-                    <div class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
+                    <div
+                        class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
                         <h4 class="font-bold text-white text-sm">Генерирует идеи</h4>
                         <p class="text-xs text-slate-400 mt-1 leading-normal">
                             Предложит концепцию для стартапа, тему для статьи, подарок другу или сценарий мероприятия.
@@ -370,12 +410,15 @@
 
                 <!-- Step 5: Answers Questions -->
                 <div class="relative z-10 flex flex-col items-center text-center max-w-sm group w-full">
-                    <div class="w-10 h-10 rounded-full bg-slate-900 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-emerald-500/20">
+                    <div
+                        class="w-10 h-10 rounded-full bg-slate-900 border-2 border-emerald-500 flex items-center justify-center text-emerald-400 transition-all duration-300 group-hover:scale-110 shadow-lg shadow-emerald-500/20">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                     </div>
-                    <div class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
+                    <div
+                        class="mt-3 bg-slate-950/65 backdrop-blur border border-slate-800 px-4 py-3 rounded-2xl w-full">
                         <h4 class="font-bold text-white text-sm">Отвечает на вопросы</h4>
                         <p class="text-xs text-slate-400 mt-1 leading-normal">
                             Быстро найдет нужные факты, рецепты, исторические справки или математические решения.
@@ -388,8 +431,10 @@
     </div>
 
     <!-- Featured Rooms Section -->
-    <div class="mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full animate-fade-in" style="animation-delay: 0.5s;">
-        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white text-center mb-6 sm:mb-8">Популярные открытые комнаты</h2>
+    <div class="mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full animate-fade-in"
+        style="animation-delay: 0.5s;">
+        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white text-center mb-6 sm:mb-8">Популярные открытые
+            комнаты</h2>
         <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {% for room in featured_rooms %}
             <div
@@ -547,7 +592,7 @@
                     <div class="flex justify-between items-start mb-4">
                         <span
                             class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">
-                            Общение 
+                            Общение
                         </span>
                         <span class="text-xs text-slate-500 flex items-center gap-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
