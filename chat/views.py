@@ -239,10 +239,12 @@ def fetch_ai_response(alias, prompt, integration):
 
 
 def sanitize_ai_response(text: str) -> str:
+    if not text:
+        return ''
     text = re.sub(r'<environment_details>.*?</environment_details>', '', text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r'</?environment_details>', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\*\*', '', text)
-    text = re.sub(r'```', '', text)
+    text = re.sub(r'\`\`\`', '', text)
     text = re.sub(r'Current time:.*?\n', '', text)
     text = re.sub(r'Working directory:.*?\n', '', text)
     text = re.sub(r'Workspace root folder:.*?\n', '', text)
@@ -772,7 +774,7 @@ def get_messages(request, slug):
             'id': msg.id,
             'username': msg.user.username,
             'is_me': msg.user == request.user,
-            'content': msg.content,
+            'content': sanitize_ai_response(msg.content) if msg.user.username == 'nextroom_ai' else msg.content,
             'message_type': msg.message_type,
             'timestamp': msg.created_at.strftime('%H:%M'),
             'reactions': {
@@ -848,7 +850,7 @@ def send_message(request, slug):
             except Exception as exc:
                 bot_content = f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
                 tokens_used = 0
-            Message.objects.create(room=room, user=bot_user, content=bot_content, message_type='text')
+            Message.objects.create(room=room, user=bot_user, content=sanitize_ai_response(bot_content), message_type='text')
             if tokens_used:
                 try:
                     profile = integration.profile or get_user_profile(request.user)
