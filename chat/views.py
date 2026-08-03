@@ -942,10 +942,14 @@ def room_stats(request, slug):
 @login_required
 def achievements(request):
     profile = get_user_profile(request.user)
-    all_achievements = Achievement.objects.all()
+    all_achievements = Achievement.objects.all().distinct()
     earned_ids = set(request.user.user_achievements.values_list('achievement_id', flat=True))
     achievements_list = []
+    seen = set()
     for achievement in all_achievements:
+        if achievement.id in seen:
+            continue
+        seen.add(achievement.id)
         achievements_list.append({
             'achievement': achievement,
             'earned': achievement.id in earned_ids,
@@ -954,7 +958,7 @@ def achievements(request):
         'profile': profile,
         'achievements_list': achievements_list,
         'earned_count': len(earned_ids),
-        'total_count': all_achievements.count(),
+        'total_count': len(achievements_list),
     }
     return render(request, 'chat/achievements.html', context)
 
