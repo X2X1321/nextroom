@@ -176,7 +176,8 @@ class Achievement(models.Model):
 
     name = models.CharField(max_length=100)
     description = models.TextField()
-    icon = models.CharField(max_length=10, default='🏆')
+    icon = models.CharField(max_length=50, default='lottie-celebration')
+    lottie_url = models.URLField(blank=True)
     premium_days = models.IntegerField(default=0)
     condition_type = models.CharField(max_length=30, choices=CONDITION_TYPES)
     condition_value = models.IntegerField(default=0)
@@ -242,14 +243,14 @@ def _check_and_grant_achievements(user, condition_type, condition_value):
 
 def _ensure_achievements():
     defaults = [
-        {'name': 'Новичок', 'description': 'Зарегистрируйтесь в NextRoom', 'icon': '🎉', 'premium_days': 10, 'condition_type': 'registration', 'condition_value': 1},
-        {'name': 'Основатель', 'description': 'Создайте первую комнату', 'icon': '🚀', 'premium_days': 5, 'condition_type': 'rooms_created', 'condition_value': 1},
-        {'name': 'Болтун', 'description': 'Напишите 10 сообщений', 'icon': '💬', 'premium_days': 2, 'condition_type': 'messages', 'condition_value': 10},
-        {'name': 'Коммуникатор', 'description': 'Напишите 100 сообщений', 'icon': '🗣️', 'premium_days': 5, 'condition_type': 'messages', 'condition_value': 100},
-        {'name': 'Гуру чата', 'description': 'Напишите 1000 сообщений', 'icon': '👑', 'premium_days': 15, 'condition_type': 'messages', 'condition_value': 1000},
-        {'name': 'Командир', 'description': 'Пригласите друзей в комнату', 'icon': '🤝', 'premium_days': 10, 'condition_type': 'invites', 'condition_value': 1},
-        {'name': 'AI-ассистент', 'description': 'Общайтесь с нейросетью', 'icon': '🤖', 'premium_days': 1, 'condition_type': 'ai_messages', 'condition_value': 1},
-        {'name': 'Непрерывный', 'description': 'Зайдите в NextRoom 30 дней подряд', 'icon': '🔥', 'premium_days': 60, 'condition_type': 'consecutive_days', 'condition_value': 30},
+        {'name': 'Новичок', 'description': 'Зарегистрируйтесь в NextRoom', 'icon': 'lottie-celebration', 'premium_days': 10, 'condition_type': 'registration', 'condition_value': 1, 'lottie_url': 'https://lottie.host/efe95c6a-079b-4e5c-8510-e5f279341968/SKYk8dDY60.json'},
+        {'name': 'Основатель', 'description': 'Создайте первую комнату', 'icon': 'lottie-star', 'premium_days': 5, 'condition_type': 'rooms_created', 'condition_value': 1, 'lottie_url': 'https://lottie.host/4d65e848-ceb9-412f-8265-3f9250f00e2f/03yolDCrAz.json'},
+        {'name': 'Болтун', 'description': 'Напишите 10 сообщений', 'icon': 'lottie-chat', 'premium_days': 2, 'condition_type': 'messages', 'condition_value': 10, 'lottie_url': 'https://lottie.host/1a85d24a-53ce-4884-8bf0-38e4aff1478b/T1gtQIA75C.json'},
+        {'name': 'Коммуникатор', 'description': 'Напишите 100 сообщений', 'icon': 'lottie-megaphone', 'premium_days': 5, 'condition_type': 'messages', 'condition_value': 100, 'lottie_url': 'https://lottie.host/1c9c77cc-0e1f-444a-a1ef-a9492494fb1f/tLIspmfYne.json'},
+        {'name': 'Гуру чата', 'description': 'Напишите 1000 сообщений', 'icon': 'lottie-crown', 'premium_days': 15, 'condition_type': 'messages', 'condition_value': 1000, 'lottie_url': 'https://lottie.host/d1df02d9-a53f-4c75-9150-ddffcc13b2f6/85r1MVpXy2.json'},
+        {'name': 'Командир', 'description': 'Пригласите друзей в комнату', 'icon': 'lottie-rocket', 'premium_days': 10, 'condition_type': 'invites', 'condition_value': 1, 'lottie_url': 'https://lottie.host/b4301e06-63d0-48cd-8024-ee311915f942/4mkLFmOjoy.json'},
+        {'name': 'AI-ассистент', 'description': 'Общайтесь с нейросетью', 'icon': 'lottie-robot', 'premium_days': 1, 'condition_type': 'ai_messages', 'condition_value': 1, 'lottie_url': 'https://lottie.host/a325630f-5313-4ee4-841e-ed45f7355f48/X87DTO1KMa.json'},
+        {'name': 'Непрерывный', 'description': 'Зайдите в NextRoom 30 дней подряд', 'icon': 'lottie-diamond', 'premium_days': 60, 'condition_type': 'consecutive_days', 'condition_value': 30, 'lottie_url': 'https://lottie.host/5ae48158-8997-4d93-90b1-7d7d713007e4/CRp7UowfhN.json'},
     ]
     for data in defaults:
         Achievement.objects.get_or_create(name=data['name'], defaults=data)

@@ -35,11 +35,11 @@
         {% for item in achievements_list %}
             <div class="glass-panel rounded-2xl p-5 border {% if item.earned %}border-indigo-500/30{% else %}border-slate-800 opacity-75{% endif %}">
                 <div class="flex items-start gap-3">
-                    <div class="text-2xl">
-                        {% if item.achievement.icon == '👑' %}
-                            <dotlottie-wc src="https://lottie.host/d1df02d9-a53f-4c75-9150-ddffcc13b2f6/85r1MVpXy2.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                    <div class="w-10 h-10 flex items-center justify-center">
+                        {% if item.achievement.lottie_url %}
+                            <dotlottie-wc src="{{ item.achievement.lottie_url }}" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
                         {% else %}
-                            {{ item.achievement.icon }}
+                            <span class="text-2xl">{{ item.achievement.icon }}</span>
                         {% endif %}
                     </div>
                     <div class="flex-1">
