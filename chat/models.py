@@ -235,7 +235,7 @@ class AIUsageLog(models.Model):
 class GeneratedImage(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='generated_images')
     prompt = models.TextField()
-    image_url = models.URLField()
+    image_url = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

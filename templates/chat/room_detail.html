@@ -178,8 +178,8 @@
                                 {% endif %}
                             </div>
                             <div class="absolute -bottom-2 {% if msg.user == user %}left-0{% else %}right-0{% endif %} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-20">
-                                <button onclick="copyMessageText({{ msg.id }})" class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Копировать текст">
-                                    📋
+                                <button onclick="copyMessageText({{ msg.id }})" class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Копировать текст">
+                                    <span class="material-symbols-outlined text-sm">copy_all</span>
                                 </button>
                                 {% if msg.get_image_urls %}
                                     {% for img_url in msg.get_image_urls %}
@@ -620,9 +620,9 @@
         navigator.clipboard.writeText(text.trim()).then(() => {
             const btn = msgEl.querySelector('[title="Копировать текст"]');
             if (btn) {
-                const original = btn.textContent;
-                btn.textContent = '✅';
-                setTimeout(() => { btn.textContent = original; }, 1500);
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span class="material-symbols-outlined text-sm">check</span>';
+                setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
             }
         }).catch(err => console.error('Ошибка копирования:', err));
     }
