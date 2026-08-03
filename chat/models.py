@@ -233,6 +233,7 @@ class AIUsageLog(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='ai_usage_logs')
     provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)
     tokens_used = models.IntegerField(default=0)
+    response_time = models.FloatField(default=0.0, help_text='Время ответа в секундах')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

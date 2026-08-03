@@ -184,16 +184,16 @@
                                 {% endif %}
                             </div>
                             <div class="absolute -bottom-2 {% if msg.user == user %}left-0{% else %}right-0{% endif %} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-20">
-                                <button onclick="copyMessageText({{ msg.id }})" class="bg-slate-900 border border-slate-700 rounded-full p-1 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Копировать текст">
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>
+                                <button onclick="copyMessageText({{ msg.id }})" class="bg-slate-900 border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Копировать текст">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>
                                 </button>
                                 {% if msg.image or msg.get_image_urls %}
-                                    <a href="{{ msg.image.url|default:msg.get_image_urls.0 }}" download class="bg-slate-900 border border-slate-700 rounded-full p-1 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение">
-                                        <span class="material-symbols-outlined text-xs leading-none">download</span>
+                                    <a href="{{ msg.image.url|default:msg.get_image_urls.0 }}" download class="bg-slate-900 border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение">
+                                        <span class="material-symbols-outlined text-[10px] leading-none">download</span>
                                     </a>
                                 {% endif %}
-                                <button class="reaction-picker-btn bg-slate-900 border border-slate-700 rounded-full p-1 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" onclick="toggleReactionPicker(this, {{ msg.id }})" title="Реакция">
-                                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M440-440H240v-80h200v-200h80v200h200v80H520v200h-80v-200Z"/></svg>
+                                <button class="reaction-picker-btn bg-slate-900 border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" onclick="toggleReactionPicker(this, {{ msg.id }})" title="Реакция">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M440-440H240v-80h200v-200h80v200h200v80H520v200h-80v-200Z"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -433,13 +433,13 @@
                         ${mediaHTML}
                     </div>
                     <div class="absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-20">
-                        <button onclick="copyMessageText(${msg.id})" class="bg-slate-900 border border-slate-700 rounded-full p-1 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Копировать текст">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>
+                        <button onclick="copyMessageText(${msg.id})" class="bg-slate-900 border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Копировать текст">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M360-240q-33 0-56.5-23.5T280-320v-480q0-33 23.5-56.5T360-880h360q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H360Zm0-80h360v-480H360v480ZM200-80q-33 0-56.5-23.5T120-160v-560h80v560h440v80H200Zm160-240v-480 480Z"/></svg>
                         </button>
-                        ${msg.image_url && !imageMatches.length ? `<a href="${msg.image_url}" download class="bg-slate-900 border border-slate-700 rounded-full p-1 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-xs leading-none">download</span></a>` : ''}
-                        ${imageMatches.length > 0 ? `<a href="${imageMatches[0]}" download class="bg-slate-900 border border-slate-700 rounded-full p-1 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-xs leading-none">download</span></a>` : ''}
-                        <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full p-1 text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
-                            <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M440-440H240v-80h200v-200h80v200h200v80H520v200h-80v-200Z"/></svg>
+                        ${msg.image_url && !imageMatches.length ? `<a href="${msg.image_url}" download class="bg-slate-900 border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-[10px] leading-none">download</span></a>` : ''}
+                        ${imageMatches.length > 0 ? `<a href="${imageMatches[0]}" download class="bg-slate-900 border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-[10px] leading-none">download</span></a>` : ''}
+                        <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M440-440H240v-80h200v-200h80v200h200v80H520v200h-80v-200Z"/></svg>
                         </button>
                     </div>
                 </div>

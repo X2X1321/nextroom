@@ -2,6 +2,10 @@
 
 {% block title %}Генерация изображений — NextRoom{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
     <div class="flex items-center justify-between">
@@ -53,6 +57,32 @@
             </button>
         </form>
         <a href="{% url 'image_history' %}" class="text-sm text-indigo-400 hover:text-indigo-300">История генераций</a>
+    </div>
+
+    <div class="glass-panel rounded-3xl p-6">
+        <h2 class="text-lg font-bold text-white mb-2">Статистика AI</h2>
+        <p class="text-xs text-slate-400 mb-4">Показатели эффективности нейросетей</p>
+        <div class="h-80">
+            <canvas id="ai-stats-radar-chart" role="img" aria-label="AI statistics radar chart"></canvas>
+        </div>
+        <table class="sr-only">
+            <caption>
+                AI usage metrics
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Metric</th>
+                    <th scope="col">Value</th>
+                </tr>
+            </thead>
+            <tbody id="ai-stats-table-body">
+                <tr><th scope="row">Speed</th><td>0</td></tr>
+                <tr><th scope="row">Quality</th><td>0</td></tr>
+                <tr><th scope="row">Reliability</th><td>0</td></tr>
+                <tr><th scope="row">Coverage</th><td>0</td></tr>
+                <tr><th scope="row">Volume</th><td>0</td></tr>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -108,5 +138,81 @@
             errorDiv.classList.remove('hidden');
         }
     });
+
+    // Radar chart for AI stats
+    const radarCanvas = document.getElementById('ai-stats-radar-chart');
+    let radarChartInstance = null;
+
+    async function loadRadarChart() {
+        try {
+            const res = await fetch("{% url 'ai_usage_chart' %}");
+            const data = await res.json();
+            const labels = data.labels || ['Скорость', 'Качество', 'Надежность', 'Покрытие', 'Объем'];
+            const values = data.datasets?.[0]?.data || [0, 0, 0, 0, 0];
+
+            if (radarChartInstance) {
+                radarChartInstance.data.labels = labels;
+                radarChartInstance.data.datasets[0].data = values;
+                radarChartInstance.update();
+            } else {
+                radarChartInstance = new Chart(radarCanvas, {
+                    type: 'radar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Мои показатели',
+                            data: values,
+                            borderColor: '#818cf8',
+                            backgroundColor: 'rgba(129, 140, 248, 0.25)',
+                            pointBackgroundColor: '#818cf8',
+                            pointBorderColor: '#111827',
+                            pointHoverRadius: 5,
+                            borderWidth: 2,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: {
+                            duration: 1500,
+                            easing: 'easeOutQuart',
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#9ca3af' },
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (tooltipItem) =>
+                                        `${tooltipItem.dataset.label}: ${tooltipItem.formattedValue}`,
+                                },
+                            },
+                        },
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                max: 100,
+                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                pointLabels: { color: '#9ca3af', font: { size: 11 } },
+                                ticks: { display: false },
+                            },
+                        },
+                    },
+                });
+            }
+
+            const tbody = document.getElementById('ai-stats-table-body');
+            if (tbody && values.length) {
+                tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${values[idx] || 0}</td></tr>`).join('');
+            }
+        } catch (e) {
+            console.error('Failed to load AI stats radar chart', e);
+        }
+    }
+
+    loadRadarChart();
+    setInterval(loadRadarChart, 30000);
 </script>
 {% endblock %}
