@@ -527,14 +527,24 @@ def profile(request):
     calendar_days = []
     for i in range(29, -1, -1):
         d = today - timezone.timedelta(days=i)
-        weekday = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.weekday()]
-        label = weekday if i % 7 == 0 else ''
         calendar_days.append({
             'date': d,
-            'label': label,
             'count': activity_map.get(d, 0),
             'is_today': d == today,
+            'weekday': d.weekday(),
         })
+
+    calendar_weeks = []
+    current_week = []
+    for day in calendar_days:
+        current_week.append(day)
+        if day['weekday'] == 6:
+            calendar_weeks.append(current_week)
+            current_week = []
+    if current_week:
+        while len(current_week) < 7:
+            current_week.append(None)
+        calendar_weeks.append(current_week)
 
     context = {
         'profile': profile,
@@ -544,6 +554,7 @@ def profile(request):
         'available_providers': available_providers,
         'custom_prompt': profile.custom_prompt,
         'calendar_days': calendar_days,
+        'calendar_weeks': calendar_weeks,
     }
     return render(request, 'chat/profile.html', context)
 

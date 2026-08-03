@@ -1,6 +1,9 @@
 {% extends 'chat/base.html' %}
 
 {% block title %}Достижения — NextRoom{% endblock %}
+{% block extra_head %}
+<script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+{% endblock %}
 
 {% block content %}
 <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
@@ -32,7 +35,13 @@
         {% for item in achievements_list %}
             <div class="glass-panel rounded-2xl p-5 border {% if item.earned %}border-indigo-500/30{% else %}border-slate-800 opacity-75{% endif %}">
                 <div class="flex items-start gap-3">
-                    <div class="text-2xl">{{ item.achievement.icon }}</div>
+                    <div class="text-2xl">
+                        {% if item.achievement.icon == '👑' %}
+                            <dotlottie-wc src="https://lottie.host/d1df02d9-a53f-4c75-9150-ddffcc13b2f6/85r1MVpXy2.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% else %}
+                            {{ item.achievement.icon }}
+                        {% endif %}
+                    </div>
                     <div class="flex-1">
                         <h3 class="text-sm font-bold text-white">{{ item.achievement.name }}</h3>
                         <p class="text-xs text-slate-400 mt-1">{{ item.achievement.description }}</p>
