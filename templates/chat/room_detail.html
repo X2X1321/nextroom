@@ -158,7 +158,7 @@
             </div>
 
             <!-- Messages List Container -->
-            <div id="messages-container" class="flex-grow overflow-y-auto p-4 sm:p-6 space-y-3 sm:space-y-4 flex flex-col justify-start">
+            <div id="messages-container" class="flex-grow overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-3 sm:space-y-4 flex flex-col justify-start">
                 {% for msg in chat_messages %}
                     <!-- Message Bubble wrapper -->
                     <div class="flex flex-col max-w-[85%] sm:max-w-[80%] {% if msg.user == user %}self-end items-end{% else %}self-start items-start{% endif %}" data-message-id="{{ msg.id }}">
@@ -172,11 +172,11 @@
                                     {{ msg.content|linebreaksbr }}
                                 {% endif %}
                                 {% if msg.image %}
-                                    <img src="{{ msg.image.url }}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onclick="window.open('{{ msg.image.url }}', '_blank')" onload="this.style.opacity=1" onerror="this.style.display='none'">
+                                    <img src="{{ msg.image.url }}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 max-w-full object-contain cursor-pointer hover:opacity-90 transition opacity-0" onclick="window.open('{{ msg.image.url }}', '_blank')" onload="this.style.opacity=1" onerror="this.style.display='none'">
                                 {% endif %}
                                 {% if msg.get_image_urls %}
                                     {% for img_url in msg.get_image_urls %}
-                                        <img src="{{ img_url }}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onclick="window.open('{{ img_url }}', '_blank')" onload="this.style.opacity=1" onerror="this.style.display='none'">
+                                        <img src="{{ img_url }}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 max-w-full object-contain cursor-pointer hover:opacity-90 transition opacity-0" onclick="window.open('{{ img_url }}', '_blank')" onload="this.style.opacity=1" onerror="this.style.display='none'">
                                     {% endfor %}
                                 {% endif %}
                                 {% if msg.voice %}
@@ -193,7 +193,7 @@
                                     </a>
                                 {% endif %}
                                 <button class="reaction-picker-btn bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" onclick="toggleReactionPicker(this, {{ msg.id }})" title="Реакция">
-                                    <span class="material-symbols-outlined text-sm">add</span>
+                                    <span class="material-symbols-outlined text-sm">emoji_emotions</span>
                                 </button>
                             </div>
                         </div>
@@ -222,27 +222,27 @@
     <form id="chat-form" class="flex gap-2 sm:gap-3 items-end">
         {% csrf_token %}
         <input type="file" id="image-input" accept="image/*" class="hidden">
-        <button type="button" id="image-btn" class="h-9 w-9 sm:h-8 sm:w-8 rounded-lg text-slate-300 hover:text-white transition duration-300 group flex items-center justify-center relative">
-            <span class="absolute inset-0 w-full h-full rounded-lg transition duration-300 ease-out transform translate-x-0.5 translate-y-0.5 bg-indigo-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-            <span class="absolute inset-0 w-full h-full rounded-lg bg-slate-800/60 border border-slate-700/40 group-hover:bg-indigo-900/20 group-hover:border-indigo-500/30 transition duration-300"></span>
+        <button type="button" id="image-btn" class="h-12 w-12 sm:h-11 sm:w-11 rounded-xl text-slate-300 hover:text-white transition duration-300 group flex items-center justify-center relative">
+            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-0.5 translate-y-0.5 bg-indigo-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/60 border border-slate-700/40 group-hover:bg-indigo-900/20 group-hover:border-indigo-500/30 transition duration-300"></span>
             <span class="relative z-10 flex items-center justify-center">
-                <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                 </svg>
             </span>
         </button>
-        <button type="button" id="voice-btn" class="h-9 w-9 sm:h-8 sm:w-8 rounded-lg text-slate-300 hover:text-white transition duration-300 group flex items-center justify-center relative">
-            <span class="absolute inset-0 w-full h-full rounded-lg transition duration-300 ease-out transform translate-x-0.5 translate-y-0.5 bg-indigo-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-            <span class="absolute inset-0 w-full h-full rounded-lg bg-slate-800/60 border border-slate-700/40 group-hover:bg-indigo-900/20 group-hover:border-indigo-500/30 transition duration-300"></span>
+        <button type="button" id="voice-btn" class="h-12 w-12 sm:h-11 sm:w-11 rounded-xl text-slate-300 hover:text-white transition duration-300 group flex items-center justify-center relative">
+            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-0.5 translate-y-0.5 bg-indigo-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/60 border border-slate-700/40 group-hover:bg-indigo-900/20 group-hover:border-indigo-500/30 transition duration-300"></span>
             <span class="relative z-10 flex items-center justify-center">
-                <svg class="w-4 h-4 sm:w-3.5 sm:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
                 </svg>
             </span>
         </button>
         <div class="flex-grow relative">
             <textarea id="message-input" rows="1" max-rows="4" required placeholder="Напишите сообщение..."
-                class="block w-full rounded-xl py-3 pl-4 pr-12 sm:pr-14 text-sm sm:text-base glass-input placeholder-slate-600 resize-none max-h-32 min-h-[48px] sm:min-h-[44px] leading-relaxed transition-all scrollbar-none"></textarea>
+                class="block w-full rounded-xl py-3 pl-4 pr-12 sm:pr-14 text-sm sm:text-base glass-input placeholder-slate-600 resize-none max-h-32 h-12 sm:h-11 leading-relaxed transition-all scrollbar-none"></textarea>
             <button type="submit" 
                     class="absolute right-1.5 bottom-1.5 sm:right-2 sm:bottom-2 h-10 w-10 sm:h-9 sm:w-9 rounded-xl text-slate-300 hover:text-white transition duration-300 group flex items-center justify-center">
                 <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-0.5 translate-y-0.5 bg-indigo-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
@@ -411,12 +411,12 @@
             const imageMatches = safeContent.match(urlPattern) || [];
             let imagesHTML = '';
             imageMatches.forEach(url => {
-                imagesHTML += `<img src="${url}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onload="this.style.opacity=1" onerror="this.style.display='none'">`;
+                imagesHTML += `<img src="${url}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 max-w-full object-contain cursor-pointer hover:opacity-90 transition opacity-0" onload="this.style.opacity=1" onerror="this.style.display='none'">`;
             });
 
             let mediaHTML = '';
             if (msg.image_url && !imagesHTML) {
-                mediaHTML += `<img src="${msg.image_url}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onload="this.style.opacity=1" onerror="this.style.display='none'">`;
+                mediaHTML += `<img src="${msg.image_url}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 max-w-full object-contain cursor-pointer hover:opacity-90 transition opacity-0" onload="this.style.opacity=1" onerror="this.style.display='none'">`;
             }
             if (msg.voice_url) {
                 mediaHTML += `<audio controls src="${msg.voice_url}" class="mt-2 w-full max-w-xs"></audio>`;
@@ -439,7 +439,7 @@
                         ${msg.image_url && !imageMatches.length ? `<a href="${msg.image_url}" download class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-sm">download</span></a>` : ''}
                         ${imageMatches.length > 0 ? `<a href="${imageMatches[0]}" download class="bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition" title="Скачать изображение"><span class="material-symbols-outlined text-sm">download</span></a>` : ''}
                         <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full p-1.5 text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
-                            <span class="material-symbols-outlined text-sm">add</span>
+                            <span class="material-symbols-outlined text-sm">emoji_emotions</span>
                         </button>
                     </div>
                 </div>
