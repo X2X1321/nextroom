@@ -39,6 +39,7 @@ class Room(models.Model):
     category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='general')
     is_private = models.BooleanField(default=False, verbose_name="Private Room")
     access_code = models.CharField(max_length=50, blank=True, null=True, verbose_name="Access Code")
+    is_pinned = models.BooleanField(default=False, verbose_name="Pinned Room")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -66,6 +67,7 @@ class UserProfile(models.Model):
     api_keys = JSONField(default=dict, blank=True)
     visited_rooms = models.ManyToManyField(Room, related_name='visited_by', blank=True)
     custom_prompt = models.TextField(blank=True, help_text='Дополнительные правила для нейросети в чате.')
+    showcase_achievements = models.ManyToManyField('Achievement', related_name='showcased_by', blank=True)
 
     def __str__(self):
         return f'{self.user.username} profile'

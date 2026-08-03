@@ -25,4 +25,8 @@ urlpatterns = [
     path('room/<slug:slug>/stats/', views.room_stats, name='room_stats'),
     path('achievements/', views.achievements, name='achievements'),
     path('ai-management/', views.ai_management, name='ai_management'),
+    path('room/<slug:slug>/toggle-pin/', views.toggle_room_pin, name='toggle_room_pin'),
+    path('profile/showcase/', views.manage_showcase, name='manage_showcase'),
+    path('image-chat/', views.image_generation_chat, name='image_generation_chat'),
+    path('image-chat/generate/', views.generate_image, name='generate_image'),
 ]

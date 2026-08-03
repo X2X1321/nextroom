@@ -1,0 +1,82 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Генерация изображений — NextRoom{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition duration-200 group mb-3">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Назад
+            </a>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Генерация изображений</h1>
+            <p class="text-sm text-slate-400 mt-1">Опишите, что нужно нарисовать, и нейросеть сгенерирует изображение.</p>
+        </div>
+    </div>
+
+    <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
+        <div id="image-result" class="hidden">
+            <img id="generated-image" src="" alt="Generated image" class="w-full rounded-2xl border border-slate-800">
+        </div>
+        <div id="image-loading" class="hidden text-sm text-slate-400">Генерация изображения... Это может занять до минуты.</div>
+        <div id="image-error" class="hidden text-sm text-red-300"></div>
+        <form id="image-form" class="flex gap-3">
+            {% csrf_token %}
+            <input type="text" id="image-prompt" placeholder="Например: Космонавт на марсе в стиле киберпанк" class="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+            <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
+                <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                <span class="relative z-10">Сгенерировать</span>
+            </button>
+        </form>
+        <p class="text-xs text-slate-500">Для генерации необходимо добавить OpenAI API ключ в разделе «Управление AI».</p>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById('image-form');
+    const promptInput = document.getElementById('image-prompt');
+    const resultDiv = document.getElementById('image-result');
+    const imageEl = document.getElementById('generated-image');
+    const loadingDiv = document.getElementById('image-loading');
+    const errorDiv = document.getElementById('image-error');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const prompt = promptInput.value.trim();
+        if (!prompt) return;
+
+        resultDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+        loadingDiv.classList.remove('hidden');
+
+        try {
+            const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const res = await fetch("{% url 'generate_image' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrf,
+                },
+                body: JSON.stringify({prompt}),
+            });
+            const data = await res.json();
+            loadingDiv.classList.add('hidden');
+            if (res.ok && data.image_url) {
+                imageEl.src = data.image_url;
+                resultDiv.classList.remove('hidden');
+            } else {
+                errorDiv.textContent = data.error || 'Не удалось сгенерировать изображение.';
+                errorDiv.classList.remove('hidden');
+            }
+        } catch (err) {
+            loadingDiv.classList.add('hidden');
+            errorDiv.textContent = 'Ошибка соединения.';
+            errorDiv.classList.remove('hidden');
+        }
+    });
+</script>
+{% endblock %}

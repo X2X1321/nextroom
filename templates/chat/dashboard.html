@@ -137,10 +137,18 @@
             </div>
 
             <!-- Join Button -->
-            <div class="mt-6 border-t border-slate-900/60 pt-4">
+            <div class="mt-6 border-t border-slate-900/60 pt-4 space-y-2">
                 <a href="{% url 'room_detail' room.slug %}" class="block w-full text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2.5 text-sm font-semibold text-slate-300 hover:text-white transition">
                     Присоединиться к комнате
                 </a>
+                {% if user.is_staff %}
+                <form action="{% url 'toggle_room_pin' room.slug %}" method="POST" class="block">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full rounded-xl border border-slate-800 hover:border-indigo-500/40 py-2.5 text-sm font-semibold text-slate-300 hover:text-white transition">
+                        {% if room.is_pinned %}Открепить{% else %}Закрепить{% endif %}
+                    </button>
+                </form>
+                {% endif %}
             </div>
         </div>
         {% empty %}

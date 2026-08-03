@@ -1,0 +1,46 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Витрина достижений — NextRoom{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <a href="{% url 'profile' %}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition duration-200 group mb-3">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Назад в профиль
+            </a>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Витрина достижений</h1>
+            <p class="text-sm text-slate-400 mt-1">Выберите до 3 достижений, которые будут отображаться в вашем профиле.</p>
+        </div>
+    </div>
+
+    <form method="POST" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% csrf_token %}
+        {% for achievement in earned_achievements %}
+            <label class="glass-panel rounded-2xl p-4 border cursor-pointer transition hover:border-indigo-500/40 {% if achievement.id in showcase_ids %}border-indigo-500/40 bg-indigo-500/5{% else %}border-slate-800{% endif %}">
+                <div class="flex items-start gap-3">
+                    <input type="checkbox" name="achievements" value="{{ achievement.id }}" class="mt-1" {% if achievement.id in showcase_ids %}checked{% endif %}>
+                    <div class="flex-1">
+                        <h3 class="text-sm font-bold text-white">{{ achievement.name }}</h3>
+                        <p class="text-xs text-slate-400 mt-1">{{ achievement.description }}</p>
+                    </div>
+                </div>
+            </label>
+        {% empty %}
+            <p class="text-sm text-slate-400 col-span-full">Вы ещё не получили ни одного достижения.</p>
+        {% endfor %}
+        {% if earned_achievements %}
+            <div class="col-span-full">
+                <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                    <span class="relative z-10">Сохранить</span>
+                </button>
+            </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

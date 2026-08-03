@@ -134,6 +134,12 @@
                         <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
                         <span class="relative z-10">Мой кабинет</span>
                     </a>
+                    <a href="{% url 'image_generation_chat' %}" 
+                        class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                        <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                        <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                        <span class="relative z-10">Генерация изображений</span>
+                    </a>
                     <a href="{% url 'logout' %}" 
                         class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
                         <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-red-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
@@ -166,6 +172,7 @@
                 {% if user.is_authenticated %}
                     <a href="{% url 'dashboard' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Панель комнат</a>
                     <a href="{% url 'profile' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Мой кабинет</a>
+                    <a href="{% url 'image_generation_chat' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Генерация изображений</a>
                     <a href="{% url 'logout' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-red-900/30 transition">Выйти</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Войти</a>

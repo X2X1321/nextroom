@@ -420,6 +420,9 @@ def dashboard(request):
     elif room_type == 'private':
         rooms = rooms.filter(is_private=True)
         
+    # Pinned rooms first
+    rooms = rooms.order_by('-is_pinned', '-created_at')
+    
     # Get stats
     total_rooms = Room.objects.count()
     my_rooms_count = Room.objects.filter(creator=request.user).count()
@@ -991,4 +994,82 @@ def ai_management(request):
         'custom_prompt': profile.custom_prompt,
     }
     return render(request, 'chat/ai_management.html', context)
+
+
+@login_required
+def toggle_room_pin(request, slug):
+    room = get_object_or_404(Room, slug=slug)
+    if not request.user.is_staff:
+        messages.error(request, 'Только администратор может закреплять комнаты.')
+        return redirect('dashboard')
+    room.is_pinned = not room.is_pinned
+    room.save()
+    messages.success(request, f'Комната {"закреплена" if room.is_pinned else "откреплена"}.')
+    return redirect('dashboard')
+
+
+@login_required
+def manage_showcase(request):
+    profile = get_user_profile(request.user)
+    earned_ids = set(request.user.user_achievements.values_list('achievement_id', flat=True))
+    earned_achievements = Achievement.objects.filter(id__in=earned_ids)
+
+    if request.method == 'POST':
+        selected_ids = request.POST.getlist('achievements')
+        profile.showcase_achievements.set(selected_ids)
+        messages.success(request, 'Витрина достижений обновлена.')
+        return redirect('manage_showcase')
+
+    context = {
+        'profile': profile,
+        'earned_achievements': earned_achievements,
+        'showcase_ids': set(profile.showcase_achievements.values_list('id', flat=True)),
+    }
+    return render(request, 'chat/manage_showcase.html', context)
+
+
+@login_required
+def image_generation_chat(request):
+    profile = get_user_profile(request.user)
+    return render(request, 'chat/image_generation_chat.html', {'profile': profile})
+
+
+@login_required
+def generate_image(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    data = json.loads(request.body)
+    prompt = data.get('prompt', '').strip()
+    if not prompt:
+        return JsonResponse({'error': 'Prompt is required'}, status=400)
+
+    profile = get_user_profile(request.user)
+    api_keys = profile.api_keys or {}
+    openai_key = api_keys.get('openai')
+
+    if not openai_key:
+        return JsonResponse({
+            'error': 'Для генерации изображений добавьте OpenAI API ключ в управлении AI.',
+            'setup_required': True,
+        }, status=400)
+
+    try:
+        url = 'https://api.openai.com/v1/images/generations'
+        payload = json.dumps({
+            'model': 'dall-e-3',
+            'prompt': prompt,
+            'n': 1,
+            'size': '1024x1024',
+        }).encode('utf-8')
+        req = urllib.request.Request(url, data=payload, method='POST')
+        req.add_header('Authorization', f'Bearer {openai_key}')
+        req.add_header('Content-Type', 'application/json')
+        with urllib.request.urlopen(req, timeout=60) as resp:
+            result = json.loads(resp.read().decode('utf-8'))
+
+        image_url = result['data'][0]['url']
+        return JsonResponse({'status': 'success', 'image_url': image_url})
+    except Exception as exc:
+        return JsonResponse({'error': f'Ошибка генерации: {str(exc)}'}, status=500)
 
