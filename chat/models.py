@@ -253,7 +253,7 @@ def _ensure_achievements():
         {'name': 'Непрерывный', 'description': 'Зайдите в NextRoom 30 дней подряд', 'icon': 'lottie-diamond', 'premium_days': 60, 'condition_type': 'consecutive_days', 'condition_value': 30, 'lottie_url': 'https://lottie.host/5ae48158-8997-4d93-90b1-7d7d713007e4/CRp7UowfhN.json'},
     ]
     for data in defaults:
-        Achievement.objects.get_or_create(name=data['name'], defaults=data)
+        Achievement.objects.update_or_create(name=data['name'], defaults=data)
 
 
 @receiver(post_save, sender=Room)
