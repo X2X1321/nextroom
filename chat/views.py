@@ -1129,12 +1129,22 @@ def generate_image(request):
         return JsonResponse({'error': 'Prompt is required'}, status=400)
 
     try:
+        start_time = time.time()
         import time as time_module
         time_module.sleep(8)
         encoded_prompt = urllib.parse.quote(prompt)
         image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(timezone.now().timestamp())}'
+        generation_time = time.time() - start_time
         profile = get_user_profile(request.user)
-        GeneratedImage.objects.create(profile=profile, prompt=prompt, image_url=image_url)
+        GeneratedImage.objects.create(
+            profile=profile,
+            prompt=prompt,
+            image_url=image_url,
+            generation_time=generation_time,
+            width=1024,
+            height=1024,
+            model_name='pollinations',
+        )
         return JsonResponse({'status': 'success', 'image_url': image_url})
     except Exception as exc:
         return JsonResponse({'error': f'Ошибка генерации: {str(exc)}'}, status=500)
@@ -1149,6 +1159,51 @@ def image_history(request):
         'images': images,
     }
     return render(request, 'chat/image_history.html', context)
+
+
+@login_required
+def image_gen_stats(request):
+    profile = get_user_profile(request.user)
+    images = GeneratedImage.objects.filter(profile=profile)
+    total = images.count()
+    now = timezone.now()
+    week_ago = now - datetime.timedelta(days=7)
+    week_count = images.filter(created_at__gte=week_ago).count()
+
+    if total == 0:
+        return JsonResponse({
+            'labels': ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'],
+            'datasets': [{
+                'label': 'Генерация изображений',
+                'data': [0, 0, 0, 0, 0, 0],
+            }]
+        })
+
+    avg_time = images.aggregate(avg=Avg('generation_time'))['avg'] or 0
+    speed_score = max(0, min(100, int((1 - min(avg_time / 15, 1)) * 100)))
+
+    success_count = images.exclude(image_url__isnull=True).exclude(image_url__exact='').count()
+    success_score = int((success_count / total) * 100) if total else 0
+
+    volume_score = min(100, total)
+
+    models_used = images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').distinct().count()
+    coverage_score = min(100, models_used * 20)
+
+    avg_width = images.aggregate(avg=Avg('width'))['avg'] or 0
+    avg_height = images.aggregate(avg=Avg('height'))['avg'] or 0
+    avg_pixels = (avg_width * avg_height) if avg_width and avg_height else 0
+    resolution_score = min(100, int(avg_pixels / 20000))
+
+    week_score = min(100, week_count * 2)
+
+    return JsonResponse({
+        'labels': ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'],
+        'datasets': [{
+            'label': 'Генерация изображений',
+            'data': [speed_score, success_score, volume_score, coverage_score, resolution_score, week_score],
+        }]
+    })
 
 
 @login_required

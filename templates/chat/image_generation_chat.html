@@ -60,14 +60,14 @@
     </div>
 
     <div class="glass-panel rounded-3xl p-6">
-        <h2 class="text-lg font-bold text-white mb-2">Статистика AI</h2>
-        <p class="text-xs text-slate-400 mb-4">Показатели эффективности нейросетей</p>
+        <h2 class="text-lg font-bold text-white mb-2">Статистика генерации изображений</h2>
+        <p class="text-xs text-slate-400 mb-4">Показатели эффективности генерации</p>
         <div class="h-80">
-            <canvas id="ai-stats-radar-chart" role="img" aria-label="AI statistics radar chart"></canvas>
+            <canvas id="ai-stats-radar-chart" role="img" aria-label="AI image generation statistics radar chart"></canvas>
         </div>
         <table class="sr-only">
             <caption>
-                AI usage metrics
+                Image generation metrics
             </caption>
             <thead>
                 <tr>
@@ -76,11 +76,12 @@
                 </tr>
             </thead>
             <tbody id="ai-stats-table-body">
-                <tr><th scope="row">Speed</th><td>0</td></tr>
-                <tr><th scope="row">Quality</th><td>0</td></tr>
-                <tr><th scope="row">Reliability</th><td>0</td></tr>
-                <tr><th scope="row">Coverage</th><td>0</td></tr>
-                <tr><th scope="row">Volume</th><td>0</td></tr>
+                <tr><th scope="row">Скорость генерации</th><td>0</td></tr>
+                <tr><th scope="row">Успешность</th><td>0</td></tr>
+                <tr><th scope="row">Изображений создано</th><td>0</td></tr>
+                <tr><th scope="row">Использовано моделей</th><td>0</td></tr>
+                <tr><th scope="row">Среднее разрешение</th><td>0</td></tr>
+                <tr><th scope="row">Генераций за неделю</th><td>0</td></tr>
             </tbody>
         </table>
     </div>
@@ -139,16 +140,16 @@
         }
     });
 
-    // Radar chart for AI stats
+    // Radar chart for image generation stats
     const radarCanvas = document.getElementById('ai-stats-radar-chart');
     let radarChartInstance = null;
 
     async function loadRadarChart() {
         try {
-            const res = await fetch("{% url 'ai_usage_chart' %}");
+            const res = await fetch("{% url 'image_gen_stats' %}");
             const data = await res.json();
-            const labels = data.labels || ['Скорость', 'Качество', 'Надежность', 'Покрытие', 'Объем'];
-            const values = data.datasets?.[0]?.data || [0, 0, 0, 0, 0];
+            const labels = data.labels || ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'];
+            const values = data.datasets?.[0]?.data || [0, 0, 0, 0, 0, 0];
 
             if (radarChartInstance) {
                 radarChartInstance.data.labels = labels;
@@ -160,7 +161,7 @@
                     data: {
                         labels: labels,
                         datasets: [{
-                            label: 'Мои показатели',
+                            label: 'Генерация изображений',
                             data: values,
                             borderColor: '#818cf8',
                             backgroundColor: 'rgba(129, 140, 248, 0.25)',
@@ -208,7 +209,7 @@
                 tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${values[idx] || 0}</td></tr>`).join('');
             }
         } catch (e) {
-            console.error('Failed to load AI stats radar chart', e);
+            console.error('Failed to load image generation stats radar chart', e);
         }
     }
 

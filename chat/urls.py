@@ -31,5 +31,6 @@ urlpatterns = [
     path('image-chat/', views.image_generation_chat, name='image_generation_chat'),
     path('image-chat/generate/', views.generate_image, name='generate_image'),
     path('image-chat/history/', views.image_history, name='image_history'),
+    path('image-chat/stats/', views.image_gen_stats, name='image_gen_stats'),
     path('ai-management/usage-chart/', views.ai_usage_chart, name='ai_usage_chart'),
 ]

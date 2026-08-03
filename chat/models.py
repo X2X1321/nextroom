@@ -247,6 +247,10 @@ class GeneratedImage(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='generated_images')
     prompt = models.TextField()
     image_url = models.TextField()
+    generation_time = models.FloatField(null=True, blank=True, help_text='Время генерации в секундах')
+    width = models.IntegerField(null=True, blank=True)
+    height = models.IntegerField(null=True, blank=True)
+    model_name = models.CharField(max_length=100, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
