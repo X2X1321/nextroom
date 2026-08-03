@@ -21,7 +21,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import Q, Count
 
-from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction
+from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity
 
 AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES}
 
@@ -519,6 +519,23 @@ def profile(request):
         messages.success(request, 'Промпт сохранен.')
         return redirect('profile')
 
+    from django.utils import timezone
+    today = timezone.now().date()
+    start_date = today - timezone.timedelta(days=29)
+    activities = UserActivity.objects.filter(user=request.user, date__range=[start_date, today])
+    activity_map = {a.date: a.messages_count for a in activities}
+    calendar_days = []
+    for i in range(29, -1, -1):
+        d = today - timezone.timedelta(days=i)
+        weekday = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][d.weekday()]
+        label = weekday if i % 7 == 0 else ''
+        calendar_days.append({
+            'date': d,
+            'label': label,
+            'count': activity_map.get(d, 0),
+            'is_today': d == today,
+        })
+
     context = {
         'profile': profile,
         'my_rooms': my_rooms,
@@ -526,6 +543,7 @@ def profile(request):
         'integrations': integrations,
         'available_providers': available_providers,
         'custom_prompt': profile.custom_prompt,
+        'calendar_days': calendar_days,
     }
     return render(request, 'chat/profile.html', context)
 
@@ -908,4 +926,50 @@ def room_stats(request, slug):
         'top_user': top_user,
     }
     return render(request, 'chat/room_stats.html', context)
+
+
+@login_required
+def achievements(request):
+    profile = get_user_profile(request.user)
+    all_achievements = Achievement.objects.all()
+    earned_ids = set(request.user.user_achievements.values_list('achievement_id', flat=True))
+    achievements_list = []
+    for achievement in all_achievements:
+        achievements_list.append({
+            'achievement': achievement,
+            'earned': achievement.id in earned_ids,
+        })
+    context = {
+        'profile': profile,
+        'achievements_list': achievements_list,
+        'earned_count': len(earned_ids),
+        'total_count': all_achievements.count(),
+    }
+    return render(request, 'chat/achievements.html', context)
+
+
+@login_required
+def ai_management(request):
+    profile = get_user_profile(request.user)
+    integrations = profile.integrations.all()
+    available_providers = [
+        ('groq', 'Groq', 'llama-3.1-8b-instant'),
+        ('qwen', 'Qwen', 'qwen/qwen3-32b'),
+        ('openai', 'OpenAI', 'openai/gpt-oss-120b'),
+        ('openai', 'OpenAI', 'openai/gpt-oss-20b'),
+    ]
+
+    if request.method == 'POST':
+        profile.custom_prompt = request.POST.get('custom_prompt', '').strip()
+        profile.save()
+        messages.success(request, 'Промпт сохранен.')
+        return redirect('ai_management')
+
+    context = {
+        'profile': profile,
+        'integrations': integrations,
+        'available_providers': available_providers,
+        'custom_prompt': profile.custom_prompt,
+    }
+    return render(request, 'chat/ai_management.html', context)
 

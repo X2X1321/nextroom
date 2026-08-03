@@ -26,23 +26,6 @@
         </div>
     </div>
 
-    <div class="glass-panel p-5 rounded-2xl mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-            <p class="text-sm font-semibold uppercase tracking-wider text-slate-400">Текущий тариф</p>
-            <h3 class="mt-2 text-xl font-black text-white">{{ profile.active_plan }}</h3>
-            {% if profile.is_premium %}
-            <p class="text-sm text-slate-400">Premium действует до {{ profile.premium_until|date:'d.m.Y' }}</p>
-            {% else %}
-            <p class="text-sm text-slate-400">Free: до 5 комнат, до 10 приглашений на комнату.</p>
-            {% endif %}
-        </div>
-        <a href="{% url 'profile' %}" class="relative inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
-            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-            <span class="relative z-10">Открыть личный кабинет</span>
-        </a>
-    </div>
-
     <!-- Actions bar: Search and Filter + Create Button -->
     <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-8">
         <!-- Search and filters Form -->

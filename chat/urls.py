@@ -23,4 +23,6 @@ urlpatterns = [
     path('contacts/', views.contacts_view, name='contacts'),
     path('message/<int:message_id>/react/', views.toggle_message_reaction, name='toggle_message_reaction'),
     path('room/<slug:slug>/stats/', views.room_stats, name='room_stats'),
+    path('achievements/', views.achievements, name='achievements'),
+    path('ai-management/', views.ai_management, name='ai_management'),
 ]

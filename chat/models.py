@@ -163,7 +163,146 @@ class MessageReaction(models.Model):
     def __str__(self):
         return f"{self.user.username} reacted {self.reaction} to message {self.message.id}"
 
+
+class Achievement(models.Model):
+    CONDITION_TYPES = [
+        ('registration', 'Регистрация'),
+        ('rooms_created', 'Создано комнат'),
+        ('messages', 'Всего сообщений'),
+        ('invites', 'Приглашений'),
+        ('ai_messages', 'Сообщений к AI'),
+        ('consecutive_days', 'Дней подряд'),
+    ]
+
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    icon = models.CharField(max_length=10, default='🏆')
+    premium_days = models.IntegerField(default=0)
+    condition_type = models.CharField(max_length=30, choices=CONDITION_TYPES)
+    condition_value = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.name
+
+
+class UserAchievement(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_achievements')
+    achievement = models.ForeignKey(Achievement, on_delete=models.CASCADE)
+    earned_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'achievement')
+
+    def __str__(self):
+        return f"{self.user.username} earned {self.achievement.name}"
+
+
+class UserActivity(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')
+    date = models.DateField()
+    messages_count = models.IntegerField(default=0)
+
+    class Meta:
+        unique_together = ('user', 'date')
+        ordering = ['-date']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date}: {self.messages_count} сообщений"
+
+
 @receiver(post_save, sender=User)
 def create_profile_for_new_user(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
+        _check_and_grant_achievements(instance, 'registration', 1)
+
+
+def _check_and_grant_achievements(user, condition_type, condition_value):
+    from django.utils import timezone
+    if not user or not hasattr(user, 'user_achievements'):
+        return []
+    earned = []
+    achievements = Achievement.objects.filter(condition_type=condition_type, condition_value__lte=condition_value)
+    for achievement in achievements:
+        if not UserAchievement.objects.filter(user=user, achievement=achievement).exists():
+            UserAchievement.objects.create(user=user, achievement=achievement)
+            profile = user.profile
+            if achievement.premium_days > 0 and profile:
+                from django.utils import timezone
+                now = timezone.now()
+                if profile.premium_until and profile.premium_until > now:
+                    profile.premium_until = profile.premium_until + timezone.timedelta(days=achievement.premium_days)
+                else:
+                    profile.premium_until = now + timezone.timedelta(days=achievement.premium_days)
+                profile.subscription_plan = 'premium'
+                profile.save()
+            earned.append(achievement)
+    return earned
+
+
+def _ensure_achievements():
+    defaults = [
+        {'name': 'Новичок', 'description': 'Зарегистрируйтесь в NextRoom', 'icon': '🎉', 'premium_days': 10, 'condition_type': 'registration', 'condition_value': 1},
+        {'name': 'Основатель', 'description': 'Создайте первую комнату', 'icon': '🚀', 'premium_days': 5, 'condition_type': 'rooms_created', 'condition_value': 1},
+        {'name': 'Болтун', 'description': 'Напишите 10 сообщений', 'icon': '💬', 'premium_days': 2, 'condition_type': 'messages', 'condition_value': 10},
+        {'name': 'Коммуникатор', 'description': 'Напишите 100 сообщений', 'icon': '🗣️', 'premium_days': 5, 'condition_type': 'messages', 'condition_value': 100},
+        {'name': 'Гуру чата', 'description': 'Напишите 1000 сообщений', 'icon': '👑', 'premium_days': 15, 'condition_type': 'messages', 'condition_value': 1000},
+        {'name': 'Командир', 'description': 'Пригласите друзей в комнату', 'icon': '🤝', 'premium_days': 10, 'condition_type': 'invites', 'condition_value': 1},
+        {'name': 'AI-ассистент', 'description': 'Общайтесь с нейросетью', 'icon': '🤖', 'premium_days': 1, 'condition_type': 'ai_messages', 'condition_value': 1},
+        {'name': 'Непрерывный', 'description': 'Зайдите в NextRoom 30 дней подряд', 'icon': '🔥', 'premium_days': 60, 'condition_type': 'consecutive_days', 'condition_value': 30},
+    ]
+    for data in defaults:
+        Achievement.objects.get_or_create(name=data['name'], defaults=data)
+
+
+@receiver(post_save, sender=Room)
+def room_created_check_achievements(sender, instance, created, **kwargs):
+    if created and instance.creator_id:
+        _check_and_grant_achievements(instance.creator, 'rooms_created', Room.objects.filter(creator_id=instance.creator_id).count())
+
+
+@receiver(post_save, sender=Message)
+def message_created_check_achievements(sender, instance, created, **kwargs):
+    if created and instance.user_id:
+        user = instance.user
+        if not user or not hasattr(user, 'user_achievements'):
+            return
+        from django.utils import timezone
+        today = timezone.now().date()
+        activity, _ = UserActivity.objects.get_or_create(user=user, date=today, defaults={'messages_count': 0})
+        activity.messages_count += 1
+        activity.save()
+
+        total_messages = Message.objects.filter(user=user).count()
+        _check_and_grant_achievements(user, 'messages', total_messages)
+
+        if instance.content.strip().startswith('@'):
+            _check_and_grant_achievements(user, 'ai_messages', 1)
+
+        streak = _calculate_streak(user)
+        if streak >= 30:
+            _check_and_grant_achievements(user, 'consecutive_days', streak)
+
+
+@receiver(post_save, sender=RoomInvitation)
+def invitation_created_check_achievements(sender, instance, created, **kwargs):
+    if created and instance.invited_by_id:
+        invites_count = RoomInvitation.objects.filter(invited_by_id=instance.invited_by_id).count()
+        _check_and_grant_achievements(instance.invited_by, 'invites', invites_count)
+
+
+def _calculate_streak(user):
+    activities = UserActivity.objects.filter(user=user).order_by('-date')[:60]
+    if not activities:
+        return 0
+    from django.utils import timezone
+    today = timezone.now().date()
+    if activities[0].date != today:
+        return 0
+    streak = 1
+    for i in range(len(activities) - 1):
+        if (activities[i].date - activities[i + 1].date).days == 1:
+            streak += 1
+        else:
+            break
+    return streak
