@@ -91,7 +91,7 @@
         </section>
     </div>
 
-    <div class="glass-panel rounded-3xl p-6">
+    <div class="glass-panel rounded-3xl p-6 flex-grow">
         <h2 class="text-lg font-bold text-white mb-2">Использование токенов</h2>
         <p class="text-xs text-slate-400 mb-4">Количество токенов, использованных за последние 7 дней.</p>
         <div class="h-64">
@@ -117,6 +117,15 @@
                 <tr><th scope="row">Sun</th><td>0</td></tr>
             </tbody>
         </table>
+    </div>
+
+    <div class="glass-panel rounded-3xl p-6">
+        <h2 class="text-lg font-bold text-white mb-4">Советы по использованию @</h2>
+        <div class="space-y-3 text-sm text-slate-400">
+            <p>Чтобы обратиться к модели, начните сообщение с <span class="font-semibold text-white">@gpt</span>, <span class="font-semibold text-white">@grok</span>, <span class="font-semibold text-white">@deepseek</span>, <span class="font-semibold text-white">@qwen</span> или <span class="font-semibold text-white">@claude</span>.</p>
+            <p>Например: <span class="text-indigo-300">@gpt Придумай тему для обсуждения на вечер</span></p>
+            <p>После отправки запрос будет обработан и бот ответит прямо в комнате.</p>
+        </div>
     </div>
 </div>
 {% endblock %}
