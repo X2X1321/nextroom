@@ -232,6 +232,19 @@ class AIUsageLog(models.Model):
         return f"{self.profile.user.username} - {self.provider} - {self.tokens_used} tokens"
 
 
+class GeneratedImage(models.Model):
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='generated_images')
+    prompt = models.TextField()
+    image_url = models.URLField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.profile.user.username} - {self.prompt[:50]}"
+
+
 @receiver(post_save, sender=User)
 def create_profile_for_new_user(sender, instance, created, **kwargs):
     if created:

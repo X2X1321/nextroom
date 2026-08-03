@@ -30,5 +30,6 @@ urlpatterns = [
     path('room/<slug:slug>/toggle-pin/', views.toggle_room_pin, name='toggle_room_pin'),
     path('image-chat/', views.image_generation_chat, name='image_generation_chat'),
     path('image-chat/generate/', views.generate_image, name='generate_image'),
+    path('image-chat/history/', views.image_history, name='image_history'),
     path('ai-management/usage-chart/', views.ai_usage_chart, name='ai_usage_chart'),
 ]

@@ -1,0 +1,38 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}История генераций — NextRoom{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <a href="{% url 'image_generation_chat' %}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition duration-200 group mb-3">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Назад
+            </a>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">История генераций</h1>
+            <p class="text-sm text-slate-400 mt-1">Ваши последние сгенерированные изображения</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for img in images %}
+            <div class="glass-panel rounded-2xl overflow-hidden border border-slate-800">
+                <img src="{{ img.image_url }}" alt="{{ img.prompt }}" class="w-full h-48 object-cover">
+                <div class="p-4">
+                    <p class="text-sm text-slate-300 line-clamp-2">{{ img.prompt }}</p>
+                    <p class="text-xs text-slate-500 mt-2">{{ img.created_at|date:'d.m.Y H:i' }}</p>
+                    <div class="mt-3 flex gap-2">
+                        <a href="{{ img.image_url }}" target="_blank" class="text-xs text-indigo-400 hover:text-indigo-300">Открыть</a>
+                        <a href="{{ img.image_url }}" download class="text-xs text-indigo-400 hover:text-indigo-300">Скачать</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-sm text-slate-400 col-span-full">Вы ещё не генерировали изображений.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

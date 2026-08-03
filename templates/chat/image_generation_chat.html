@@ -20,6 +20,13 @@
     <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
         <div id="image-result" class="hidden">
             <img id="generated-image" src="" alt="Generated image" class="w-full rounded-2xl border border-slate-800 opacity-0 transition-opacity duration-500">
+            <div class="mt-3 flex gap-2">
+                <a id="download-link" href="#" download class="relative inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                    <span class="relative z-10">Скачать изображение</span>
+                </a>
+            </div>
         </div>
         <div id="image-loading" class="hidden">
             <div class="flex items-center gap-3 text-sm text-slate-400">
@@ -40,6 +47,7 @@
                 <span class="relative z-10">Сгенерировать</span>
             </button>
         </form>
+        <a href="{% url 'image_history' %}" class="text-sm text-indigo-400 hover:text-indigo-300">История генераций</a>
     </div>
 </div>
 
@@ -50,6 +58,7 @@
     const imageEl = document.getElementById('generated-image');
     const loadingDiv = document.getElementById('image-loading');
     const errorDiv = document.getElementById('image-error');
+    const downloadLink = document.getElementById('download-link');
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -74,6 +83,7 @@
             loadingDiv.classList.add('hidden');
             if (res.ok && data.image_url) {
                 imageEl.src = data.image_url;
+                downloadLink.href = data.image_url;
                 imageEl.onload = () => {
                     imageEl.classList.remove('opacity-0');
                     imageEl.classList.add('opacity-100');

@@ -21,7 +21,7 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import Q, Count, Sum
 
-from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog
+from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog, GeneratedImage
 
 AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES}
 
@@ -186,14 +186,15 @@ def get_room_ai_integration_for_user(user, room, alias):
 
 
 def yookassa_request(method, endpoint, payload=None):
-    api_key = getattr(settings, 'YOOKASSA_SECRET_KEY', None)
-    if not api_key:
-        raise ValueError('YOOKASSA_SECRET_KEY is not configured in settings.')
+    shop_id = getattr(settings, 'YOOKASSA_SHOP_ID', None)
+    secret_key = getattr(settings, 'YOOKASSA_SECRET_KEY', None)
+    if not shop_id or not secret_key:
+        raise ValueError('YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY must be configured in settings.')
 
     url = f'{YOO_KASSA_API_URL}/{endpoint.lstrip("/")}'
-    auth_token = base64.b64encode(f'{api_key}:'.encode()).decode()
+    credentials = base64.b64encode(f'{shop_id}:{secret_key}'.encode()).decode()
     headers = {
-        'Authorization': f'Basic {auth_token}',
+        'Authorization': f'Basic {credentials}',
         'Content-Type': 'application/json',
         'Idempotence-Key': secrets.token_urlsafe(16),
         'Accept': 'application/json',
@@ -1094,10 +1095,23 @@ def generate_image(request):
 
     try:
         import time as time_module
-        time_module.sleep(3)
+        time_module.sleep(8)
         encoded_prompt = urllib.parse.quote(prompt)
         image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(timezone.now().timestamp())}'
+        profile = get_user_profile(request.user)
+        GeneratedImage.objects.create(profile=profile, prompt=prompt, image_url=image_url)
         return JsonResponse({'status': 'success', 'image_url': image_url})
     except Exception as exc:
         return JsonResponse({'error': f'Ошибка генерации: {str(exc)}'}, status=500)
+
+
+@login_required
+def image_history(request):
+    profile = get_user_profile(request.user)
+    images = GeneratedImage.objects.filter(profile=profile).order_by('-created_at')[:50]
+    context = {
+        'profile': profile,
+        'images': images,
+    }
+    return render(request, 'chat/image_history.html', context)
 
