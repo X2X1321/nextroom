@@ -2,6 +2,10 @@
 
 {% block title %}Управление AI — NextRoom{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -79,18 +83,98 @@
             </div>
         </section>
     </div>
+
+    <div class="glass-panel rounded-3xl p-6">
+        <h2 class="text-lg font-bold text-white mb-2">Использование токенов</h2>
+        <p class="text-xs text-slate-400 mb-4">Количество токенов, использованных за последние 7 дней.</p>
+        <div class="h-64">
+            <canvas id="weekly-orders-bar-chart" role="img" aria-label="Orders this week, bar chart"></canvas>
+        </div>
+        <table class="sr-only">
+            <caption>
+                Orders per day this week
+            </caption>
+            <thead>
+                <tr>
+                    <th scope="col">Day</th>
+                    <th scope="col">Orders</th>
+                </tr>
+            </thead>
+            <tbody id="chart-table-body">
+                <tr><th scope="row">Mon</th><td>0</td></tr>
+                <tr><th scope="row">Tue</th><td>0</td></tr>
+                <tr><th scope="row">Wed</th><td>0</td></tr>
+                <tr><th scope="row">Thu</th><td>0</td></tr>
+                <tr><th scope="row">Fri</th><td>0</td></tr>
+                <tr><th scope="row">Sat</th><td>0</td></tr>
+                <tr><th scope="row">Sun</th><td>0</td></tr>
+            </tbody>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    const providerSelect = document.getElementById('provider');
-    const modelNameInput = document.getElementById('model_name');
-    if (providerSelect && modelNameInput) {
-        providerSelect.addEventListener('change', () => {
-            const selected = providerSelect.options[providerSelect.selectedIndex];
-            modelNameInput.value = selected.getAttribute('data-model') || '';
-        });
+    const ctx = document.getElementById('weekly-orders-bar-chart');
+    let chartInstance = null;
+
+    async function loadChart() {
+        try {
+            const res = await fetch("{% url 'ai_usage_chart' %}");
+            const data = await res.json();
+            const labels = data.labels || [];
+            const values = data.data || [];
+
+            if (chartInstance) {
+                chartInstance.data.labels = labels;
+                chartInstance.data.datasets[0].data = values;
+                chartInstance.update();
+            } else {
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Токены',
+                            data: values,
+                            backgroundColor: 'rgba(99, 102, 241, 0.6)',
+                            borderColor: 'rgba(99, 102, 241, 1)',
+                            borderWidth: 1,
+                            borderRadius: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: 'rgba(148, 163, 184, 0.1)' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            const tbody = document.getElementById('chart-table-body');
+            if (tbody && labels.length) {
+                tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${values[idx] || 0}</td></tr>`).join('');
+            }
+        } catch (e) {
+            console.error('Failed to load usage chart', e);
+        }
     }
+
+    loadChart();
+    setInterval(loadChart, 30000);
 </script>
 {% endblock %}

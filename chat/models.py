@@ -67,7 +67,6 @@ class UserProfile(models.Model):
     api_keys = JSONField(default=dict, blank=True)
     visited_rooms = models.ManyToManyField(Room, related_name='visited_by', blank=True)
     custom_prompt = models.TextField(blank=True, help_text='Дополнительные правила для нейросети в чате.')
-    showcase_achievements = models.ManyToManyField('Achievement', related_name='showcased_by', blank=True)
 
     def __str__(self):
         return f'{self.user.username} profile'
@@ -211,6 +210,19 @@ class UserActivity(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.date}: {self.messages_count} сообщений"
+
+
+class AIUsageLog(models.Model):
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='ai_usage_logs')
+    provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)
+    tokens_used = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.profile.user.username} - {self.provider} - {self.tokens_used} tokens"
 
 
 @receiver(post_save, sender=User)

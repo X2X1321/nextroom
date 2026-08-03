@@ -19,9 +19,9 @@ from django.http import JsonResponse, HttpResponseForbidden, HttpResponseBadRequ
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import slugify
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 
-from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity
+from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog
 
 AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES}
 
@@ -82,7 +82,12 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
                 max_tokens=180,
                 temperature=0.8,
             )
-            return completion.choices[0].message.content.strip()
+            content = completion.choices[0].message.content.strip()
+            tokens_used = 0
+            usage = getattr(completion, 'usage', None)
+            if usage:
+                tokens_used = getattr(usage, 'total_tokens', 0) or (getattr(usage, 'prompt_tokens', 0) + getattr(usage, 'completion_tokens', 0))
+            return content, tokens_used
         except Exception as exc:
             raise ValueError(f'Groq API error: {str(exc)}') from exc
 
@@ -100,11 +105,15 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
                 stream=True,
             )
             content = ''
+            tokens_used = 0
             for chunk in stream:
                 delta = chunk.choices[0].delta
                 text = getattr(delta, 'content', None) or getattr(delta, 'reasoning', None) or ''
                 content += text
-            return content.strip()
+                usage = getattr(chunk, 'usage', None)
+                if usage:
+                    tokens_used = getattr(usage, 'total_tokens', tokens_used)
+            return content.strip(), tokens_used
         except Exception as exc:
             raise ValueError(f'Cerebras API error: {str(exc)}') from exc
 
@@ -137,12 +146,12 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
         raise ValueError(f'AI API error {exc.code}: {message}') from exc
     if 'choices' in result and result['choices']:
         content = result['choices'][0]['message'].get('content', '').strip()
-        if content:
-            return content
-        reasoning = result['choices'][0]['message'].get('reasoning', '').strip()
-        if reasoning:
-            return reasoning
-        return str(result['choices'][0]['message'])
+        if not content:
+            content = result['choices'][0]['message'].get('reasoning', '').strip()
+        if not content:
+            content = str(result['choices'][0]['message'])
+        tokens_used = result.get('usage', {}).get('total_tokens', 0)
+        return content, tokens_used
     raise ValueError('Неверный ответ от AI API.')
 
 
@@ -217,15 +226,15 @@ def parse_ai_command(content):
 
 def fetch_ai_response(alias, prompt, integration):
     if not prompt:
-        return f'Пожалуйста, укажите запрос после команды @{alias}. Например: @{alias} расскажи анекдот.'
+        return f'Пожалуйста, укажите запрос после команды @{alias}. Например: @{alias} расскажи анекдот.', 0
     custom_prompt = ''
     if integration.profile_id:
         custom_prompt = integration.profile.custom_prompt or ''
     try:
-        return fetch_chat_completion(alias, prompt, integration.api_key, model=integration.model_name or None, custom_prompt=custom_prompt)
+        content, tokens_used = fetch_chat_completion(alias, prompt, integration.api_key, model=integration.model_name or None, custom_prompt=custom_prompt)
+        return content, tokens_used
     except Exception as exc:
-        return f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
-    return sanitize_ai_response(text)
+        return f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}', 0
 
 
 def sanitize_ai_response(text: str) -> str:
@@ -801,10 +810,17 @@ def send_message(request, slug):
 
         def create_bot_message():
             try:
-                bot_content = fetch_ai_response(alias, prompt, integration)
+                bot_content, tokens_used = fetch_ai_response(alias, prompt, integration)
             except Exception as exc:
                 bot_content = f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
+                tokens_used = 0
             Message.objects.create(room=room, user=bot_user, content=bot_content)
+            if tokens_used:
+                try:
+                    profile = integration.profile or get_user_profile(request.user)
+                    AIUsageLog.objects.create(profile=profile, provider=alias, tokens_used=tokens_used)
+                except Exception:
+                    pass
 
         from django.db import connection
         use_async = connection.vendor != 'sqlite'
@@ -997,6 +1013,20 @@ def ai_management(request):
 
 
 @login_required
+def ai_usage_chart(request):
+    profile = get_user_profile(request.user)
+    today = timezone.now().date()
+    labels = []
+    data = []
+    for i in range(6, -1, -1):
+        day = today - timezone.timedelta(days=i)
+        labels.append(day.strftime('%a'))
+        total = AIUsageLog.objects.filter(profile=profile, created_at__date=day).aggregate(total=Sum('tokens_used'))['total'] or 0
+        data.append(total)
+    return JsonResponse({'labels': labels, 'data': data})
+
+
+@login_required
 def toggle_room_pin(request, slug):
     room = get_object_or_404(Room, slug=slug)
     if not request.user.is_staff:
@@ -1006,26 +1036,6 @@ def toggle_room_pin(request, slug):
     room.save()
     messages.success(request, f'Комната {"закреплена" if room.is_pinned else "откреплена"}.')
     return redirect('dashboard')
-
-
-@login_required
-def manage_showcase(request):
-    profile = get_user_profile(request.user)
-    earned_ids = set(request.user.user_achievements.values_list('achievement_id', flat=True))
-    earned_achievements = Achievement.objects.filter(id__in=earned_ids)
-
-    if request.method == 'POST':
-        selected_ids = request.POST.getlist('achievements')
-        profile.showcase_achievements.set(selected_ids)
-        messages.success(request, 'Витрина достижений обновлена.')
-        return redirect('manage_showcase')
-
-    context = {
-        'profile': profile,
-        'earned_achievements': earned_achievements,
-        'showcase_ids': set(profile.showcase_achievements.values_list('id', flat=True)),
-    }
-    return render(request, 'chat/manage_showcase.html', context)
 
 
 @login_required
