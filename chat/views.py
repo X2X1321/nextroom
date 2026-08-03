@@ -524,6 +524,7 @@ def profile(request):
     start_date = today - timezone.timedelta(days=29)
     activities = UserActivity.objects.filter(user=request.user, date__range=[start_date, today])
     activity_map = {a.date: a.messages_count for a in activities}
+
     calendar_days = []
     for i in range(29, -1, -1):
         d = today - timezone.timedelta(days=i)
@@ -536,6 +537,9 @@ def profile(request):
 
     calendar_weeks = []
     current_week = []
+    if calendar_days:
+        padding = [None] * calendar_days[0]['weekday']
+        current_week.extend(padding)
     for day in calendar_days:
         current_week.append(day)
         if day['weekday'] == 6:
