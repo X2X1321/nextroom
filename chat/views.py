@@ -87,7 +87,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
             usage = getattr(completion, 'usage', None)
             if usage:
                 tokens_used = getattr(usage, 'total_tokens', 0) or (getattr(usage, 'prompt_tokens', 0) + getattr(usage, 'completion_tokens', 0))
-            return content, tokens_used
+            return sanitize_ai_response(content), tokens_used
         except Exception as exc:
             raise ValueError(f'Groq API error: {str(exc)}') from exc
 
@@ -113,7 +113,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
                 usage = getattr(chunk, 'usage', None)
                 if usage:
                     tokens_used = getattr(usage, 'total_tokens', tokens_used)
-            return content.strip(), tokens_used
+            return sanitize_ai_response(content.strip()), tokens_used
         except Exception as exc:
             raise ValueError(f'Cerebras API error: {str(exc)}') from exc
 
@@ -151,7 +151,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
         if not content:
             content = str(result['choices'][0]['message'])
         tokens_used = result.get('usage', {}).get('total_tokens', 0)
-        return content, tokens_used
+        return sanitize_ai_response(content), tokens_used
     raise ValueError('Неверный ответ от AI API.')
 
 
@@ -238,7 +238,7 @@ def fetch_ai_response(alias, prompt, integration):
 
 
 def sanitize_ai_response(text: str) -> str:
-    text = re.sub(r'<environment_details>.*?</environment_details>', '', text, flags=re.DOTALL)
+    text = re.sub(r'<environment_details>.*?</environment_details>', '', text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r'\*\*', '', text)
     text = re.sub(r'```', '', text)
     text = re.sub(r'Current time:.*?\n', '', text)
@@ -248,6 +248,8 @@ def sanitize_ai_response(text: str) -> str:
     text = re.sub(r'Visible files:.*?\n', '', text)
     text = re.sub(r'Open tabs:.*?\n', '', text)
     text = re.sub(r'System message:.*?\n', '', text)
+    text = re.sub(r'> environment_details', '', text, flags=re.IGNORECASE)
+    text = re.sub(r'> .*?(current time|working directory|workspace root|active file|visible files|open tabs|system message).*?\n', '', text, flags=re.IGNORECASE)
     return re.sub(r'\n{2,}', '\n', text).strip()
 
 
@@ -1021,6 +1023,31 @@ def ai_management(request):
 
 
 @login_required
+def edit_ai_integration(request, pk):
+    integration = get_object_or_404(AIIntegration, pk=pk, profile__user=request.user)
+    if request.method == 'POST':
+        api_key = request.POST.get('api_key', '').strip()
+        model_name = request.POST.get('model_name', '').strip()
+        integration.api_key = api_key
+        integration.model_name = model_name
+        integration.save()
+        messages.success(request, 'Интеграция обновлена.')
+        return redirect('ai_management')
+    context = {'integration': integration}
+    return render(request, 'chat/edit_ai_integration.html', context)
+
+
+@login_required
+def delete_ai_integration(request, pk):
+    integration = get_object_or_404(AIIntegration, pk=pk, profile__user=request.user)
+    if request.method == 'POST':
+        provider = integration.provider
+        integration.delete()
+        messages.success(request, f'Интеграция @{provider} удалена.')
+    return redirect('ai_management')
+
+
+@login_required
 def ai_usage_chart(request):
     profile = get_user_profile(request.user)
     today = timezone.now().date()
@@ -1062,22 +1089,9 @@ def generate_image(request):
     if not prompt:
         return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-    api_key = 'sk_GlV6EBqGm62sNbkCQkXEjm2BDEyw3I2m'
     try:
-        url = 'https://api.pollinations.ai/v1/images/generations'
-        payload = json.dumps({
-            'model': 'flux',
-            'prompt': prompt,
-            'n': 1,
-            'size': '1024x1024',
-        }).encode('utf-8')
-        req = urllib.request.Request(url, data=payload, method='POST')
-        req.add_header('Authorization', f'Bearer {api_key}')
-        req.add_header('Content-Type', 'application/json')
-        with urllib.request.urlopen(req, timeout=120) as resp:
-            result = json.loads(resp.read().decode('utf-8'))
-
-        image_url = result['data'][0]['url']
+        encoded_prompt = urllib.parse.quote(prompt)
+        image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(timezone.now().timestamp())}'
         return JsonResponse({'status': 'success', 'image_url': image_url})
     except Exception as exc:
         return JsonResponse({'error': f'Ошибка генерации: {str(exc)}'}, status=500)

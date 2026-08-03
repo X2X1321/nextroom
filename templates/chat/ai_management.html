@@ -74,7 +74,14 @@
                             <p class="text-sm font-semibold text-white">@{{ integration.provider }}</p>
                             <p class="text-xs text-slate-500 mt-1">Ключ сохранен</p>
                         </div>
-                        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">Готово</span>
+                        <div class="flex items-center gap-2">
+                            <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">Готово</span>
+                            <a href="{% url 'edit_ai_integration' integration.pk %}" class="rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:text-white transition">Изменить</a>
+                            <form action="{% url 'delete_ai_integration' integration.pk %}" method="POST" class="inline" onsubmit="return confirm('Удалить интеграцию @{{ integration.provider }}?');">
+                                {% csrf_token %}
+                                <button type="submit" class="rounded-lg border border-red-900/50 bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-red-300 hover:text-red-200 transition">Удалить</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
                 {% empty %}
