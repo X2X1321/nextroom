@@ -1062,28 +1062,19 @@ def generate_image(request):
     if not prompt:
         return JsonResponse({'error': 'Prompt is required'}, status=400)
 
-    profile = get_user_profile(request.user)
-    api_keys = profile.api_keys or {}
-    openai_key = api_keys.get('openai')
-
-    if not openai_key:
-        return JsonResponse({
-            'error': 'Для генерации изображений добавьте OpenAI API ключ в управлении AI.',
-            'setup_required': True,
-        }, status=400)
-
+    api_key = 'sk_GlV6EBqGm62sNbkCQkXEjm2BDEyw3I2m'
     try:
-        url = 'https://api.openai.com/v1/images/generations'
+        url = 'https://api.pollinations.ai/v1/images/generations'
         payload = json.dumps({
-            'model': 'dall-e-3',
+            'model': 'flux',
             'prompt': prompt,
             'n': 1,
             'size': '1024x1024',
         }).encode('utf-8')
         req = urllib.request.Request(url, data=payload, method='POST')
-        req.add_header('Authorization', f'Bearer {openai_key}')
+        req.add_header('Authorization', f'Bearer {api_key}')
         req.add_header('Content-Type', 'application/json')
-        with urllib.request.urlopen(req, timeout=60) as resp:
+        with urllib.request.urlopen(req, timeout=120) as resp:
             result = json.loads(resp.read().decode('utf-8'))
 
         image_url = result['data'][0]['url']
