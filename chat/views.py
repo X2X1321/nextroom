@@ -239,6 +239,7 @@ def fetch_ai_response(alias, prompt, integration):
 
 def sanitize_ai_response(text: str) -> str:
     text = re.sub(r'<environment_details>.*?</environment_details>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'</?environment_details>', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\*\*', '', text)
     text = re.sub(r'```', '', text)
     text = re.sub(r'Current time:.*?\n', '', text)
@@ -250,6 +251,8 @@ def sanitize_ai_response(text: str) -> str:
     text = re.sub(r'System message:.*?\n', '', text)
     text = re.sub(r'> environment_details', '', text, flags=re.IGNORECASE)
     text = re.sub(r'> .*?(current time|working directory|workspace root|active file|visible files|open tabs|system message).*?\n', '', text, flags=re.IGNORECASE)
+    lines = [line for line in text.splitlines() if line.strip()]
+    text = '\n'.join(lines)
     return re.sub(r'\n{2,}', '\n', text).strip()
 
 
@@ -1090,6 +1093,8 @@ def generate_image(request):
         return JsonResponse({'error': 'Prompt is required'}, status=400)
 
     try:
+        import time as time_module
+        time_module.sleep(3)
         encoded_prompt = urllib.parse.quote(prompt)
         image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(timezone.now().timestamp())}'
         return JsonResponse({'status': 'success', 'image_url': image_url})

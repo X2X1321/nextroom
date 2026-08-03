@@ -168,12 +168,30 @@
                         
                         <div class="relative group">
                             <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
-                                {{ msg.content|linebreaksbr }}
+                                {% if msg.content %}
+                                    {{ msg.content|linebreaksbr }}
+                                {% endif %}
+                                {% if msg.get_image_urls %}
+                                    {% for img_url in msg.get_image_urls %}
+                                        <img src="{{ img_url }}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onclick="window.open('{{ img_url }}', '_blank')" onload="this.style.opacity=1" onerror="this.style.display='none'">
+                                    {% endfor %}
+                                {% endif %}
                             </div>
-                            <!-- Reaction picker trigger -->
-                            <button class="reaction-picker-btn absolute -bottom-2 {% if msg.user == user %}left-0{% else %}right-0{% endif %} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, {{ msg.id }})">
-                                +
-                            </button>
+                            <div class="absolute -bottom-2 {% if msg.user == user %}left-0{% else %}right-0{% endif %} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-20">
+                                <button onclick="copyMessageText({{ msg.id }})" class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Копировать текст">
+                                    📋
+                                </button>
+                                {% if msg.get_image_urls %}
+                                    {% for img_url in msg.get_image_urls %}
+                                        <a href="{{ img_url }}" download class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Скачать изображение">
+                                            ⬇️
+                                        </a>
+                                    {% endfor %}
+                                {% endif %}
+                                <button class="reaction-picker-btn bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" onclick="toggleReactionPicker(this, {{ msg.id }})" title="Реакция">
+                                    +
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Reactions display -->
@@ -366,6 +384,13 @@
             const safeContent = escapeHTML(msg.content).replace(/\n/g, '<br>');
             const reactionsHTML = buildReactionsHTML(msg.id, msg.reactions);
 
+            const urlPattern = /(https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?)/gi;
+            const imageMatches = safeContent.match(urlPattern) || [];
+            let imagesHTML = '';
+            imageMatches.forEach(url => {
+                imagesHTML += `<img src="${url}" alt="Изображение" class="mt-2 rounded-xl border border-slate-800 max-h-64 object-contain cursor-pointer hover:opacity-90 transition opacity-0" onload="this.style.opacity=1" onerror="this.style.display='none'">`;
+            });
+
             bubbleWrapper.innerHTML = `
                 <span class="text-[10px] text-slate-550 mb-1 px-1 font-medium">
                     ${isMe ? 'Вы' : escapeHTML(msg.username)}
@@ -373,12 +398,19 @@
                 <div class="relative group">
                     <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
                         ${safeContent}
+                        ${imagesHTML}
                     </div>
-                    <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
-                        +
-                    </button>
+                    <div class="absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex gap-1 z-20">
+                        <button onclick="copyMessageText(${msg.id})" class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Копировать текст">
+                            📋
+                        </button>
+                        ${imageMatches.length > 0 ? `<a href="${imageMatches[0]}" download class="bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40" title="Скачать изображение">⬇️</a>` : ''}
+                        <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900 border border-slate-700 rounded-full px-1.5 py-0.5 text-[10px] text-slate-400 hover:text-white hover:border-indigo-500/40 z-20" onclick="toggleReactionPicker(this, ${msg.id})">
+                            +
+                        </button>
+                    </div>
                 </div>
-                <div class="reactions-container flex flex-wrap gap-1 mt-1 px-1" data-msg-id="${msg.id}">
+                <div class="reactions-container flex flex-wrap gap-1 mt-1 px-1" data-message-id="${msg.id}">
                     ${reactionsHTML}
                 </div>
                 <span class="text-[9px] text-slate-550 mt-1 px-1">
@@ -577,6 +609,22 @@
             }
         })
         .catch(err => console.error('Ошибка реакции:', err));
+    }
+
+    function copyMessageText(msgId) {
+        const msgEl = document.querySelector(`[data-message-id="${msgId}"]`);
+        if (!msgEl) return;
+        const textEl = msgEl.querySelector('.break-words');
+        if (!textEl) return;
+        const text = textEl.innerText || textEl.textContent || '';
+        navigator.clipboard.writeText(text.trim()).then(() => {
+            const btn = msgEl.querySelector('[title="Копировать текст"]');
+            if (btn) {
+                const original = btn.textContent;
+                btn.textContent = '✅';
+                setTimeout(() => { btn.textContent = original; }, 1500);
+            }
+        }).catch(err => console.error('Ошибка копирования:', err));
     }
 
     function updateReactionsUI(msgId, reactions) {

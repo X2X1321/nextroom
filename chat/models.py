@@ -149,6 +149,12 @@ class Message(models.Model):
             })
         return summary
 
+    def get_image_urls(self):
+        if not self.content:
+            return []
+        url_pattern = re.compile(r'(https?://\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?)', re.IGNORECASE)
+        return url_pattern.findall(self.content)
+
     def __str__(self):
         return f"{self.user.username}: {self.content[:30]} in {self.room.name}"
 

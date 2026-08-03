@@ -19,7 +19,7 @@
 
     <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
         <div id="image-result" class="hidden">
-            <img id="generated-image" src="" alt="Generated image" class="w-full rounded-2xl border border-slate-800">
+            <img id="generated-image" src="" alt="Generated image" class="w-full rounded-2xl border border-slate-800 opacity-0 transition-opacity duration-500">
         </div>
         <div id="image-loading" class="hidden">
             <div class="flex items-center gap-3 text-sm text-slate-400">
@@ -74,7 +74,15 @@
             loadingDiv.classList.add('hidden');
             if (res.ok && data.image_url) {
                 imageEl.src = data.image_url;
-                resultDiv.classList.remove('hidden');
+                imageEl.onload = () => {
+                    imageEl.classList.remove('opacity-0');
+                    imageEl.classList.add('opacity-100');
+                    resultDiv.classList.remove('hidden');
+                };
+                imageEl.onerror = () => {
+                    errorDiv.textContent = 'Не удалось загрузить изображение. Попробуйте еще раз.';
+                    errorDiv.classList.remove('hidden');
+                };
             } else {
                 errorDiv.textContent = data.error || 'Не удалось сгенерировать изображение.';
                 errorDiv.classList.remove('hidden');
