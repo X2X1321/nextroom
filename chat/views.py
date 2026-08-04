@@ -1014,14 +1014,16 @@ def room_stats(request, slug):
 @login_required
 def achievements(request):
     profile = get_user_profile(request.user)
-    all_achievements = Achievement.objects.all().distinct()
+    all_achievements = Achievement.objects.all().order_by('id')
     earned_ids = set(request.user.user_achievements.values_list('achievement_id', flat=True))
     achievements_list = []
-    seen = set()
+    seen_ids = set()
+    seen_names = set()
     for achievement in all_achievements:
-        if achievement.id in seen:
+        if achievement.id in seen_ids or achievement.name in seen_names:
             continue
-        seen.add(achievement.id)
+        seen_ids.add(achievement.id)
+        seen_names.add(achievement.name)
         achievements_list.append({
             'achievement': achievement,
             'earned': achievement.id in earned_ids,
