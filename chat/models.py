@@ -299,7 +299,7 @@ def _ensure_achievements():
         {'name': 'Гуру чата', 'description': 'Напишите 1000 сообщений', 'icon': 'lottie-crown', 'premium_days': 15, 'condition_type': 'messages', 'condition_value': 1000, 'lottie_url': 'https://lottie.host/d1df02d9-a53f-4c75-9150-ddffcc13b2f6/85r1MVpXy2.json'},
         {'name': 'Командир', 'description': 'Пригласите друзей в комнату', 'icon': 'lottie-rocket', 'premium_days': 10, 'condition_type': 'invites', 'condition_value': 1, 'lottie_url': 'https://lottie.host/b4301e06-63d0-48cd-8024-ee311915f942/4mkLFmOjoy.json'},
         {'name': 'AI-ассистент', 'description': 'Общайтесь с нейросетью', 'icon': 'lottie-robot', 'premium_days': 1, 'condition_type': 'ai_messages', 'condition_value': 1, 'lottie_url': 'https://lottie.host/a325630f-5313-4ee4-841e-ed45f7355f48/X87DTO1KMa.json'},
-        {'name': 'Непрерывный', 'description': 'Зайдите в NextRoom 30 дней подряд', 'icon': 'lottie-diamond', 'premium_days': 60, 'condition_type': 'consecutive_days', 'condition_value': 30, 'lottie_url': 'https://lottie.host/5ae48158-8997-4d93-90b1-7d7d713007e4/CRp7UowfhN.json'},
+        {'name': 'Непрерывный', 'description': 'Зайдите в NextRoom 30 дней подряд', 'icon': 'lottie-diamond', 'premium_days': 60, 'condition_type': 'consecutive_days', 'condition_value': 30, 'lottie_url': 'https://lottie.host/33fd2bfb-6be8-4d00-89a5-61dcb569d326/CfQkyKMdgR.json'},
     ]
     seen_names = set()
     for data in defaults:
