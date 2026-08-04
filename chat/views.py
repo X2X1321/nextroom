@@ -6,6 +6,7 @@ import os
 import re
 import secrets
 import threading
+import time
 import urllib.error
 import urllib.request
 
@@ -1213,42 +1214,27 @@ def ai_usage_chart(request):
     profile = get_user_profile(request.user)
     logs = AIUsageLog.objects.filter(profile=profile)
     
-    # Calculate metrics
-    total_requests = logs.count()
-    if total_requests == 0:
-        return JsonResponse({
-            'labels': ['Скорость', 'Качество', 'Надежность', 'Покрытие', 'Объем'],
-            'datasets': [{
-                'label': 'Мои показатели',
-                'data': [0, 0, 0, 0, 0],
-            }]
-        })
+    from django.db.models.functions import TruncDate
+    from django.utils import timezone
+    today = timezone.now().date()
+    start_date = today - datetime.timedelta(days=6)
     
-    # Speed: average response time (inverted - faster is better, max 10s)
-    avg_response_time = logs.aggregate(avg=Avg('response_time'))['avg'] or 0
-    speed_score = max(0, min(100, int((1 - min(avg_response_time / 10, 1)) * 100)))
+    daily = logs.filter(created_at__date__gte=start_date).annotate(day=TruncDate('created_at')).values('day').annotate(total=Sum('tokens_used')).order_by('day')
     
-    # Quality: average tokens per response (normalized to 0-100, max 2000 tokens)
-    avg_tokens = logs.aggregate(avg=Avg('tokens_used'))['avg'] or 0
-    quality_score = min(100, int(avg_tokens / 20))
+    day_map = {item['day']: item['total'] for item in daily}
     
-    # Reliability: percentage of successful responses (tokens_used > 0)
-    successful = logs.filter(tokens_used__gt=0).count()
-    reliability_score = int((successful / total_requests) * 100) if total_requests > 0 else 0
+    labels = []
+    data = []
+    day_names_ru = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
     
-    # Coverage: number of different models used (normalized to 0-100, max 5 models)
-    models_used = logs.values('provider').distinct().count()
-    coverage_score = min(100, models_used * 20)
-    
-    # Volume: total requests (normalized to 0-100, max 100 requests)
-    volume_score = min(100, total_requests)
+    for i in range(6, -1, -1):
+        d = today - datetime.timedelta(days=i)
+        labels.append(day_names_ru[d.weekday()])
+        data.append(day_map.get(d, 0))
     
     return JsonResponse({
-        'labels': ['Скорость', 'Качество', 'Надежность', 'Покрытие', 'Объем'],
-        'datasets': [{
-            'label': 'Мои показатели',
-            'data': [speed_score, quality_score, reliability_score, coverage_score, volume_score],
-        }]
+        'labels': labels,
+        'data': data,
     })
 
 

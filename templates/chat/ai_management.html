@@ -14,7 +14,7 @@
                 <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                 </svg>
-                Назад в профиль
+                Назад
             </a>
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Управление нейросетями</h1>
             <p class="text-sm text-slate-400 mt-1">Подключайте API ключи и настраивайте поведение моделей</p>
@@ -95,16 +95,16 @@
         <h2 class="text-lg font-bold text-white mb-2">Использование токенов</h2>
         <p class="text-xs text-slate-400 mb-4">Количество токенов, использованных за последние 7 дней.</p>
         <div class="h-64">
-            <canvas id="weekly-orders-bar-chart" role="img" aria-label="Orders this week, bar chart"></canvas>
+            <canvas id="weekly-tokens-chart" role="img" aria-label="Tokens used this week, bar chart"></canvas>
         </div>
         <table class="sr-only">
             <caption>
-                Orders per day this week
+                Tokens per day this week
             </caption>
             <thead>
                 <tr>
                     <th scope="col">Day</th>
-                    <th scope="col">Orders</th>
+                    <th scope="col">Tokens</th>
                 </tr>
             </thead>
             <tbody id="chart-table-body">
@@ -132,7 +132,7 @@
 
 {% block extra_js %}
 <script>
-    const ctx = document.getElementById('weekly-orders-bar-chart');
+    const ctx = document.getElementById('weekly-tokens-chart');
     let chartInstance = null;
 
     async function loadChart() {

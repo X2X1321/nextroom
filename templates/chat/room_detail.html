@@ -19,16 +19,16 @@
             </a>
         </div>
         <div class="flex items-center gap-2">
-            <span class="inline-flex items-center rounded-md bg-indigo-400/10 px-2.5 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20">
+            <span class="hidden md:inline-flex items-center rounded-md bg-indigo-400/10 px-2.5 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20">
                 {{ room.get_category_display }}
             </span>
             {% if room.is_private %}
-                <span class="text-xs text-amber-450 bg-amber-500/10 px-2.5 py-1 rounded-md flex items-center gap-1 font-semibold border border-amber-550/20">
+                <span class="hidden md:inline-flex text-xs text-amber-450 bg-amber-500/10 px-2.5 py-1 rounded-md flex items-center gap-1 font-semibold border border-amber-550/20">
                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/></svg>
                     Приватная
                 </span>
             {% else %}
-                <span class="text-xs text-emerald-450 bg-emerald-500/10 px-2.5 py-1 rounded-md flex items-center gap-1 font-semibold border border-emerald-550/20">
+                <span class="hidden md:inline-flex text-xs text-emerald-450 bg-emerald-500/10 px-2.5 py-1 rounded-md flex items-center gap-1 font-semibold border border-emerald-550/20">
                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V9a2 2 0 002 2h2a2 2 0 012 2v.5a.5.5 0 001 0V13a3 3 0 00-3-3h-1.586A1.986 1.986 0 0110 9.414V8.5a.5.5 0 00-1 0V9a3 3 0 003 3h2a1 1 0 011 1v.09a3.001 3.001 0 01-6 0V13a.5.5 0 00-1 0v.5a5 5 0 004.83 4.985A8.003 8.003 0 014.332 8.027z" clip-rule="evenodd"/></svg>
                     Открытая
                 </span>
