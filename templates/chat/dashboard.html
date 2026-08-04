@@ -48,7 +48,7 @@
 
         <!-- Create Button -->
         <button id="open-create-modal" 
-        class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
+        class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group w-full sm:w-auto">
     <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
     <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
     <span class="relative z-10 flex items-center justify-center gap-2">
@@ -61,17 +61,17 @@
     </div>
 
     <!-- Category Pills & Type Filters -->
-    <div class="flex flex-col gap-4 mb-8">
+    <div class="flex flex-col gap-3 mb-6 sm:mb-8">
         <!-- Filter Category Pills -->
-        <div class="flex items-center gap-2 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-2">Категории:</span>
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-none">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-1 shrink-0">Категории:</span>
             <a href="?q={{ query }}&category=all&type={{ selected_type }}" 
-               class="rounded-full px-4 py-1.5 text-xs font-semibold transition shrink-0 {% if not selected_category or selected_category == 'all' %}bg-brand-600 text-white shadow-md shadow-brand-600/10{% else %}bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850 border border-slate-800/40{% endif %}">
-                Все категории
+               class="rounded-full px-3 py-1 text-[11px] font-semibold transition shrink-0 {% if not selected_category or selected_category == 'all' %}bg-brand-600 text-white shadow-md shadow-brand-600/10{% else %}bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850 border border-slate-800/40{% endif %}">
+                Все
             </a>
             {% for cat_val, cat_lbl in categories %}
             <a href="?q={{ query }}&category={{ cat_val }}&type={{ selected_type }}" 
-               class="rounded-full px-4 py-1.5 text-xs font-semibold transition shrink-0 {% if selected_category == cat_val %}bg-brand-600 text-white shadow-md shadow-brand-600/10{% else %}bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850 border border-slate-800/40{% endif %}">
+               class="rounded-full px-3 py-1 text-[11px] font-semibold transition shrink-0 {% if selected_category == cat_val %}bg-brand-600 text-white shadow-md shadow-brand-600/10{% else %}bg-slate-900 text-slate-400 hover:text-white hover:bg-slate-850 border border-slate-800/40{% endif %}">
                 {{ cat_lbl }}
             </a>
             {% endfor %}
@@ -79,18 +79,18 @@
 
         <!-- Filter Room Type Tabs -->
         <div class="flex items-center gap-2 border-b border-slate-900/60 pb-2">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider mr-2">Доступность:</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mr-1 shrink-0">Доступность:</span>
             <div class="flex p-0.5 rounded-lg bg-slate-950/60 border border-slate-900">
                 <a href="?q={{ query }}&category={{ selected_category }}&type=all" 
-                   class="rounded-md px-3 py-1 text-xs font-semibold transition {% if selected_type == 'all' or not selected_type %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-white{% endif %}">
-                    Все комнаты
+                   class="rounded-md px-2.5 py-1 text-[11px] font-semibold transition {% if selected_type == 'all' or not selected_type %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-white{% endif %}">
+                    Все
                 </a>
                 <a href="?q={{ query }}&category={{ selected_category }}&type=public" 
-                   class="rounded-md px-3 py-1 text-xs font-semibold transition {% if selected_type == 'public' %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-white{% endif %}">
+                   class="rounded-md px-2.5 py-1 text-[11px] font-semibold transition {% if selected_type == 'public' %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-white{% endif %}">
                     Открытые
                 </a>
                 <a href="?q={{ query }}&category={{ selected_category }}&type=private" 
-                   class="rounded-md px-3 py-1 text-xs font-semibold transition {% if selected_type == 'private' %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-white{% endif %}">
+                   class="rounded-md px-2.5 py-1 text-[11px] font-semibold transition {% if selected_type == 'private' %}bg-slate-900 text-white{% else %}text-slate-400 hover:text-white{% endif %}">
                     Приватные
                 </a>
             </div>

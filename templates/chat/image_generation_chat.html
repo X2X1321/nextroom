@@ -47,22 +47,22 @@
             </div>
         </div>
         <div id="image-error" class="hidden text-sm text-red-300"></div>
-        <form id="image-form" class="flex gap-3">
+        <form id="image-form" class="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {% csrf_token %}
-            <input type="text" id="image-prompt" placeholder="Например: Космонавт на марсе в стиле киберпанк" class="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-            <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
+            <input type="text" id="image-prompt" placeholder="Например: Космонавт на марсе в стиле киберпанк" class="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+            <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
                 <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
                 <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
                 <span class="relative z-10">Сгенерировать</span>
             </button>
         </form>
-        <a href="{% url 'image_history' %}" class="text-sm text-indigo-400 hover:text-indigo-300">История генераций</a>
+        <a href="{% url 'image_history' %}" class="text-xs sm:text-sm text-indigo-400 hover:text-indigo-300">История генераций</a>
     </div>
 
-    <div class="glass-panel rounded-3xl p-6">
-        <h2 class="text-lg font-bold text-white mb-2">Статистика генерации изображений</h2>
-        <p class="text-xs text-slate-400 mb-4">Показатели эффективности генерации</p>
-        <div class="h-80">
+    <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6">
+        <h2 class="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2">Статистика генерации изображений</h2>
+        <p class="text-[11px] sm:text-xs text-slate-400 mb-3 sm:mb-4">Показатели эффективности генерации</p>
+        <div class="h-64 sm:h-80">
             <canvas id="ai-stats-radar-chart" role="img" aria-label="AI image generation statistics radar chart"></canvas>
         </div>
         <table class="sr-only">

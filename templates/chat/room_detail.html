@@ -9,7 +9,7 @@
         <div class="flex items-center gap-4">
             <a href="{% url 'dashboard' %}" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-white transition group">
                 <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Назад в панель
+                Назад
             </a>
             <a href="{% url 'room_stats' room.slug %}" class="inline-flex items-center gap-1.5 text-sm text-indigo-400 hover:text-indigo-300 transition">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -42,10 +42,16 @@
     </div>
 
     <!-- Main Layout Container: Sidebar + Chatbox -->
-    <div class="flex flex-col md:flex-row flex-grow gap-4 sm:gap-6 overflow-hidden min-h-0">
+    <div class="flex flex-col md:flex-row flex-grow gap-4 sm:gap-6 overflow-hidden min-h-0 relative">
         
         <!-- SIDEBAR: Room info & stats -->
-        <aside id="room-sidebar" class="w-full md:w-80 flex flex-col gap-4 shrink-0 overflow-y-auto pb-4 md:pb-0 hidden md:flex">
+        <aside id="room-sidebar" class="absolute inset-0 z-30 md:relative md:inset-auto md:z-auto w-full md:w-80 flex flex-col gap-4 shrink-0 overflow-y-auto pb-4 md:pb-0 bg-slate-950/95 md:bg-transparent backdrop-blur-md md:backdrop-blur-none border-r border-slate-800/60 md:border-none hidden md:flex">
+            <div class="flex items-center justify-between md:hidden">
+                <h2 class="text-lg font-bold text-white">О комнате</h2>
+                <button id="close-sidebar" class="p-2 text-slate-400 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
             <div class="glass-panel p-4 sm:p-5 rounded-2xl flex flex-col gap-4">
                 <div>
                     <h1 class="text-xl sm:text-2xl font-black text-white leading-tight truncate" title="{{ room.name }}">{{ room.name }}</h1>
@@ -795,6 +801,39 @@
         if (activeReactionPicker && !e.target.closest('.reaction-picker') && !e.target.closest('.reaction-picker-btn')) {
             activeReactionPicker.remove();
             activeReactionPicker = null;
+        }
+    });
+
+    // Mobile sidebar toggle
+    const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+    const roomSidebar = document.getElementById('room-sidebar');
+    const closeSidebarBtn = document.getElementById('close-sidebar');
+    
+    function openSidebar() {
+        if (roomSidebar) {
+            roomSidebar.classList.remove('hidden');
+            roomSidebar.classList.add('flex');
+        }
+    }
+    
+    function closeSidebar() {
+        if (roomSidebar) {
+            roomSidebar.classList.add('hidden');
+            roomSidebar.classList.remove('flex');
+        }
+    }
+    
+    if (mobileSidebarToggle) {
+        mobileSidebarToggle.addEventListener('click', openSidebar);
+    }
+    if (closeSidebarBtn) {
+        closeSidebarBtn.addEventListener('click', closeSidebar);
+    }
+    
+    // Close sidebar on escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && roomSidebar && !roomSidebar.classList.contains('hidden')) {
+            closeSidebar();
         }
     });
 </script>

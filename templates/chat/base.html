@@ -122,16 +122,25 @@
             animation: fadeIn 0.4s ease-out forwards;
         }
         
-        /* Custom card micro-interaction */
-        .premium-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .premium-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(99, 102, 241, 0.35);
-            box-shadow: 0 12px 24px -10px rgba(99, 102, 241, 0.15);
-        }
-    </style>
+         /* Custom card micro-interaction */
+         .premium-card {
+             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+         }
+         .premium-card:hover {
+             transform: translateY(-4px);
+             border-color: rgba(99, 102, 241, 0.35);
+             box-shadow: 0 12px 24px -10px rgba(99, 102, 241, 0.15);
+         }
+         
+         /* Hide scrollbar for category pills */
+         .scrollbar-none {
+             -ms-overflow-style: none;
+             scrollbar-width: none;
+         }
+         .scrollbar-none::-webkit-scrollbar {
+             display: none;
+         }
+     </style>
     {% block extra_head %}{% endblock %}
 </head>
 <body class="flex flex-col min-h-screen font-sans antialiased bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-950/40 via-slate-950 to-slate-950">
