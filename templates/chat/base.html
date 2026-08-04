@@ -203,6 +203,9 @@
                     <a href="{% url 'profile' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Мой кабинет</a>
                     <a href="{% url 'image_generation_chat' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Генерация изображений</a>
                     <a href="{% url 'logout' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-red-900/30 transition">Выйти</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Войти</a>
+                    <a href="{% url 'register' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Создать аккаунт</a>
                 {% endif %}
             </div>
         </div>
