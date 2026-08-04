@@ -1253,12 +1253,12 @@ def ai_usage_chart(request):
 
 
 def sitemap(request):
-    from django.contrib.sites.models import Site
     from django.urls import reverse
     
     try:
-        current_site = Site.objects.get_current()
-        domain = current_site.domain
+        domain = request.get_host()
+        if not domain:
+            domain = 'nextroom.vercel.app'
     except Exception:
         domain = 'nextroom.vercel.app'
     
@@ -1284,7 +1284,7 @@ def sitemap(request):
             'loc': f'https://{domain}/room/{room.slug}/',
             'priority': '0.8',
             'changefreq': 'daily',
-            'lastmod': room.updated_at.strftime('%Y-%m-%d') if hasattr(room, 'updated_at') else '',
+            'lastmod': room.updated_at.strftime('%Y-%m-%d') if hasattr(room, 'updated_at') and room.updated_at else '',
         })
     
     xml = ['<?xml version="1.0" encoding="UTF-8"?>']
@@ -1303,10 +1303,10 @@ def sitemap(request):
 
 
 def robots_txt(request):
-    from django.contrib.sites.models import Site
     try:
-        current_site = Site.objects.get_current()
-        domain = current_site.domain
+        domain = request.get_host()
+        if not domain:
+            domain = 'nextroom.vercel.app'
     except Exception:
         domain = 'nextroom.vercel.app'
     

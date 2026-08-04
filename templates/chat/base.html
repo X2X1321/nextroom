@@ -172,14 +172,18 @@
                         <span class="relative z-10">Выйти</span>
                     </a>
                 {% else %}
-                    <div class="flex items-center gap-2 shrink-0">
+                    <div class="hidden sm:flex items-center gap-2 shrink-0">
                         <a href="{% url 'login' %}"
-                            class="inline-flex items-center whitespace-nowrap rounded-xl border border-slate-700/50 bg-slate-800/80 px-4 py-2 text-sm font-semibold text-slate-300 hover:border-indigo-500/40 hover:bg-indigo-900/40 hover:text-white transition duration-200">
-                            Войти
+                            class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                            <span class="relative z-10">Войти</span>
                         </a>
                         <a href="{% url 'register' %}"
-                            class="inline-flex items-center whitespace-nowrap rounded-xl border border-indigo-500/30 bg-indigo-600/20 px-4 py-2 text-sm font-semibold text-indigo-200 hover:border-indigo-400/50 hover:bg-indigo-600/40 hover:text-white transition duration-200">
-                            Создать аккаунт
+                            class="relative inline-block px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                            <span class="relative z-10">Создать аккаунт</span>
                         </a>
                     </div>
                 {% endif %}
@@ -199,9 +203,6 @@
                     <a href="{% url 'profile' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Мой кабинет</a>
                     <a href="{% url 'image_generation_chat' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Генерация изображений</a>
                     <a href="{% url 'logout' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-red-900/30 transition">Выйти</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Войти</a>
-                    <a href="{% url 'register' %}" class="block rounded-xl px-3 py-2 text-sm font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition">Создать аккаунт</a>
                 {% endif %}
             </div>
         </div>
