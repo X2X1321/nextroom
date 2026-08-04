@@ -172,7 +172,7 @@
                             {% if msg.user == user %}Вы{% else %}{{ msg.user.username }}{% endif %}
                         </span>
                         
-                        <div class="relative group">
+                        <div class="relative group pb-6">
                             <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
                                 {% if msg.content %}
                                     {{ msg.content|linebreaksbr }}
@@ -432,7 +432,7 @@
                 <span class="text-[10px] text-slate-550 mb-1 px-1 font-medium">
                     ${isMe ? 'Вы' : escapeHTML(msg.username)}
                 </span>
-                <div class="relative group">
+                <div class="relative group pb-6">
                     <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
                         ${safeContent}
                         ${imagesHTML}
@@ -444,7 +444,7 @@
                         </button>
                         ${msg.image_url && !imageMatches.length ? `<a href="${msg.image_url}" download class="bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition-all" title="Скачать изображение"><span class="material-symbols-outlined text-[10px] leading-none">download</span></a>` : ''}
                         ${imageMatches.length > 0 ? `<a href="${imageMatches[0]}" download class="bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 transition-all" title="Скачать изображение"><span class="material-symbols-outlined text-[10px] leading-none">download</span></a>` : ''}
-                        <button class="reaction-picker-btn absolute -bottom-2 ${isMe ? 'left-0' : 'right-0'} opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 z-20 active:scale-95" onclick="toggleReactionPicker(this, ${msg.id})">
+                        <button class="reaction-picker-btn opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-slate-900/80 backdrop-blur-sm border border-slate-700 rounded-full p-0.5 text-slate-400 hover:text-white hover:border-indigo-500/40 z-20 active:scale-95" onclick="toggleReactionPicker(this, ${msg.id})">
                             <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="currentColor"><path d="M440-440H240v-80h200v-200h80v200h200v80H520v200h-80v-200Z"/></svg>
                         </button>
                     </div>

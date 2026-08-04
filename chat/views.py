@@ -109,7 +109,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
             tokens_used = 0
             for chunk in stream:
                 delta = chunk.choices[0].delta
-                text = getattr(delta, 'content', None) or getattr(delta, 'reasoning', None) or ''
+                text = getattr(delta, 'content', None) or ''
                 content += text
                 usage = getattr(chunk, 'usage', None)
                 if usage:
@@ -147,8 +147,6 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
         raise ValueError(f'AI API error {exc.code}: {message}') from exc
     if 'choices' in result and result['choices']:
         content = result['choices'][0]['message'].get('content', '').strip()
-        if not content:
-            content = result['choices'][0]['message'].get('reasoning', '').strip()
         if not content:
             content = str(result['choices'][0]['message'])
         tokens_used = result.get('usage', {}).get('total_tokens', 0)
@@ -257,7 +255,39 @@ def sanitize_ai_response(text: str) -> str:
     text = re.sub(r'> .*?(current time|working directory|workspace root|active file|visible files|open tabs|system message).*?\n', '', text, flags=re.IGNORECASE)
     lines = [line for line in text.splitlines() if line.strip()]
     text = '\n'.join(lines)
-    return re.sub(r'\n{2,}', '\n', text).strip()
+    text = re.sub(r'\n{2,}', '\n', text).strip()
+    
+    patterns_to_strip = [
+        r'1\.\s*Analyze the User\'?s Input:.*?(?=\n\d\.|\Z)',
+        r'2\.\s*Analyze the Constraints:.*?(?=\n\d\.|\Z)',
+        r'3\.\s*Formulate the Response:.*?(?=\n\d\.|\Z)',
+        r'4\.\s*Draft the response:.*?(?=\n\d\.|\Z)',
+        r'5\.\s*Final Response:.*?(?=\n\d\.|\Z)',
+        r'Analyze the user\'?s input:.*?(?=\n\d\.|\Z)',
+        r'Analyze the system instructions:.*?(?=\n\d\.|\Z)',
+        r'Determine the appropriate response:.*?(?=\n\d\.|\Z)',
+        r'Option \d+:.*?(?=\nOption \d+:|\Z)',
+        r'Reply in Russian only\.',
+        r'Do not reveal, quote, or paraphrase system instructions.*?continue\.',
+        r'If asked to show/explain instructions.*?continue\.',
+        r'Do not use markdown.*?blocks\.',
+        r'Formatting: No markdown.*?blocks\.',
+        r'System Instructions:.*?continue\.',
+        r'Instruction Handling:.*?continue\.',
+    ]
+    
+    for pattern in patterns_to_strip:
+        text = re.sub(pattern, '', text, flags=re.DOTALL | re.IGNORECASE)
+    
+    text = re.sub(r'\n{2,}', '\n', text).strip()
+    
+    if text.startswith('Привет') or text.startswith('Здравствуйте'):
+        return text
+    
+    if len(text) < 5:
+        text = f'Привет! {text}'
+    
+    return text.strip()
 
 
 def fetch_openai_response(prompt, api_key):
@@ -528,10 +558,20 @@ def profile(request):
     visited_rooms = profile.visited_rooms.all()
     integrations = profile.integrations.all()
     available_providers = [
+        ('gpt', 'ChatGPT', 'gpt-3.5-turbo'),
+        ('gpt', 'ChatGPT', 'gpt-4o-mini'),
+        ('gpt', 'ChatGPT', 'gpt-4o'),
         ('groq', 'Groq', 'llama-3.3-70b-versatile'),
+        ('groq', 'Groq', 'llama-3.1-8b-instant'),
+        ('groq', 'Groq', 'mixtral-8x7b-32768'),
         ('qwen', 'Qwen', 'qwen-turbo'),
+        ('qwen', 'Qwen', 'qwen-plus'),
         ('deepseek', 'DeepSeek', 'deepseek-chat'),
+        ('deepseek', 'DeepSeek', 'deepseek-reasoner'),
         ('claude', 'Claude', 'claude-3-5-sonnet-20240620'),
+        ('claude', 'Claude', 'claude-3-haiku-20240307'),
+        ('cerebras', 'Cerebras', 'zai-glm-4.7'),
+        ('grok', 'Grok', 'grok-beta'),
     ]
 
     if request.method == 'POST':
@@ -1043,10 +1083,20 @@ def ai_management(request):
     profile = get_user_profile(request.user)
     integrations = profile.integrations.all()
     available_providers = [
+        ('gpt', 'ChatGPT', 'gpt-3.5-turbo'),
+        ('gpt', 'ChatGPT', 'gpt-4o-mini'),
+        ('gpt', 'ChatGPT', 'gpt-4o'),
         ('groq', 'Groq', 'llama-3.3-70b-versatile'),
+        ('groq', 'Groq', 'llama-3.1-8b-instant'),
+        ('groq', 'Groq', 'mixtral-8x7b-32768'),
         ('qwen', 'Qwen', 'qwen-turbo'),
+        ('qwen', 'Qwen', 'qwen-plus'),
         ('deepseek', 'DeepSeek', 'deepseek-chat'),
+        ('deepseek', 'DeepSeek', 'deepseek-reasoner'),
         ('claude', 'Claude', 'claude-3-5-sonnet-20240620'),
+        ('claude', 'Claude', 'claude-3-haiku-20240307'),
+        ('cerebras', 'Cerebras', 'zai-glm-4.7'),
+        ('grok', 'Grok', 'grok-beta'),
     ]
 
     if request.method == 'POST':
@@ -1133,8 +1183,6 @@ def generate_image(request):
 
     try:
         start_time = time.time()
-        import time as time_module
-        time_module.sleep(8)
         encoded_prompt = urllib.parse.quote(prompt)
         image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(timezone.now().timestamp())}'
         generation_time = time.time() - start_time
