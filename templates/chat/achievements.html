@@ -53,6 +53,48 @@
                                     </filter>
                                 </defs>
                             </svg>
+                        {% elif item.achievement.name == 'Новичок' %}
+                            <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="120" height="120" rx="24" fill="#A855F7"/>
+                                <path d="M60 25L70 45H90L75 58L82 78L60 65L38 78L45 58L30 45H50L60 25Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
+                            </svg>
+                        {% elif item.achievement.name == 'Основатель' %}
+                            <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="120" height="120" rx="24" fill="#A855F7"/>
+                                <path d="M60 25L75 45H105L82 62L90 85L60 70L30 85L38 62L15 45H45L60 25Z" fill="#FBBF24" stroke="#1E1B4B" stroke-width="3"/>
+                            </svg>
+                        {% elif item.achievement.name == 'Болтун' %}
+                            <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="120" height="120" rx="24" fill="#A855F7"/>
+                                <path d="M35 35H85V85H35V35Z" fill="#8B5CF6" stroke="#1E1B4B" stroke-width="4"/>
+                                <circle cx="55" cy="60" r="3" fill="#1E1B4B"/>
+                                <circle cx="72" cy="60" r="3" fill="#1E1B4B"/>
+                                <circle cx="89" cy="60" r="3" fill="#1E1B4B"/>
+                            </svg>
+                        {% elif item.achievement.name == 'Коммуникатор' %}
+                            <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="120" height="120" rx="24" fill="#A855F7"/>
+                                <path d="M40 40H80L95 60V80L80 90H40L25 80V60L40 40Z" fill="#8B5CF6" stroke="#1E1B4B" stroke-width="4"/>
+                                <path d="M55 55H85V85H55V55Z" fill="#A855F7" stroke="#1E1B4B" stroke-width="3"/>
+                            </svg>
+                        {% elif item.achievement.name == 'Командир' %}
+                            <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="120" height="120" rx="24" fill="#A855F7"/>
+                                <path d="M60 20L75 45H105L82 62L90 85L60 70L30 85L38 62L15 45H45L60 20Z" fill="#3B82F6" stroke="#1E1B4B" stroke-width="3"/>
+                            </svg>
+                        {% elif item.achievement.name == 'AI-ассистент' %}
+                            <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="120" height="120" rx="24" fill="#A855F7"/>
+                                <rect x="35" y="40" width="50" height="40" rx="8" fill="#8B5CF6" stroke="#1E1B4B" stroke-width="4"/>
+                                <circle cx="50" cy="60" r="4" fill="#1E1B4B"/>
+                                <circle cx="70" cy="60" r="4" fill="#1E1B4B"/>
+                                <path d="M45 70H75" stroke="#1E1B4B" stroke-width="4" stroke-linecap="round"/>
+                            </svg>
+                        {% elif item.achievement.name == 'Непрерывный' %}
+                            <svg width="40" height="40" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect width="120" height="120" rx="24" fill="#A855F7"/>
+                                <path d="M60 20L75 45H105L82 62L90 85L60 70L30 85L38 62L15 45H45L60 20Z" fill="#10B981" stroke="#1E1B4B" stroke-width="3"/>
+                            </svg>
                         {% endif %}
                     </div>
                     <div class="flex-1">
