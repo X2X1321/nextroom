@@ -1251,3 +1251,69 @@ def ai_usage_chart(request):
         }]
     })
 
+
+def sitemap(request):
+    from django.contrib.sites.models import Site
+    from django.urls import reverse
+    
+    try:
+        current_site = Site.objects.get_current()
+        domain = current_site.domain
+    except Exception:
+        domain = 'nextroom.vercel.app'
+    
+    # Static pages
+    urls = [
+        {'loc': f'https://{domain}/', 'priority': '1.0', 'changefreq': 'daily'},
+        {'loc': f'https://{domain}/register/', 'priority': '0.8', 'changefreq': 'weekly'},
+        {'loc': f'https://{domain}/login/', 'priority': '0.8', 'changefreq': 'weekly'},
+        {'loc': f'https://{domain}/dashboard/', 'priority': '0.9', 'changefreq': 'daily'},
+        {'loc': f'https://{domain}/profile/', 'priority': '0.7', 'changefreq': 'weekly'},
+        {'loc': f'https://{domain}/achievements/', 'priority': '0.6', 'changefreq': 'weekly'},
+        {'loc': f'https://{domain}/ai-management/', 'priority': '0.7', 'changefreq': 'weekly'},
+        {'loc': f'https://{domain}/image-chat/', 'priority': '0.7', 'changefreq': 'weekly'},
+        {'loc': f'https://{domain}/terms/', 'priority': '0.5', 'changefreq': 'monthly'},
+        {'loc': f'https://{domain}/privacy/', 'priority': '0.5', 'changefreq': 'monthly'},
+        {'loc': f'https://{domain}/contacts/', 'priority': '0.5', 'changefreq': 'monthly'},
+    ]
+    
+    # Add rooms
+    from .models import Room
+    for room in Room.objects.all()[:1000]:
+        urls.append({
+            'loc': f'https://{domain}/room/{room.slug}/',
+            'priority': '0.8',
+            'changefreq': 'daily',
+            'lastmod': room.updated_at.strftime('%Y-%m-%d') if hasattr(room, 'updated_at') else '',
+        })
+    
+    xml = ['<?xml version="1.0" encoding="UTF-8"?>']
+    xml.append('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">')
+    for url in urls:
+        xml.append('  <url>')
+        xml.append(f'    <loc>{url["loc"]}</loc>')
+        if 'lastmod' in url and url['lastmod']:
+            xml.append(f'    <lastmod>{url["lastmod"]}</lastmod>')
+        xml.append(f'    <changefreq>{url["changefreq"]}</changefreq>')
+        xml.append(f'    <priority>{url["priority"]}</priority>')
+        xml.append('  </url>')
+    xml.append('</urlset>')
+    
+    return HttpResponse('\n'.join(xml), content_type='application/xml')
+
+
+def robots_txt(request):
+    from django.contrib.sites.models import Site
+    try:
+        current_site = Site.objects.get_current()
+        domain = current_site.domain
+    except Exception:
+        domain = 'nextroom.vercel.app'
+    
+    content = f"""User-agent: *
+Allow: /
+
+Sitemap: https://{domain}/sitemap.xml
+"""
+    return HttpResponse(content, content_type='text/plain')
+
