@@ -36,8 +36,30 @@
             <div class="glass-panel rounded-2xl p-5 border {% if item.earned %}border-indigo-500/30{% else %}border-slate-800 opacity-75{% endif %}">
                 <div class="flex items-start gap-3">
                     <div class="w-10 h-10 flex items-center justify-center">
-                        {% if item.achievement.lottie_url %}
-                            <dotlottie-wc src="{{ item.achievement.lottie_url }}" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% if item.achievement.name == 'Новичок' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/efe95c6a-079b-4e5c-8510-e5f279341968/SKYk8dDY60.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% elif item.achievement.name == 'Основатель' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/4d65e848-ceb9-412f-8265-3f9250f00e2f/03yolDCrAz.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% elif item.achievement.name == 'Болтун' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/1a85d24a-53ce-4884-8bf0-38e4aff1478b/T1gtQIA75C.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% elif item.achievement.name == 'Коммуникатор' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/1c9c77cc-0e1f-444a-a1ef-a9492494fb1f/tLIspmfYne.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% elif item.achievement.name == 'Гуру чата' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/d1df02d9-a53f-4c75-9150-ddffcc13b2f6/85r1MVpXy2.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% elif item.achievement.name == 'Командир' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/b4301e06-63d0-48cd-8024-ee311915f942/4mkLFmOjoy.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% elif item.achievement.name == 'AI-ассистент' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/a325630f-5313-4ee4-841e-ed45f7355f48/X87DTO1KMa.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
+                        {% elif item.achievement.name == 'Непрерывный' %}
+                            <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.4/dist/dotlottie-wc.js" type="module"></script>
+                            <dotlottie-wc src="https://lottie.host/33fd2bfb-6be8-4d00-89a5-61dcb569d326/CfQkyKMdgR.json" style="width: 40px;height: 40px" autoplay loop></dotlottie-wc>
                         {% endif %}
                     </div>
                     <div class="flex-1">
