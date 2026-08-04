@@ -90,5 +90,51 @@
             </div>
         </aside>
     </div>
+
+    <div class="grid gap-6 lg:grid-cols-2">
+        <section class="glass-panel rounded-3xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-white">Мои комнаты</h2>
+                <span class="text-xs uppercase tracking-[0.24em] text-slate-400">{{ my_rooms.count }} / {{ profile.room_limit }}</span>
+            </div>
+            <div class="space-y-3">
+                {% for room in my_rooms %}
+                <a href="{% url 'room_detail' room.slug %}" class="block rounded-3xl border border-slate-800 bg-slate-950/80 p-4 transition hover:border-indigo-500/30 hover:bg-slate-900">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-semibold text-white">{{ room.name }}</h3>
+                            <p class="text-sm text-slate-400 mt-1">{{ room.get_category_display }} · {{ room.messages.count }} сообщений</p>
+                        </div>
+                        <span class="text-xs uppercase tracking-[0.24em] text-slate-400">{{ room.created_at|date:'d.m.Y' }}</span>
+                    </div>
+                </a>
+                {% empty %}
+                <p class="text-sm text-slate-400">Вы ещё не создали ни одной комнаты. Создайте первую на панели комнат.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="glass-panel rounded-3xl p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-white">Комнаты, в которых вы были</h2>
+                <span class="text-xs uppercase tracking-[0.24em] text-slate-400">{{ visited_rooms.count }}</span>
+            </div>
+            <div class="space-y-3">
+                {% for room in visited_rooms %}
+                <a href="{% url 'room_detail' room.slug %}" class="block rounded-3xl border border-slate-800 bg-slate-950/80 p-4 transition hover:border-indigo-500/30 hover:bg-slate-900">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <h3 class="text-base font-semibold text-white">{{ room.name }}</h3>
+                            <p class="text-sm text-slate-400 mt-1">{{ room.get_category_display }} · Создатель: {{ room.creator.username }}</p>
+                        </div>
+                        <span class="text-xs uppercase tracking-[0.24em] text-slate-400">{{ room.updated_at|date:'d.m.Y' }}</span>
+                    </div>
+                </a>
+                {% empty %}
+                <p class="text-sm text-slate-400">Вы ещё не посещали ни одной комнаты. Попробуйте присоединиться к интересной беседе!</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
 </div>
 {% endblock %}
