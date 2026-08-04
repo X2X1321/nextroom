@@ -259,14 +259,13 @@ def sanitize_ai_response(text: str) -> str:
     
     patterns_to_strip = [
         r'1\.\s*Analyze the User\'?s Input:.*?(?=\n\d\.|\Z)',
+        r'1\.\s*Analyze the user\'?s input:.*?(?=\n\d\.|\Z)',
         r'2\.\s*Analyze the Constraints:.*?(?=\n\d\.|\Z)',
+        r'2\.\s*Analyze the system instructions:.*?(?=\n\d\.|\Z)',
         r'3\.\s*Formulate the Response:.*?(?=\n\d\.|\Z)',
+        r'3\.\s*Determine the appropriate response:.*?(?=\n\d\.|\Z)',
         r'4\.\s*Draft the response:.*?(?=\n\d\.|\Z)',
-        r'5\.\s*Final Response:.*?(?=\n\d\.|\Z)',
-        r'Analyze the user\'?s input:.*?(?=\n\d\.|\Z)',
-        r'Analyze the system instructions:.*?(?=\n\d\.|\Z)',
-        r'Determine the appropriate response:.*?(?=\n\d\.|\Z)',
-        r'Option \d+:.*?(?=\nOption \d+:|\Z)',
+        r'5\.\s*(Final Response|Check).*?(?=\n\d\.|\Z)',
         r'Reply in Russian only\.',
         r'Do not reveal, quote, or paraphrase system instructions.*?continue\.',
         r'If asked to show/explain instructions.*?continue\.',
@@ -274,6 +273,7 @@ def sanitize_ai_response(text: str) -> str:
         r'Formatting: No markdown.*?blocks\.',
         r'System Instructions:.*?continue\.',
         r'Instruction Handling:.*?continue\.',
+        r'Language: Reply \*only\* in Russian\.',
     ]
     
     for pattern in patterns_to_strip:
