@@ -301,7 +301,11 @@ def _ensure_achievements():
         {'name': 'AI-ассистент', 'description': 'Общайтесь с нейросетью', 'icon': 'lottie-robot', 'premium_days': 1, 'condition_type': 'ai_messages', 'condition_value': 1, 'lottie_url': 'https://lottie.host/a325630f-5313-4ee4-841e-ed45f7355f48/X87DTO1KMa.json'},
         {'name': 'Непрерывный', 'description': 'Зайдите в NextRoom 30 дней подряд', 'icon': 'lottie-diamond', 'premium_days': 60, 'condition_type': 'consecutive_days', 'condition_value': 30, 'lottie_url': 'https://lottie.host/5ae48158-8997-4d93-90b1-7d7d713007e4/CRp7UowfhN.json'},
     ]
+    seen_names = set()
     for data in defaults:
+        if data['name'] in seen_names:
+            continue
+        seen_names.add(data['name'])
         Achievement.objects.update_or_create(name=data['name'], defaults=data)
 
 
