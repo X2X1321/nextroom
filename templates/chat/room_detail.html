@@ -583,6 +583,11 @@
             imageInput.addEventListener('change', () => {
                 const file = imageInput.files[0];
                 if (!file) return;
+                
+                // Show loading state on image button
+                imageBtn.disabled = true;
+                imageBtn.classList.add('opacity-70');
+
                 const formData = new FormData();
                 formData.append('image', file);
                 formData.append('content', '');
@@ -601,11 +606,16 @@
                         scrollToBottom();
                         pollMessages();
                     } else {
-                        console.error('Ошибка отправки изображения: ', data.error);
+                        alert(data.error || 'Ошибка отправки изображения');
                     }
                 })
-                .catch(err => console.error('Ошибка сети при отправке изображения: ', err))
+                .catch(err => {
+                    console.error('Ошибка сети при отправке изображения: ', err);
+                    alert('Не удалось отправить изображение. Проверьте подключение к сети.');
+                })
                 .finally(() => {
+                    imageBtn.disabled = false;
+                    imageBtn.classList.remove('opacity-70');
                     imageInput.value = '';
                 });
             });
@@ -616,20 +626,39 @@
         let mediaRecorder = null;
         let audioChunks = [];
         let isRecording = false;
+        let recordingTimer = null;
+
         if (voiceBtn) {
             voiceBtn.addEventListener('click', async () => {
                 if (!isRecording) {
                     try {
+                        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                            alert('Ваш браузер не поддерживает запись голосовых сообщений.');
+                            return;
+                        }
+
                         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        mediaRecorder = new MediaRecorder(stream);
+                        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 
+                                         MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : 
+                                         MediaRecorder.isTypeSupported('audio/ogg;codecs=opus') ? 'audio/ogg;codecs=opus' : '';
+
+                        mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
                         audioChunks = [];
-                        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+                        mediaRecorder.ondataavailable = (e) => {
+                            if (e.data && e.data.size > 0) audioChunks.push(e.data);
+                        };
+
                         mediaRecorder.onstop = () => {
-                            const blob = new Blob(audioChunks, { type: 'audio/webm' });
+                            clearTimeout(recordingTimer);
+                            const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
+                            if (audioBlob.size === 0) return;
+
                             const formData = new FormData();
-                            formData.append('voice', blob);
+                            const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
+                            formData.append('voice', audioBlob, `voice.${ext}`);
                             formData.append('content', '');
                             const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
                             fetch("{% url 'send_message' room.slug %}", {
                                 method: 'POST',
                                 headers: { 'X-CSRFToken': csrf },
@@ -644,29 +673,41 @@
                                     scrollToBottom();
                                     pollMessages();
                                 } else {
-                                    console.error('Ошибка отправки голосового: ', data.error);
+                                    alert(data.error || 'Ошибка отправки голосового сообщения');
                                 }
                             })
-                            .catch(err => console.error('Ошибка сети при отправке голосового: ', err));
+                            .catch(err => {
+                                console.error('Ошибка сети при отправке голосового: ', err);
+                                alert('Не удалось отправить голосовое сообщение.');
+                            });
+
                             stream.getTracks().forEach(track => track.stop());
                         };
+
                         mediaRecorder.start();
                         isRecording = true;
-                        voiceBtn.classList.add('text-red-400');
-                        setTimeout(() => {
+                        voiceBtn.classList.add('text-red-500', 'animate-pulse');
+                        voiceBtn.title = 'Идет запись... Нажмите еще раз для отправки';
+
+                        // Auto stop recording after 60 seconds
+                        recordingTimer = setTimeout(() => {
                             if (mediaRecorder && mediaRecorder.state === 'recording') {
                                 mediaRecorder.stop();
                                 isRecording = false;
-                                voiceBtn.classList.remove('text-red-400');
+                                voiceBtn.classList.remove('text-red-500', 'animate-pulse');
+                                voiceBtn.title = 'Записать голосовое сообщение';
                             }
-                        }, 10000);
+                        }, 60000);
+
                     } catch (err) {
                         console.error('Ошибка доступа к микрофону: ', err);
+                        alert('Доступ к микрофону отклонен или недоступен.');
                     }
                 } else if (mediaRecorder && mediaRecorder.state === 'recording') {
                     mediaRecorder.stop();
                     isRecording = false;
-                    voiceBtn.classList.remove('text-red-400');
+                    voiceBtn.classList.remove('text-red-500', 'animate-pulse');
+                    voiceBtn.title = 'Записать голосовое сообщение';
                 }
             });
         }
