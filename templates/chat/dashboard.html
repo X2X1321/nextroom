@@ -1,4 +1,5 @@
 {% extends 'chat/base.html' %}
+{% load static %}
 
 {% block title %}Комнаты — NextRoom{% endblock %}
 
@@ -34,11 +35,11 @@
             <input type="hidden" name="type" value="{{ selected_type|default:'all' }}">
             
             <div class="relative flex-grow">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none">
-                    <img src="/media/purple_logo.png" alt="Logo" class="h-6 w-6 object-contain rounded-lg drop-shadow-[0_0_6px_rgba(168,85,247,0.7)]">
+                <div class="absolute inset-y-0 left-0 flex items-center pl-2.5 pointer-events-none z-10">
+                    <img src="{% static 'chat/img/purple_logo.png' %}" onerror="this.onerror=null;this.src='/media/purple_logo.png';" alt="Logo" class="h-6 w-6 object-contain rounded-lg drop-shadow-[0_0_8px_rgba(168,85,247,0.85)]">
                 </div>
                 <input type="text" name="q" value="{{ query }}" placeholder="Поиск комнат по названию или автору..."
-                    class="block w-full pl-10 pr-4 py-3 rounded-xl text-sm glass-input border-indigo-500/20 focus:border-purple-500 focus:ring-purple-500/30">
+                    class="block w-full pl-10 pr-4 py-3 rounded-xl text-sm glass-input !border-purple-500/40 focus:!border-purple-400 focus:!ring-2 focus:!ring-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
             </div>
             
             <button type="submit" class="rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 px-6 py-3 font-semibold text-white transition text-sm">
