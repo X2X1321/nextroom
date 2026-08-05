@@ -704,7 +704,7 @@
         const emojis = ['❤️', '🔥', '😂', '🎉'];
         emojis.forEach(emoji => {
             const emojiBtn = document.createElement('button');
-            emojiBtn.className = 'text-base hover:scale-125 transition-transform duration-150 px-0.5';
+            emojiBtn.className = 'text-sm leading-none hover:scale-125 transition-transform duration-150 px-0.5';
             emojiBtn.textContent = emoji;
             emojiBtn.onclick = (e) => {
                 e.stopPropagation();
