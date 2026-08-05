@@ -15,5 +15,10 @@
       "src": "/(.*)",
       "dest": "nextroom_project/wsgi.py"
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "PYTHONPATH": "."
+    }
+  }
 }
