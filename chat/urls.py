@@ -35,4 +35,5 @@ urlpatterns = [
     path('ai-management/usage-chart/', views.ai_usage_chart, name='ai_usage_chart'),
     path('sitemap.xml', views.sitemap, name='sitemap'),
     path('robots.txt', views.robots_txt, name='robots_txt'),
+    path('favicon.ico', views.favicon_view, name='favicon'),
 ]

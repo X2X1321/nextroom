@@ -1487,3 +1487,13 @@ Sitemap: https://{domain}/sitemap.xml
 """
     return HttpResponse(content, content_type='text/plain')
 
+
+def favicon_view(request):
+    favicon_path = os.path.join(settings.BASE_DIR, 'media', 'favicon.ico')
+    if not os.path.exists(favicon_path):
+        favicon_path = os.path.join(settings.BASE_DIR, 'chat', 'static', 'favicon.ico')
+    if os.path.exists(favicon_path):
+        with open(favicon_path, 'rb') as f:
+            return HttpResponse(f.read(), content_type='image/x-icon')
+    return HttpResponse(status=404)
+
