@@ -89,7 +89,7 @@ class RoomAIAccessTests(TestCase):
         self.client.logout()
 
         self.client.force_login(self.viewer)
-        with patch('chat.views.fetch_ai_response', return_value='room-agent-response'):
+        with patch('chat.views.fetch_ai_response', return_value=('room-agent-response', 10)):
             response = self.client.post(
                 reverse('send_message', args=[self.room.slug]),
                 data=json.dumps({'content': '@gpt hello there'}),
