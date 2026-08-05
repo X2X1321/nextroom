@@ -7,7 +7,7 @@ from django.shortcuts import redirect, render
 from django.urls import path
 from django.utils import timezone
 
-from .models import Room, Message, UserProfile, AIIntegration, RoomInvitation
+from .models import Room, Message, UserProfile, AIIntegration, RoomInvitation, GuestSession, GeneratedImage
 
 
 class GrantPremiumByIdForm(forms.Form):
@@ -80,3 +80,13 @@ admin.site.register(Message)
 admin.site.register(UserProfile, UserProfileAdmin)
 admin.site.register(AIIntegration)
 admin.site.register(RoomInvitation)
+admin.site.register(GeneratedImage)
+
+
+@admin.register(GuestSession)
+class GuestSessionAdmin(admin.ModelAdmin):
+    list_display = ('guest_name', 'session_key', 'ip_address', 'messages_count', 'images_count', 'first_seen', 'last_activity')
+    search_fields = ('guest_name', 'session_key', 'ip_address')
+    list_filter = ('first_seen', 'last_activity')
+    readonly_fields = ('session_key', 'first_seen', 'last_activity', 'messages_count', 'images_count')
+

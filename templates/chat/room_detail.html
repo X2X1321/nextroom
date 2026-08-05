@@ -167,9 +167,9 @@
             <div id="messages-container" class="flex-grow overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-3 sm:space-y-4 flex flex-col justify-start">
                 {% for msg in chat_messages %}
                     <!-- Message Bubble wrapper -->
-                    <div class="flex flex-col max-w-[85%] sm:max-w-[80%] {% if msg.user == user %}self-end items-end{% else %}self-start items-start{% endif %}" data-message-id="{{ msg.id }}">
+                    <div class="flex flex-col max-w-[85%] sm:max-w-[80%] {% if msg.user and msg.user == user %}self-end items-end{% else %}self-start items-start{% endif %}" data-message-id="{{ msg.id }}">
                         <span class="text-[10px] text-slate-500 mb-1 px-1 font-medium">
-                            {% if msg.user == user %}Вы{% else %}{{ msg.user.username }}{% endif %}
+                            {% if msg.user and msg.user == user %}Вы{% elif msg.user %}{{ msg.user.username }}{% else %}{{ msg.guest_name|default:"Гость" }}{% endif %}
                         </span>
                         
                         <div class="relative group pb-1.5">

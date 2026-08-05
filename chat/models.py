@@ -146,6 +146,24 @@ class RoomInvitation(models.Model):
     def __str__(self):
         return f'Invite {self.invite_code} for {self.room.name}'
 
+class GuestSession(models.Model):
+    session_key = models.CharField(max_length=100, unique=True, verbose_name="Ключ сессии")
+    guest_name = models.CharField(max_length=100, verbose_name="Имя гостя")
+    ip_address = models.GenericIPAddressField(null=True, blank=True, verbose_name="IP адрес")
+    messages_count = models.IntegerField(default=0, verbose_name="Отправлено сообщений")
+    images_count = models.IntegerField(default=0, verbose_name="Сгенерировано фото")
+    first_seen = models.DateTimeField(auto_now_add=True, verbose_name="Первый визит")
+    last_activity = models.DateTimeField(auto_now=True, verbose_name="Последняя активность")
+
+    class Meta:
+        verbose_name = "Незарегистрированный пользователь"
+        verbose_name_plural = "Незарегистрированные пользователи"
+        ordering = ['-last_activity']
+
+    def __str__(self):
+        return f"{self.guest_name} ({self.ip_address or self.session_key[:8]})"
+
+
 class Message(models.Model):
     MESSAGE_TYPES = [
         ('text', 'Text'),
@@ -153,7 +171,9 @@ class Message(models.Model):
         ('voice', 'Voice'),
     ]
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='messages')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='messages', null=True, blank=True)
+    guest_session = models.ForeignKey(GuestSession, on_delete=models.SET_NULL, related_name='messages', null=True, blank=True)
+    guest_name = models.CharField(max_length=100, blank=True)
     content = models.TextField(verbose_name="Message Content", blank=True)
     message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text')
     image = models.ImageField(upload_to='chat_images/', blank=True, null=True)
@@ -184,7 +204,9 @@ class Message(models.Model):
         return url_pattern.findall(self.content)
 
     def __str__(self):
-        return f"{self.user.username}: {self.content[:30]} in {self.room.name}"
+        sender = self.user.username if self.user else (self.guest_name or "Гость")
+        return f"{sender}: {self.content[:30]} in {self.room.name}"
+
 
 class MessageReaction(models.Model):
     message = models.ForeignKey(Message, on_delete=models.CASCADE, related_name='reactions')
@@ -261,7 +283,8 @@ class AIUsageLog(models.Model):
 
 
 class GeneratedImage(models.Model):
-    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='generated_images')
+    profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='generated_images', null=True, blank=True)
+    guest_session = models.ForeignKey(GuestSession, on_delete=models.SET_NULL, related_name='generated_images', null=True, blank=True)
     prompt = models.TextField()
     image_url = models.TextField()
     generation_time = models.FloatField(null=True, blank=True, help_text='Время генерации в секундах')
@@ -274,7 +297,8 @@ class GeneratedImage(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.profile.user.username} - {self.prompt[:50]}"
+        owner = self.profile.user.username if self.profile else (self.guest_session.guest_name if self.guest_session else "Гость")
+        return f"{owner} - {self.prompt[:50]}"
 
 
 @receiver(post_save, sender=User)

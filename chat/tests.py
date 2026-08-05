@@ -118,3 +118,43 @@ class RoomAIAccessTests(TestCase):
         self.assertIn('status', response.json())
         self.assertTrue(Message.objects.filter(content='cloro-gemini-response').exists())
 
+    def test_guest_can_chat_and_generate_images_and_other_features_require_login(self):
+        from .models import GuestSession, GeneratedImage
+
+        # Guest sends a message in room without logging in
+        response = self.client.post(
+            reverse('send_message', args=[self.room.slug]),
+            data=json.dumps({'content': 'Hello from guest!'}),
+            content_type='application/json',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Message.objects.filter(content='Hello from guest!').exists())
+        self.assertEqual(GuestSession.objects.count(), 1)
+        guest = GuestSession.objects.first()
+        self.assertEqual(guest.messages_count, 1)
+
+        # Guest generates an image without logging in
+        img_response = self.client.post(
+            reverse('generate_image'),
+            data=json.dumps({'prompt': 'A neon guest cat'}),
+            content_type='application/json',
+        )
+        self.assertEqual(img_response.status_code, 200)
+        self.assertTrue(GeneratedImage.objects.filter(prompt='A neon guest cat').exists())
+        guest.refresh_from_db()
+        self.assertEqual(guest.images_count, 1)
+
+        # Restricted pages require login and redirect to login page
+        profile_res = self.client.get(reverse('profile'))
+        self.assertEqual(profile_res.status_code, 302)
+        self.assertIn('/login/', profile_res.url)
+
+        ai_res = self.client.get(reverse('ai_management'))
+        self.assertEqual(ai_res.status_code, 302)
+        self.assertIn('/login/', ai_res.url)
+
+        achieve_res = self.client.get(reverse('achievements'))
+        self.assertEqual(achieve_res.status_code, 302)
+        self.assertIn('/login/', achieve_res.url)
+
+

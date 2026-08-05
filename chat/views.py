@@ -22,7 +22,33 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import Q, Count, Sum, Avg
 
-from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog, GeneratedImage
+from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog, GeneratedImage, GuestSession
+
+
+def get_or_create_guest_session(request):
+    if not request.session.session_key:
+        request.session.create()
+    session_key = request.session.session_key
+    guest_name = request.session.get('guest_name')
+    if not guest_name:
+        short_id = session_key[:6].upper()
+        guest_name = f"Гость #{short_id}"
+        request.session['guest_name'] = guest_name
+
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+
+    guest, _ = GuestSession.objects.get_or_create(
+        session_key=session_key,
+        defaults={'guest_name': guest_name, 'ip_address': ip}
+    )
+    if guest.ip_address != ip:
+        guest.ip_address = ip
+        guest.save(update_fields=['ip_address', 'last_activity'])
+    return guest
 
 AI_COMMAND_ALIASES = {
     'cloro': 'Cloro Gemini',
@@ -230,12 +256,13 @@ def get_ai_bot_user():
 
 def get_room_ai_integration_for_user(user, room, alias):
     target_provider = 'cloro' if alias == 'gemini' else alias
-    profile = get_user_profile(user)
-    integration = profile.integrations.filter(provider=target_provider).first()
-    if integration:
-        return integration
+    if user and getattr(user, 'is_authenticated', False):
+        profile = get_user_profile(user)
+        integration = profile.integrations.filter(provider=target_provider).first()
+        if integration:
+            return integration
 
-    if room.creator != user:
+    if not user or not getattr(user, 'is_authenticated', False) or room.creator != user:
         room_enabled = room.ai_integrations.filter(provider=target_provider).first()
         if room_enabled:
             creator_profile = get_user_profile(room.creator)
@@ -476,10 +503,16 @@ def login_view(request):
         if user is not None:
             login(request, user)
             messages.success(request, f'С возвращением, {username}!')
+            next_url = request.GET.get('next')
+            if next_url:
+                return redirect(next_url)
             return redirect('dashboard')
         else:
             messages.error(request, 'Неверное имя пользователя или пароль.')
             
+    elif 'next' in request.GET:
+        messages.info(request, 'Для использования этой функции необходимо войти или зарегистрироваться.')
+
     return render(request, 'chat/login.html')
 
 def logout_view(request):
@@ -501,10 +534,9 @@ def contacts_view(request):
     return render(request, 'chat/contacts.html')
 
 
-@login_required
 def dashboard(request):
     """Dashboard view listing all rooms with search, filters, and statistics."""
-    profile = get_user_profile(request.user)
+    profile = get_user_profile(request.user) if request.user.is_authenticated else None
     query = request.GET.get('q', '').strip()
     category_filter = request.GET.get('category', '').strip()
     room_type = request.GET.get('type', 'all').strip() # all, public, private
@@ -534,7 +566,7 @@ def dashboard(request):
     
     # Get stats
     total_rooms = Room.objects.count()
-    my_rooms_count = Room.objects.filter(creator=request.user).count()
+    my_rooms_count = Room.objects.filter(creator=request.user).count() if request.user.is_authenticated else 0
     total_messages = Message.objects.count()
     
     categories = Room.CATEGORY_CHOICES
@@ -797,14 +829,13 @@ def manage_room_ai_integrations(request, slug):
     return redirect('room_detail', slug=room.slug)
 
 
-@login_required
 def room_detail(request, slug):
     """Display the chat room. Verifies access code for private rooms."""
     room = get_object_or_404(Room, slug=slug)
     
     # Handle private room access code verification
     session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
+    is_authorized = session_key in request.session or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
     
     if room.is_private and not is_authorized:
         if request.method == 'POST':
@@ -819,14 +850,17 @@ def room_detail(request, slug):
         return render(request, 'chat/room_unlock.html', {'room': room})
         
     # Mark the room as visited for the current user
-    if request.user != room.creator:
-        profile = get_user_profile(request.user)
-        profile.visited_rooms.add(room)
+    if request.user.is_authenticated:
+        if request.user != room.creator:
+            profile = get_user_profile(request.user)
+            profile.visited_rooms.add(room)
+    else:
+        get_or_create_guest_session(request)
 
     # Retrieve last 100 messages
-    chat_messages = room.messages.all().select_related('user').prefetch_related('reactions__user')[:100]
+    chat_messages = room.messages.all().select_related('user', 'guest_session').prefetch_related('reactions__user')[:100]
     for msg in chat_messages:
-        if msg.user.username == 'nextroom_ai':
+        if msg.user and msg.user.username == 'nextroom_ai':
             msg.content = sanitize_ai_response(msg.content)
     
     # Get active/recent participants in this room
@@ -835,11 +869,11 @@ def room_detail(request, slug):
     ).distinct()[:10]
     
     room_invites = room.invitations.order_by('-created_at')[:10]
-    profile = get_user_profile(request.user)
-    can_create_invites = (profile.invite_limit is None or room.invitations.count() < profile.invite_limit) and request.user == room.creator
+    profile = get_user_profile(request.user) if request.user.is_authenticated else None
+    can_create_invites = request.user.is_authenticated and (profile.invite_limit is None or room.invitations.count() < profile.invite_limit) and request.user == room.creator
     enabled_room_providers = list(room.ai_integrations.values_list('provider', flat=True))
     available_room_providers = []
-    if request.user == room.creator:
+    if request.user.is_authenticated and request.user == room.creator:
         available_room_providers = [(integration.provider, integration.model_name or integration.provider) for integration in profile.integrations.all()]
 
     context = {
@@ -848,38 +882,40 @@ def room_detail(request, slug):
         'recent_members': recent_members,
         'room_invites': room_invites,
         'can_create_invites': can_create_invites,
-        'invite_limit': profile.invite_limit,
+        'invite_limit': profile.invite_limit if profile else None,
         'ai_aliases': AI_COMMAND_ALIASES,
         'enabled_room_providers': enabled_room_providers,
         'available_room_providers': available_room_providers,
     }
     return render(request, 'chat/room_detail.html', context)
 
-@login_required
+
 def get_messages(request, slug):
     """JSON API endpoint to poll messages for real-time update."""
     room = get_object_or_404(Room, slug=slug)
     
     # Verify access to private room
     session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
+    is_authorized = session_key in request.session or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
     if not is_authorized:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
         
     after_id = request.GET.get('after_id')
     
     # Query messages
-    queryset = room.messages.all().select_related('user').prefetch_related('reactions__user')
+    queryset = room.messages.all().select_related('user', 'guest_session').prefetch_related('reactions__user')
     if after_id:
         queryset = queryset.filter(id__gt=int(after_id))
         
     messages_data = []
     for msg in queryset:
+        username = msg.user.username if msg.user else (msg.guest_name or "Гость")
+        is_me = (msg.user == request.user) if request.user.is_authenticated else (msg.guest_session and request.session.session_key == msg.guest_session.session_key)
         msg_data = {
             'id': msg.id,
-            'username': msg.user.username,
-            'is_me': msg.user == request.user,
-            'content': sanitize_ai_response(msg.content) if msg.user.username == 'nextroom_ai' else msg.content,
+            'username': username,
+            'is_me': is_me,
+            'content': sanitize_ai_response(msg.content) if (msg.user and msg.user.username == 'nextroom_ai') else msg.content,
             'message_type': msg.message_type,
             'timestamp': msg.created_at.strftime('%H:%M'),
             'reactions': {
@@ -896,9 +932,18 @@ def get_messages(request, slug):
             msg_data['voice_url'] = msg.voice.url
         messages_data.append(msg_data)
         
-    return JsonResponse({'messages': messages_data})
+def _update_user_activity(user):
+    if not user or not getattr(user, 'is_authenticated', False):
+        return
+    today = timezone.now().date()
+    activity, _ = UserActivity.objects.get_or_create(user=user, date=today)
+    activity.messages_count += 1
+    activity.save()
+    total_messages = Message.objects.filter(user=user).count()
+    from .models import _check_and_grant_achievements
+    _check_and_grant_achievements(user, 'messages', total_messages)
 
-@login_required
+
 def send_message(request, slug):
     """JSON API endpoint to send a message."""
     if request.method != 'POST':
@@ -908,7 +953,7 @@ def send_message(request, slug):
     
     # Verify access to private room
     session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
+    is_authorized = session_key in request.session or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
     if not is_authorized:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
@@ -935,9 +980,12 @@ def send_message(request, slug):
     if not content and not image and not voice:
         return JsonResponse({'error': 'Message content cannot be empty'}, status=400)
 
+    user_obj = request.user if request.user.is_authenticated else None
+    guest_obj = None if user_obj else get_or_create_guest_session(request)
+
     alias, prompt = parse_ai_command(content)
     if alias in AI_COMMAND_ALIASES and message_type == 'text':
-        integration = get_room_ai_integration_for_user(request.user, room, alias)
+        integration = get_room_ai_integration_for_user(user_obj, room, alias)
         if not integration:
             if alias == 'groq' and getattr(settings, 'GROQ_API_KEY', None):
                 integration = type('GlobalGroqIntegration', (), {'api_key': settings.GROQ_API_KEY})()
@@ -946,7 +994,14 @@ def send_message(request, slug):
             if not integration:
                 return JsonResponse({'error': f'Для использования @{alias} добавьте ключ API в личном кабинете или включите модель для комнаты.'}, status=400)
 
-        user_message = Message.objects.create(room=room, user=request.user, content=content, message_type='text')
+        if user_obj:
+            user_message = Message.objects.create(room=room, user=user_obj, content=content, message_type='text')
+            _update_user_activity(user_obj)
+        else:
+            user_message = Message.objects.create(room=room, user=None, guest_session=guest_obj, guest_name=guest_obj.guest_name, content=content, message_type='text')
+            guest_obj.messages_count += 1
+            guest_obj.save(update_fields=['messages_count', 'last_activity'])
+
         bot_user = get_ai_bot_user()
 
         def create_bot_message():
@@ -960,8 +1015,9 @@ def send_message(request, slug):
             Message.objects.create(room=room, user=bot_user, content=sanitize_ai_response(bot_content), message_type='text')
             if tokens_used:
                 try:
-                    profile = integration.profile or get_user_profile(request.user)
-                    AIUsageLog.objects.create(profile=profile, provider=alias, tokens_used=tokens_used, response_time=response_time)
+                    profile = getattr(integration, 'profile', None) or (get_user_profile(user_obj) if user_obj else None)
+                    if profile:
+                        AIUsageLog.objects.create(profile=profile, provider=alias, tokens_used=tokens_used, response_time=response_time)
                 except Exception:
                     pass
 
@@ -977,7 +1033,7 @@ def send_message(request, slug):
             'status': 'success',
             'message': {
                 'id': user_message.id,
-                'username': user_message.user.username,
+                'username': user_message.user.username if user_message.user else user_message.guest_name,
                 'is_me': True,
                 'content': user_message.content,
                 'message_type': user_message.message_type,
@@ -986,20 +1042,35 @@ def send_message(request, slug):
             }
         })
 
-    message = Message.objects.create(
-        room=room,
-        user=request.user,
-        content=content,
-        message_type=message_type,
-        image=image,
-        voice=voice
-    )
+    if user_obj:
+        message = Message.objects.create(
+            room=room,
+            user=user_obj,
+            content=content,
+            message_type=message_type,
+            image=image,
+            voice=voice
+        )
+        _update_user_activity(user_obj)
+    else:
+        message = Message.objects.create(
+            room=room,
+            user=None,
+            guest_session=guest_obj,
+            guest_name=guest_obj.guest_name,
+            content=content,
+            message_type=message_type,
+            image=image,
+            voice=voice
+        )
+        guest_obj.messages_count += 1
+        guest_obj.save(update_fields=['messages_count', 'last_activity'])
     
     response_data = {
         'status': 'success',
         'message': {
             'id': message.id,
-            'username': message.user.username,
+            'username': message.user.username if message.user else message.guest_name,
             'is_me': True,
             'content': message.content,
             'message_type': message.message_type,
@@ -1297,13 +1368,11 @@ def toggle_room_pin(request, slug):
     return redirect('dashboard')
 
 
-@login_required
 def image_generation_chat(request):
-    profile = get_user_profile(request.user)
+    profile = get_user_profile(request.user) if request.user.is_authenticated else None
     return render(request, 'chat/image_generation_chat.html', {'profile': profile})
 
 
-@login_required
 def generate_image(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -1322,16 +1391,34 @@ def generate_image(request):
             f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true',
         ]
         generation_time = time.time() - start_time
-        profile = get_user_profile(request.user)
-        GeneratedImage.objects.create(
-            profile=profile,
-            prompt=prompt,
-            image_url=image_url,
-            generation_time=generation_time,
-            width=1024,
-            height=1024,
-            model_name='pollinations',
-        )
+        
+        if request.user.is_authenticated:
+            profile = get_user_profile(request.user)
+            GeneratedImage.objects.create(
+                profile=profile,
+                guest_session=None,
+                prompt=prompt,
+                image_url=image_url,
+                generation_time=generation_time,
+                width=1024,
+                height=1024,
+                model_name='pollinations',
+            )
+        else:
+            guest = get_or_create_guest_session(request)
+            GeneratedImage.objects.create(
+                profile=None,
+                guest_session=guest,
+                prompt=prompt,
+                image_url=image_url,
+                generation_time=generation_time,
+                width=1024,
+                height=1024,
+                model_name='pollinations',
+            )
+            guest.images_count += 1
+            guest.save(update_fields=['images_count', 'last_activity'])
+
         return JsonResponse({'status': 'success', 'image_url': image_url, 'fallback_urls': fallback_urls})
     except Exception as exc:
         return JsonResponse({'error': f'Ошибка генерации: {str(exc)}'}, status=500)
