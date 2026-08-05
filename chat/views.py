@@ -99,7 +99,7 @@ AI_PROVIDERS = {
     },
     'cerebras': {
         'base_url': 'https://api.cerebras.ai/v1',
-        'default_model': 'zai-glm-4.7',
+        'default_model': 'llama-3.3-70b',
     },
 }
 
@@ -182,9 +182,11 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
             import httpx
             from cerebras.cloud.sdk import Cerebras
             client = Cerebras(api_key=api_key, http_client=httpx.Client())
+            valid_cerebras_models = ['llama3.1-8b', 'llama-3.3-70b']
+            model_to_use = model if model in valid_cerebras_models else 'llama-3.3-70b'
             stream = client.chat.completions.create(
                 messages=messages,
-                model=model,
+                model=model_to_use,
                 max_tokens=180,
                 temperature=0.8,
                 top_p=1,
@@ -724,6 +726,7 @@ def add_ai_integration(request):
     provider = request.POST.get('provider', '').strip().lower()
     api_key = request.POST.get('api_key', '').strip()
     model_name = request.POST.get('model_name', '').strip()
+    custom_prompt = request.POST.get('custom_prompt', '').strip()
     profile = get_user_profile(request.user)
     if not profile.is_premium:
         messages.error(request, 'Добавление API ключей доступно только для Premium-подписки.')
@@ -735,7 +738,7 @@ def add_ai_integration(request):
     integration, created = AIIntegration.objects.update_or_create(
         profile=profile,
         provider=provider,
-        defaults={'api_key': api_key, 'model_name': model_name}
+        defaults={'api_key': api_key, 'model_name': model_name, 'custom_prompt': custom_prompt}
     )
     messages.success(request, f'Интеграция @{provider} сохранена.')
     return redirect('profile')
@@ -1340,10 +1343,12 @@ def edit_ai_integration(request, pk):
     if request.method == 'POST':
         api_key = request.POST.get('api_key', '').strip()
         model_name = request.POST.get('model_name', '').strip()
+        custom_prompt = request.POST.get('custom_prompt', '').strip()
         integration.api_key = api_key
         integration.model_name = model_name
+        integration.custom_prompt = custom_prompt
         integration.save()
-        messages.success(request, 'Интеграция обновлена.')
+        messages.success(request, f'Интеграция @{integration.provider} обновлена.')
         return redirect('ai_management')
     context = {'integration': integration}
     return render(request, 'chat/edit_ai_integration.html', context)

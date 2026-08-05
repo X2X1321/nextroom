@@ -70,6 +70,10 @@
                         <label for="api_key" class="block text-sm font-medium text-slate-300">API ключ</label>
                         <input id="api_key" name="api_key" type="text" placeholder="Секретный ключ провайдера" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
                     </div>
+                    <div>
+                        <label for="integration_custom_prompt" class="block text-sm font-medium text-slate-300">Персональный промпт для модели (опционально)</label>
+                        <textarea id="integration_custom_prompt" name="custom_prompt" rows="2" placeholder="Инструкции и роль исключительно для этой модели" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-600 resize-none"></textarea>
+                    </div>
                     <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
                         <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
                         <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
@@ -84,8 +88,12 @@
                 <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-4">
                     <div class="flex items-center justify-between gap-3">
                         <div>
-                            <p class="text-sm font-semibold text-white">@{{ integration.provider }}</p>
-                            <p class="text-xs text-slate-500 mt-1">Ключ сохранен</p>
+                            <p class="text-sm font-semibold text-white">@{{ integration.provider }} {% if integration.model_name %}<span class="text-xs text-slate-400">({{ integration.model_name }})</span>{% endif %}</p>
+                            {% if integration.custom_prompt %}
+                                <p class="text-xs text-indigo-300 mt-1 line-clamp-1">Промпт: {{ integration.custom_prompt }}</p>
+                            {% else %}
+                                <p class="text-xs text-slate-500 mt-1">Ключ сохранен</p>
+                            {% endif %}
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">Готово</span>

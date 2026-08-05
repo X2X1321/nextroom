@@ -111,6 +111,7 @@ class AIIntegration(models.Model):
     provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)
     api_key = models.CharField(max_length=255)
     model_name = models.CharField(max_length=120, blank=True)
+    custom_prompt = models.TextField(blank=True, verbose_name="Персональный промпт", help_text="Инструкции и роль для этой модели в чате")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
