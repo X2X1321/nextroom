@@ -241,6 +241,7 @@ def sanitize_ai_response(text: str) -> str:
     if not text:
         return ''
     text = re.sub(r'<environment_details>.*?</environment_details>', '', text, flags=re.DOTALL | re.IGNORECASE)
+    text = re.sub(r'<environment_details>.*', '', text, flags=re.DOTALL | re.IGNORECASE)
     text = re.sub(r'</?environment_details>', '', text, flags=re.IGNORECASE)
     text = re.sub(r'\*\*', '', text)
     text = re.sub(r'\`\`\`', '', text)
