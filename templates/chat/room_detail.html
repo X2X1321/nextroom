@@ -221,6 +221,19 @@
                         </span>
                     </div>
                 {% endfor %}
+
+                <!-- Real-time AI Typing Indicator -->
+                <div id="ai-typing-indicator" class="flex flex-col self-start items-start hidden transition-all duration-300 my-1">
+                    <span class="text-[10px] text-slate-500 mb-1 px-1 font-medium">Нейросеть (AI)</span>
+                    <div class="glass-panel text-slate-300 rounded-2xl rounded-tl-none border border-indigo-500/30 px-4 py-2.5 text-sm flex items-center gap-2 bg-indigo-950/20">
+                        <span class="text-xs text-indigo-300 font-medium">Генерирует ответ</span>
+                        <div class="flex gap-1 items-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]"></span>
+                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Chat input form -->
@@ -505,7 +518,10 @@
             messageInput.value = '';
             messageInput.style.height = 'auto';
 
-            const isAICommand = content.trim().startsWith('@');
+            const isAICommand = content.startsWith('@');
+            if (isAICommand && typeof showAITypingIndicator === 'function') {
+                showAITypingIndicator();
+            }
 
             fetch("{% url 'send_message' room.slug %}", {
                 method: 'POST',
@@ -524,21 +540,23 @@
                     updateNoMessagesAlert();
                     scrollToBottom();
                     if (data.bot_message) {
+                        if (typeof hideAITypingIndicator === 'function') hideAITypingIndicator();
                         renderMessage(data.bot_message);
                         lastMessageId = Math.max(lastMessageId, data.bot_message.id);
                         updateNoMessagesAlert();
                         scrollToBottom();
+                    } else if (isAICommand && typeof showAITypingIndicator === 'function') {
+                        showAITypingIndicator();
                     }
-                    // Perform verification fetch to pull any concurrently posted messages
                     pollMessages();
                 } else {
+                    if (typeof hideAITypingIndicator === 'function') hideAITypingIndicator();
                     console.error('Ошибка отправки: ', data.error);
                 }
             })
             .catch(err => {
+                if (typeof hideAITypingIndicator === 'function') hideAITypingIndicator();
                 console.error('Ошибка сети при отправке сообщения: ', err);
-            })
-            .finally(() => {
             });
         });
 
@@ -547,7 +565,6 @@
             fetch(`{% url 'get_messages' room.slug %}?after_id=${lastMessageId}`)
             .then(res => {
                 if (res.status === 403) {
-                    // Unauthorized: maybe session expired or logged out
                     window.location.reload();
                     return;
                 }
@@ -556,21 +573,27 @@
             .then(data => {
                 if (data && data.messages && data.messages.length > 0) {
                     let hasNew = false;
+                    let hasAIMessage = false;
                     data.messages.forEach(msg => {
                         if (msg.id > lastMessageId) {
                             renderMessage(msg);
                             lastMessageId = Math.max(lastMessageId, msg.id);
                             hasNew = true;
+                            if (msg.username === 'nextroom_ai' || msg.username.includes('AI') || msg.username.includes('Bot')) {
+                                hasAIMessage = true;
+                            }
                         }
                     });
                     if (hasNew) {
+                        if (hasAIMessage && typeof hideAITypingIndicator === 'function') {
+                            hideAITypingIndicator();
+                        }
                         updateNoMessagesAlert();
                         scrollToBottom();
                     }
                 }
             })
             .catch(err => {
-                // Silently handle error or network loss
                 console.warn('Ошибка опроса сообщений: ', err);
             });
         }
@@ -763,8 +786,35 @@
             });
         }
 
-        // Start polling interval
-        let pollInterval = setInterval(pollMessages, 2000);
+        // Fast polling & typing indicator helpers
+        let isFastPolling = false;
+        let pollInterval = setInterval(pollMessages, 1000);
+
+        window.showAITypingIndicator = function() {
+            const indicator = document.getElementById('ai-typing-indicator');
+            if (indicator) {
+                indicator.classList.remove('hidden');
+                messagesContainer.appendChild(indicator);
+                scrollToBottom();
+            }
+            if (!isFastPolling) {
+                isFastPolling = true;
+                clearInterval(pollInterval);
+                pollInterval = setInterval(pollMessages, 400);
+            }
+        };
+
+        window.hideAITypingIndicator = function() {
+            const indicator = document.getElementById('ai-typing-indicator');
+            if (indicator) {
+                indicator.classList.add('hidden');
+            }
+            if (isFastPolling) {
+                isFastPolling = false;
+                clearInterval(pollInterval);
+                pollInterval = setInterval(pollMessages, 1000);
+            }
+        };
 
         // Pause polling when tab is inactive to optimize server load & resource usage
         document.addEventListener('visibilitychange', () => {
@@ -772,7 +822,7 @@
                 clearInterval(pollInterval);
             } else {
                 pollMessages(); // Poll immediately
-                pollInterval = setInterval(pollMessages, 2000);
+                pollInterval = setInterval(pollMessages, isFastPolling ? 400 : 1000);
             }
         });
     });
