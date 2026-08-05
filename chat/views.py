@@ -583,8 +583,8 @@ def dashboard(request):
             'total_messages': total_messages,
         },
         'profile': profile,
-        'room_limit_reached': my_rooms_count >= profile.room_limit,
-        'max_rooms': profile.room_limit,
+        'room_limit_reached': (my_rooms_count >= profile.room_limit) if profile else False,
+        'max_rooms': profile.room_limit if profile else 3,
     }
     return render(request, 'chat/dashboard.html', context)
 

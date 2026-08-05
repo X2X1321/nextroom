@@ -144,6 +144,10 @@ class RoomAIAccessTests(TestCase):
         guest.refresh_from_db()
         self.assertEqual(guest.images_count, 1)
 
+        # Guest can access dashboard page without 500 error
+        dash_res = self.client.get(reverse('dashboard'))
+        self.assertEqual(dash_res.status_code, 200)
+
         # Restricted pages require login and redirect to login page
         profile_res = self.client.get(reverse('profile'))
         self.assertEqual(profile_res.status_code, 302)
