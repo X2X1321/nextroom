@@ -971,7 +971,10 @@ def get_messages(request, slug):
         if msg.voice:
             msg_data['voice_url'] = msg.voice.url
         messages_data.append(msg_data)
-        
+
+    return JsonResponse({'messages': messages_data})
+
+
 def _update_user_activity(user):
     if not user or not getattr(user, 'is_authenticated', False):
         return

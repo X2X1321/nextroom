@@ -224,13 +224,12 @@
 
                 <!-- Real-time AI Typing Indicator -->
                 <div id="ai-typing-indicator" class="flex flex-col self-start items-start hidden transition-all duration-300 my-1">
-                    <span class="text-[10px] text-slate-500 mb-1 px-1 font-medium">Нейросеть (AI)</span>
-                    <div class="glass-panel text-slate-300 rounded-2xl rounded-tl-none border border-indigo-500/30 px-4 py-2.5 text-sm flex items-center gap-2 bg-indigo-950/20">
-                        <span class="text-xs text-indigo-300 font-medium">Генерирует ответ</span>
-                        <div class="flex gap-1 items-center">
-                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce"></span>
-                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.2s]"></span>
-                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.4s]"></span>
+                    <span class="text-[10px] text-slate-500 mb-1 px-1 font-medium">AI</span>
+                    <div class="glass-panel text-slate-300 rounded-2xl rounded-tl-none border border-indigo-500/30 px-4 py-3 text-sm flex items-center bg-indigo-950/20">
+                        <div class="flex gap-1.5 items-center">
+                            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce"></span>
+                            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.15s]"></span>
+                            <span class="w-2 h-2 rounded-full bg-indigo-400 animate-bounce [animation-delay:0.3s]"></span>
                         </div>
                     </div>
                 </div>
@@ -443,7 +442,7 @@
 
             bubbleWrapper.innerHTML = `
                 <span class="text-[10px] text-slate-550 mb-1 px-1 font-medium">
-                    ${isMe ? 'Вы' : escapeHTML(msg.username)}
+                    ${escapeHTML(msg.username)}
                 </span>
                 <div class="relative group pb-1.5">
                     <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
