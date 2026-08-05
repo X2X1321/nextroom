@@ -14,7 +14,16 @@
   ],
   "build": {
     "env": {
-      "PYTHONPATH": "."
+      "PYTHONPATH": ".",
+      "HORDE_API_KEY": "l-HYLLpgL4PFJxntXP82lw",
+      "AI_HORDE_API_BASE_URL": "https://aihorde.net/api/v2",
+      "AI_HORDE_MODELS": "Pony Diffusion V6 XL,Anything v5,Deliberate,Realistic Vision",
+      "AI_HORDE_SAMPLER": "k_dpmpp_2s_a",
+      "AI_HORDE_CFG_SCALE": "7",
+      "AI_HORDE_WIDTH": "512",
+      "AI_HORDE_HEIGHT": "512",
+      "AI_HORDE_STEPS": "20",
+      "HF_IMAGE_MODEL": "stabilityai/stable-diffusion-xl-base-1.0"
     }
   }
 }

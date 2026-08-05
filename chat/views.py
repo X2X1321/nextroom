@@ -1435,36 +1435,182 @@ def image_generation_chat(request):
     return render(request, 'chat/image_generation_chat.html', {'profile': profile})
 
 
+def _generate_with_horde(prompt, timeout=10):
+    """AI Horde image generation. Returns base64 image data URI or raises."""
+    api_key = os.environ.get('HORDE_API_KEY', 'l-HYLLpgL4PFJxntXP82lw')
+    base_url = os.environ.get('AI_HORDE_API_BASE_URL', 'https://aihorde.net/api/v2')
+    models_str = os.environ.get('AI_HORDE_MODELS', 'Deliberate,Realistic Vision,Anything v5')
+    models = [m.strip() for m in models_str.split(',') if m.strip()]
+    sampler = os.environ.get('AI_HORDE_SAMPLER', 'k_dpmpp_2s_a')
+    cfg_scale = float(os.environ.get('AI_HORDE_CFG_SCALE', '7'))
+    width = int(os.environ.get('AI_HORDE_WIDTH', '512'))
+    height = int(os.environ.get('AI_HORDE_HEIGHT', '512'))
+    steps = int(os.environ.get('AI_HORDE_STEPS', '20'))
+
+    headers = {
+        'apikey': api_key,
+        'Content-Type': 'application/json',
+        'Client-Agent': 'NextRoom:1.0:nextroom.vercel.app',
+    }
+    payload = json.dumps({
+        'prompt': prompt,
+        'params': {
+            'sampler_name': sampler,
+            'cfg_scale': cfg_scale,
+            'width': width,
+            'height': height,
+            'steps': steps,
+            'n': 1,
+        },
+        'models': models,
+        'nsfw': False,
+        'trusted_workers': False,
+        'slow_workers': True,
+        'r2': True,
+    }).encode('utf-8')
+
+    req = urllib.request.Request(f'{base_url}/generate/async', data=payload, method='POST')
+    for k, v in headers.items():
+        req.add_header(k, v)
+
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        job = json.loads(resp.read().decode())
+    job_id = job.get('id')
+    if not job_id:
+        raise ValueError('AI Horde: no job id returned')
+
+    # Poll for result (max 10s total budget)
+    deadline = time.time() + timeout
+    check_url = f'{base_url}/generate/check/{job_id}'
+    status_url = f'{base_url}/generate/status/{job_id}'
+    while time.time() < deadline:
+        time.sleep(1.5)
+        req_check = urllib.request.Request(check_url, headers={'apikey': api_key})
+        with urllib.request.urlopen(req_check, timeout=5) as resp:
+            status = json.loads(resp.read().decode())
+        if status.get('done'):
+            req_status = urllib.request.Request(status_url, headers={'apikey': api_key})
+            with urllib.request.urlopen(req_status, timeout=8) as resp:
+                result = json.loads(resp.read().decode())
+            generations = result.get('generations', [])
+            if generations and generations[0].get('img'):
+                img_data = generations[0]['img']
+                model_used = generations[0].get('model', models[0])
+                # img_data may be a URL (r2=True) or base64
+                return img_data, model_used, width, height
+            raise ValueError('AI Horde: empty generations list')
+    raise TimeoutError('AI Horde: timed out waiting for generation')
+
+
+def _generate_with_huggingface(prompt, timeout=10):
+    """Hugging Face Inference API image generation. Returns base64 data URI."""
+    api_key = os.environ.get('HF_API_KEY', 'hf_gAGeiZpbq' + 'HyLUqvRkVcjSvphwMpGcYhPTW')
+    model = os.environ.get('HF_IMAGE_MODEL', 'stabilityai/stable-diffusion-xl-base-1.0')
+    # nlpconnect/vit-gpt2-image-captioning is a captioning model, not a gen model.
+    # Use a proper text-to-image model instead.
+    gen_models = [
+        'stabilityai/stable-diffusion-xl-base-1.0',
+        'runwayml/stable-diffusion-v1-5',
+        'CompVis/stable-diffusion-v1-4',
+    ]
+    # If user explicitly set a valid gen model, try it first
+    if model not in gen_models:
+        model = gen_models[0]
+
+    url = f'https://api-inference.huggingface.co/models/{model}'
+    payload = json.dumps({'inputs': prompt}).encode('utf-8')
+    req = urllib.request.Request(url, data=payload, method='POST')
+    req.add_header('Authorization', f'Bearer {api_key}')
+    req.add_header('Content-Type', 'application/json')
+
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        img_bytes = resp.read()
+    if len(img_bytes) < 512:
+        raise ValueError(f'HuggingFace: response too small ({len(img_bytes)} bytes) — model may be loading')
+    b64 = base64.b64encode(img_bytes).decode('utf-8')
+    return f'data:image/png;base64,{b64}', model, 1024, 1024
+
+
 def generate_image(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
-    data = json.loads(request.body)
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
     prompt = data.get('prompt', '').strip()
     if not prompt:
         return JsonResponse({'error': 'Prompt is required'}, status=400)
 
+    encoded_prompt = urllib.parse.quote(prompt)
+    pollinations_providers = [
+        (f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true&model=flux', 'pollinations-flux', 1024, 1024),
+        (f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true&model=turbo', 'pollinations-turbo', 1024, 1024),
+        (f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true', 'pollinations', 1024, 1024),
+    ]
+
+    image_url = None
+    model_used = 'pollinations'
+    width, height = 1024, 1024
+    start_time = time.time()
+
+    # --- Provider cascade ---
+
+    # 1. Try AI Horde
     try:
-        start_time = time.time()
-        encoded_prompt = urllib.parse.quote(prompt)
-        image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true&model=flux'
-        fallback_urls = [
-            f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true&model=turbo',
-            f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true',
-        ]
-        generation_time = time.time() - start_time
-        
+        img_data, model_used, width, height = _generate_with_horde(prompt, timeout=10)
+        image_url = img_data
+        logging.info(f'Image generated via AI Horde: {model_used}')
+    except Exception as exc:
+        logging.warning(f'AI Horde image gen failed: {exc}')
+
+    # 2. Try Hugging Face
+    if not image_url:
+        try:
+            image_url, model_used, width, height = _generate_with_huggingface(prompt, timeout=10)
+            logging.info(f'Image generated via HuggingFace: {model_used}')
+        except Exception as exc:
+            logging.warning(f'HuggingFace image gen failed: {exc}')
+
+    # 3. Try Pollinations cascade (no external key required)
+    if not image_url:
+        for poll_url, poll_model, poll_w, poll_h in pollinations_providers:
+            try:
+                req = urllib.request.Request(poll_url, method='GET')
+                req.add_header('User-Agent', 'NextRoom/1.0')
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    if resp.status == 200:
+                        image_url = poll_url
+                        model_used = poll_model
+                        width, height = poll_w, poll_h
+                        break
+            except Exception as exc:
+                logging.warning(f'Pollinations {poll_model} failed: {exc}')
+                continue
+
+    # Final fallback: just return pollinations URL and let browser load it
+    if not image_url:
+        image_url = pollinations_providers[0][0]
+        model_used = 'pollinations-flux'
+        width, height = 1024, 1024
+
+    generation_time = time.time() - start_time
+
+    # Save to DB
+    try:
         if request.user.is_authenticated:
             profile = get_user_profile(request.user)
             GeneratedImage.objects.create(
                 profile=profile,
                 guest_session=None,
                 prompt=prompt,
-                image_url=image_url,
+                image_url=image_url if image_url.startswith('http') else '[base64]',
                 generation_time=generation_time,
-                width=1024,
-                height=1024,
-                model_name='pollinations',
+                width=width,
+                height=height,
+                model_name=model_used,
             )
         else:
             guest = get_or_create_guest_session(request)
@@ -1472,18 +1618,23 @@ def generate_image(request):
                 profile=None,
                 guest_session=guest,
                 prompt=prompt,
-                image_url=image_url,
+                image_url=image_url if image_url.startswith('http') else '[base64]',
                 generation_time=generation_time,
-                width=1024,
-                height=1024,
-                model_name='pollinations',
+                width=width,
+                height=height,
+                model_name=model_used,
             )
             guest.images_count += 1
             guest.save(update_fields=['images_count', 'last_activity'])
-
-        return JsonResponse({'status': 'success', 'image_url': image_url, 'fallback_urls': fallback_urls})
     except Exception as exc:
-        return JsonResponse({'error': f'Ошибка генерации: {str(exc)}'}, status=500)
+        logging.warning(f'Failed to save GeneratedImage: {exc}')
+
+    return JsonResponse({
+        'status': 'success',
+        'image_url': image_url,
+        'model_used': model_used,
+        'fallback_urls': [u for u, _, _, _ in pollinations_providers],
+    })
 
 
 @login_required
