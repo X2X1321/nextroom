@@ -765,6 +765,9 @@ def room_detail(request, slug):
 
     # Retrieve last 100 messages
     chat_messages = room.messages.all().select_related('user').prefetch_related('reactions__user')[:100]
+    for msg in chat_messages:
+        if msg.user.username == 'nextroom_ai':
+            msg.content = sanitize_ai_response(msg.content)
     
     # Get active/recent participants in this room
     recent_members = User.objects.filter(
