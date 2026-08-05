@@ -99,3 +99,22 @@ class RoomAIAccessTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('status', response.json())
         self.assertTrue(Message.objects.filter(content='room-agent-response').exists())
+
+    def test_room_member_can_use_cloro_gemini_agent(self):
+        AIIntegration.objects.create(profile=self.creator_profile, provider='cloro', api_key='cloro-test-key', model_name='gemini')
+        self.client.force_login(self.creator)
+        self.client.post(reverse('manage_room_ai_integrations', args=[self.room.slug]), {'providers': ['cloro']})
+        self.client.logout()
+
+        self.client.force_login(self.viewer)
+        with patch('chat.views.fetch_ai_response', return_value=('cloro-gemini-response', 15)):
+            response = self.client.post(
+                reverse('send_message', args=[self.room.slug]),
+                data=json.dumps({'content': '@gemini Explain quantum computing'}),
+                content_type='application/json',
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('status', response.json())
+        self.assertTrue(Message.objects.filter(content='cloro-gemini-response').exists())
+

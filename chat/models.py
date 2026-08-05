@@ -10,6 +10,7 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 
 AI_PROVIDER_CHOICES = [
+    ('cloro', 'Cloro'),
     ('gpt', 'ChatGPT'),
     ('groq', 'Groq'),
     ('grok', 'Grok'),

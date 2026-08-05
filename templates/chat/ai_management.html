@@ -41,14 +41,27 @@
         <section class="glass-panel rounded-3xl p-6">
             <h2 class="text-lg font-bold text-white mb-4">API ключи</h2>
             {% if profile.is_premium %}
-                <form action="{% url 'add_ai_integration' %}" method="POST" class="space-y-4">
+                <form action="{% url 'add_ai_integration' %}" method="POST" class="space-y-4" id="ai-integration-form">
                     {% csrf_token %}
                     <div>
+                        <label for="provider_group_select" class="block text-sm font-medium text-slate-300">Провайдер нейросети</label>
+                        <select id="provider_group_select" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                            <option value="">Все провайдеры</option>
+                            {% for p in providers_structured %}
+                                <option value="{{ p.id }}">{{ p.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
                         <label for="provider" class="block text-sm font-medium text-slate-300">Модель нейросети</label>
-                        <select id="provider" name="provider" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <select id="provider" name="provider" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
                             <option value="">Выберите модель</option>
-                            {% for provider, label, model_name in available_providers %}
-                                <option value="{{ provider }}" data-model="{{ model_name }}">{{ model_name }}</option>
+                            {% for p in providers_structured %}
+                                <optgroup label="{{ p.name }}" data-provider="{{ p.id }}">
+                                    {% for m in p.models %}
+                                        <option value="{{ p.id }}" data-model="{{ m.id }}" data-provider="{{ p.id }}">{{ m.name }} ({{ p.name }})</option>
+                                    {% endfor %}
+                                </optgroup>
                             {% endfor %}
                         </select>
                         <input type="hidden" name="model_name" id="model_name" value="">
@@ -122,9 +135,9 @@
     <div class="glass-panel rounded-3xl p-6">
         <h2 class="text-lg font-bold text-white mb-4">Советы по использованию @</h2>
         <div class="space-y-3 text-sm text-slate-400">
-            <p>Чтобы обратиться к модели, начните сообщение с <span class="font-semibold text-white">@gpt</span>, <span class="font-semibold text-white">@grok</span>, <span class="font-semibold text-white">@deepseek</span>, <span class="font-semibold text-white">@qwen</span> или <span class="font-semibold text-white">@claude</span>.</p>
-            <p>Например: <span class="text-indigo-300">@gpt Придумай тему для обсуждения на вечер</span></p>
-            <p>После отправки запрос будет обработан и бот ответит прямо в комнате.</p>
+            <p>Чтобы обратиться к нейросети, начните сообщение с <span class="font-semibold text-white">@cloro</span>, <span class="font-semibold text-white">@gemini</span>, <span class="font-semibold text-white">@gpt</span>, <span class="font-semibold text-white">@groq</span>, <span class="font-semibold text-white">@grok</span>, <span class="font-semibold text-white">@deepseek</span>, <span class="font-semibold text-white">@qwen</span> или <span class="font-semibold text-white">@claude</span>.</p>
+            <p>Например: <span class="text-indigo-300">@cloro Объясни квантовые вычисления</span> или <span class="text-indigo-300">@gemini Напиши эссе про ИИ</span></p>
+            <p>После отправки запрос будет обработан выбранным провайдером и моделью, и бот ответит прямо в комнате.</p>
         </div>
     </div>
 </div>
@@ -132,6 +145,39 @@
 
 {% block extra_js %}
 <script>
+    // Handle provider and model selection sync
+    const providerGroupSelect = document.getElementById('provider_group_select');
+    const providerSelect = document.getElementById('provider');
+    const modelNameInput = document.getElementById('model_name');
+
+    if (providerGroupSelect && providerSelect) {
+        providerGroupSelect.addEventListener('change', function() {
+            const selectedProvider = this.value;
+            const optgroups = providerSelect.querySelectorAll('optgroup');
+            optgroups.forEach(group => {
+                if (!selectedProvider || group.dataset.provider === selectedProvider) {
+                    group.style.display = '';
+                } else {
+                    group.style.display = 'none';
+                }
+            });
+            providerSelect.value = '';
+            modelNameInput.value = '';
+        });
+
+        providerSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption) {
+                const modelId = selectedOption.dataset.model || '';
+                const providerId = selectedOption.dataset.provider || selectedOption.value;
+                modelNameInput.value = modelId;
+                if (providerGroupSelect && providerId) {
+                    providerGroupSelect.value = providerId;
+                }
+            }
+        });
+    }
+
     const ctx = document.getElementById('weekly-tokens-chart');
     let chartInstance = null;
 

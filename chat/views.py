@@ -24,11 +24,29 @@ from django.db.models import Q, Count, Sum, Avg
 
 from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog, GeneratedImage
 
-AI_COMMAND_ALIASES = {provider: label for provider, label in AI_PROVIDER_CHOICES}
+AI_COMMAND_ALIASES = {
+    'cloro': 'Cloro Gemini',
+    'gemini': 'Cloro Gemini',
+    'gpt': 'ChatGPT',
+    'groq': 'Groq',
+    'grok': 'Grok',
+    'deepseek': 'DeepSeek',
+    'qwen': 'Qwen',
+    'claude': 'Claude',
+    'cerebras': 'Cerebras',
+}
 
 YOO_KASSA_API_URL = 'https://api.yookassa.ru/v3'
 
 AI_PROVIDERS = {
+    'cloro': {
+        'base_url': 'https://api.cloro.dev/v1/monitor',
+        'default_model': 'gemini',
+    },
+    'gemini': {
+        'base_url': 'https://api.cloro.dev/v1/monitor',
+        'default_model': 'gemini',
+    },
     'gpt': {
         'base_url': 'https://api.openai.com/v1',
         'default_model': 'gpt-3.5-turbo',
@@ -72,6 +90,47 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
         {'role': 'system', 'content': system_instruction},
         {'role': 'user', 'content': prompt},
     ]
+
+    if provider in ['cloro', 'gemini']:
+        url = 'https://api.cloro.dev/v1/monitor/gemini'
+        full_prompt = f'{custom_prompt} {prompt}'.strip() if custom_prompt else prompt
+        payload = {
+            'prompt': full_prompt,
+            'country': 'US',
+            'include': {
+                'markdown': True,
+                'html': False,
+                'rawResponse': False
+            }
+        }
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(url, data=data, method='POST')
+        req.add_header('Authorization', f'Bearer {api_key}')
+        req.add_header('Content-Type', 'application/json')
+        req.add_header('User-Agent', 'NextRoom/1.0 (+https://nextroom.vercel.app)')
+        req.add_header('Accept', 'application/json')
+        try:
+            with urllib.request.urlopen(req, timeout=45) as response:
+                body = response.read().decode('utf-8')
+                result = json.loads(body)
+        except urllib.error.HTTPError as exc:
+            try:
+                body = exc.read().decode('utf-8')
+                detail = json.loads(body)
+            except Exception:
+                detail = {'raw': body[:500] if 'body' in dir() else str(exc)}
+            message = detail.get('error', detail)
+            if isinstance(message, dict):
+                message = message.get('message') or message.get('code') or message
+            raise ValueError(f'Cloro API error {exc.code}: {message}') from exc
+
+        if result.get('success') and 'result' in result:
+            res_data = result['result']
+            content = res_data.get('markdown') or res_data.get('text') or ''
+            tokens_used = len(prompt.split()) + len(content.split())
+            return sanitize_ai_response(content.strip()), tokens_used
+
+        raise ValueError('Неверный или пустой ответ от Cloro Gemini API.')
 
     if provider == 'groq':
         try:
@@ -170,16 +229,17 @@ def get_ai_bot_user():
 
 
 def get_room_ai_integration_for_user(user, room, alias):
+    target_provider = 'cloro' if alias == 'gemini' else alias
     profile = get_user_profile(user)
-    integration = profile.integrations.filter(provider=alias).first()
+    integration = profile.integrations.filter(provider=target_provider).first()
     if integration:
         return integration
 
     if room.creator != user:
-        room_enabled = room.ai_integrations.filter(provider=alias).first()
+        room_enabled = room.ai_integrations.filter(provider=target_provider).first()
         if room_enabled:
             creator_profile = get_user_profile(room.creator)
-            return creator_profile.integrations.filter(provider=alias).first()
+            return creator_profile.integrations.filter(provider=target_provider).first()
 
     return None
 
@@ -1086,7 +1146,74 @@ def achievements(request):
 def ai_management(request):
     profile = get_user_profile(request.user)
     integrations = profile.integrations.all()
+    providers_structured = [
+        {
+            'id': 'cloro',
+            'name': 'Cloro',
+            'models': [
+                {'id': 'gemini', 'name': 'Extract Google Gemini'},
+            ]
+        },
+        {
+            'id': 'gpt',
+            'name': 'OpenAI (ChatGPT)',
+            'models': [
+                {'id': 'gpt-3.5-turbo', 'name': 'GPT-3.5 Turbo'},
+                {'id': 'gpt-4o-mini', 'name': 'GPT-4o Mini'},
+                {'id': 'gpt-4o', 'name': 'GPT-4o'},
+            ]
+        },
+        {
+            'id': 'groq',
+            'name': 'Groq',
+            'models': [
+                {'id': 'llama-3.3-70b-versatile', 'name': 'Llama 3.3 70B'},
+                {'id': 'llama-3.1-8b-instant', 'name': 'Llama 3.1 8B'},
+                {'id': 'mixtral-8x7b-32768', 'name': 'Mixtral 8x7b'},
+            ]
+        },
+        {
+            'id': 'grok',
+            'name': 'xAI (Grok)',
+            'models': [
+                {'id': 'grok-beta', 'name': 'Grok Beta'},
+                {'id': 'grok-2-latest', 'name': 'Grok 2'},
+            ]
+        },
+        {
+            'id': 'deepseek',
+            'name': 'DeepSeek',
+            'models': [
+                {'id': 'deepseek-chat', 'name': 'DeepSeek Chat (V3)'},
+                {'id': 'deepseek-reasoner', 'name': 'DeepSeek Reasoner (R1)'},
+            ]
+        },
+        {
+            'id': 'qwen',
+            'name': 'Aliyun (Qwen)',
+            'models': [
+                {'id': 'qwen-turbo', 'name': 'Qwen Turbo'},
+                {'id': 'qwen-plus', 'name': 'Qwen Plus'},
+            ]
+        },
+        {
+            'id': 'claude',
+            'name': 'Anthropic (Claude)',
+            'models': [
+                {'id': 'claude-3-5-sonnet-20240620', 'name': 'Claude 3.5 Sonnet'},
+                {'id': 'claude-3-haiku-20240307', 'name': 'Claude 3 Haiku'},
+            ]
+        },
+        {
+            'id': 'cerebras',
+            'name': 'Cerebras',
+            'models': [
+                {'id': 'zai-glm-4.7', 'name': 'ZAI GLM 4.7'},
+            ]
+        },
+    ]
     available_providers = [
+        ('cloro', 'Cloro', 'gemini'),
         ('gpt', 'ChatGPT', 'gpt-3.5-turbo'),
         ('gpt', 'ChatGPT', 'gpt-4o-mini'),
         ('gpt', 'ChatGPT', 'gpt-4o'),
@@ -1113,6 +1240,7 @@ def ai_management(request):
         'profile': profile,
         'integrations': integrations,
         'available_providers': available_providers,
+        'providers_structured': providers_structured,
         'custom_prompt': profile.custom_prompt,
     }
     return render(request, 'chat/ai_management.html', context)
