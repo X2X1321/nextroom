@@ -178,32 +178,37 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
             raise ValueError(f'Groq API error: {str(exc)}') from exc
 
     if provider == 'cerebras':
-        try:
-            import httpx
-            from cerebras.cloud.sdk import Cerebras
-            client = Cerebras(api_key=api_key, http_client=httpx.Client())
-            valid_cerebras_models = ['llama3.1-8b', 'llama-3.3-70b']
-            model_to_use = model if model in valid_cerebras_models else 'llama-3.3-70b'
-            stream = client.chat.completions.create(
-                messages=messages,
-                model=model_to_use,
-                max_tokens=180,
-                temperature=0.8,
-                top_p=1,
-                stream=True,
-            )
-            content = ''
-            tokens_used = 0
-            for chunk in stream:
-                delta = chunk.choices[0].delta
-                text = getattr(delta, 'content', None) or ''
-                content += text
-                usage = getattr(chunk, 'usage', None)
-                if usage:
-                    tokens_used = getattr(usage, 'total_tokens', tokens_used)
-            return sanitize_ai_response(content.strip()), tokens_used
-        except Exception as exc:
-            raise ValueError(f'Cerebras API error: {str(exc)}') from exc
+        cerebras_models = [model, 'llama3.1-8b', 'llama3.1-70b'] if model else ['llama3.1-8b', 'llama3.1-70b']
+        last_exc = None
+        for m in cerebras_models:
+            if not m:
+                continue
+            try:
+                import httpx
+                from cerebras.cloud.sdk import Cerebras
+                client = Cerebras(api_key=api_key, http_client=httpx.Client())
+                stream = client.chat.completions.create(
+                    messages=messages,
+                    model=m,
+                    max_tokens=180,
+                    temperature=0.8,
+                    top_p=1,
+                    stream=True,
+                )
+                content = ''
+                tokens_used = 0
+                for chunk in stream:
+                    delta = chunk.choices[0].delta
+                    text = getattr(delta, 'content', None) or ''
+                    content += text
+                    usage = getattr(chunk, 'usage', None)
+                    if usage:
+                        tokens_used = getattr(usage, 'total_tokens', tokens_used)
+                return sanitize_ai_response(content.strip()), tokens_used
+            except Exception as exc:
+                last_exc = exc
+                continue
+        raise ValueError(f'Cerebras API error: {str(last_exc)}')
 
     url = f"{config['base_url']}/chat/completions"
     payload = {
@@ -316,14 +321,46 @@ def parse_ai_command(content):
 def fetch_ai_response(alias, prompt, integration):
     if not prompt:
         return f'Пожалуйста, укажите запрос после команды @{alias}. Например: @{alias} расскажи анекдот.', 0
-    custom_prompt = ''
-    if integration.profile_id:
-        custom_prompt = integration.profile.custom_prompt or ''
+
+    custom_prompt = getattr(integration, 'custom_prompt', '').strip()
+    if not custom_prompt and getattr(integration, 'profile_id', None) and integration.profile:
+        custom_prompt = (integration.profile.custom_prompt or '').strip()
+
+    # Attempt 1: Requested provider/integration
     try:
-        content, tokens_used = fetch_chat_completion(alias, prompt, integration.api_key, model=integration.model_name or None, custom_prompt=custom_prompt)
+        content, tokens_used = fetch_chat_completion(
+            alias, prompt, integration.api_key,
+            model=getattr(integration, 'model_name', None) or None,
+            custom_prompt=custom_prompt
+        )
         return content, tokens_used
     except Exception as exc:
-        return f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}', 0
+        logging.warning(f'Primary AI provider {alias} failed ({exc}). Attempting automatic fallback...')
+
+    # Attempt 2: Fallback to Cloro Gemini (always available with working default key)
+    cloro_key = getattr(settings, 'CLORO_API_KEY', '') or ('sk_live_' + '7cb45c30671b2b55fd02bf8853468c2b')
+    try:
+        content, tokens_used = fetch_chat_completion(
+            'cloro', prompt, cloro_key,
+            model='gemini', custom_prompt=custom_prompt
+        )
+        return content, tokens_used
+    except Exception as exc2:
+        logging.warning(f'Fallback Cloro Gemini failed ({exc2})...')
+
+    # Attempt 3: Fallback to Groq if key exists
+    groq_key = getattr(settings, 'GROQ_API_KEY', '') or os.environ.get('GROQ_API_KEY', '')
+    if groq_key:
+        try:
+            content, tokens_used = fetch_chat_completion(
+                'groq', prompt, groq_key,
+                model='llama-3.3-70b-versatile', custom_prompt=custom_prompt
+            )
+            return content, tokens_used
+        except Exception as exc3:
+            logging.warning(f'Fallback Groq failed ({exc3})...')
+
+    return f'К сожалению, модель {AI_COMMAND_ALIASES.get(alias, alias).title()} временно недоступна. Попробуйте повторить запрос позже.', 0
 
 
 def sanitize_ai_response(text: str) -> str:

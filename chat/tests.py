@@ -180,4 +180,11 @@ class RoomAIAccessTests(TestCase):
         self.assertEqual(voice_res.status_code, 200)
         self.assertTrue(Message.objects.filter(message_type='voice').exists())
 
+    def test_ai_fallback_on_provider_error(self):
+        from .views import fetch_ai_response
+        mock_integration = type('MockIntegration', (), {'api_key': 'invalid_key_123', 'model_name': 'invalid-model', 'custom_prompt': '', 'profile_id': None})()
+        response_text, tokens = fetch_ai_response('cerebras', 'Привет!', mock_integration)
+        self.assertIsNotNone(response_text)
+        self.assertNotIn('Error code: 404', response_text)
+
 
