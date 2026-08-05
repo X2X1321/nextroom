@@ -1316,7 +1316,11 @@ def generate_image(request):
     try:
         start_time = time.time()
         encoded_prompt = urllib.parse.quote(prompt)
-        image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=1024&nologo=true&seed={int(timezone.now().timestamp())}'
+        image_url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true&model=flux'
+        fallback_urls = [
+            f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true&model=turbo',
+            f'https://image.pollinations.ai/prompt/{encoded_prompt}?nologo=true',
+        ]
         generation_time = time.time() - start_time
         profile = get_user_profile(request.user)
         GeneratedImage.objects.create(
@@ -1328,7 +1332,7 @@ def generate_image(request):
             height=1024,
             model_name='pollinations',
         )
-        return JsonResponse({'status': 'success', 'image_url': image_url})
+        return JsonResponse({'status': 'success', 'image_url': image_url, 'fallback_urls': fallback_urls})
     except Exception as exc:
         return JsonResponse({'error': f'Ошибка генерации: {str(exc)}'}, status=500)
 
