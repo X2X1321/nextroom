@@ -962,7 +962,15 @@ def send_message(request, slug):
     image = None
     voice = None
     
-    if request.content_type and 'multipart/form-data' in request.content_type:
+    if request.FILES:
+        content = request.POST.get('content', '').strip()
+        if 'image' in request.FILES:
+            image = request.FILES['image']
+            message_type = 'image'
+        if 'voice' in request.FILES:
+            voice = request.FILES['voice']
+            message_type = 'voice'
+    elif request.content_type and 'multipart/form-data' in request.content_type:
         content = request.POST.get('content', '').strip()
         if 'image' in request.FILES:
             image = request.FILES['image']
@@ -972,9 +980,9 @@ def send_message(request, slug):
             message_type = 'voice'
     else:
         try:
-            data = json.loads(request.body)
+            data = json.loads(request.body) if request.body else {}
             content = data.get('content', '').strip()
-        except json.JSONDecodeError:
+        except Exception:
             content = request.POST.get('content', '').strip()
     
     if not content and not image and not voice:

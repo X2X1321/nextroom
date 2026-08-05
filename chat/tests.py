@@ -161,4 +161,23 @@ class RoomAIAccessTests(TestCase):
         self.assertEqual(achieve_res.status_code, 302)
         self.assertIn('/login/', achieve_res.url)
 
+    def test_send_image_and_voice_message(self):
+        from django.core.files.uploadedfile import SimpleUploadedFile
+        test_img = SimpleUploadedFile("test.jpg", b"fake_image_bytes", content_type="image/jpeg")
+        test_voice = SimpleUploadedFile("voice.webm", b"fake_voice_bytes", content_type="audio/webm")
+
+        img_res = self.client.post(
+            reverse('send_message', args=[self.room.slug]),
+            {'image': test_img, 'content': ''}
+        )
+        self.assertEqual(img_res.status_code, 200)
+        self.assertTrue(Message.objects.filter(message_type='image').exists())
+
+        voice_res = self.client.post(
+            reverse('send_message', args=[self.room.slug]),
+            {'voice': test_voice, 'content': ''}
+        )
+        self.assertEqual(voice_res.status_code, 200)
+        self.assertTrue(Message.objects.filter(message_type='voice').exists())
+
 

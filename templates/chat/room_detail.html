@@ -575,30 +575,79 @@
             });
         }
 
+        // Client-side image compression helper
+        function compressImageIfNeeded(file, maxSizeMB = 2.0) {
+            return new Promise((resolve) => {
+                if (!file || !file.type.startsWith('image/') || file.size <= maxSizeMB * 1024 * 1024) {
+                    return resolve(file);
+                }
+                const img = new Image();
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 1920;
+                        if (width > maxDim || height > maxDim) {
+                            if (width > height) {
+                                height = Math.round((height * maxDim) / width);
+                                width = maxDim;
+                            } else {
+                                width = Math.round((width * maxDim) / height);
+                                height = maxDim;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: 'image/jpeg' });
+                                resolve(compressedFile);
+                            } else {
+                                resolve(file);
+                            }
+                        }, 'image/jpeg', 0.82);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         // Image upload handler
         const imageInput = document.getElementById('image-input');
         const imageBtn = document.getElementById('image-btn');
         if (imageBtn && imageInput) {
             imageBtn.addEventListener('click', () => imageInput.click());
-            imageInput.addEventListener('change', () => {
-                const file = imageInput.files[0];
-                if (!file) return;
+            imageInput.addEventListener('change', async () => {
+                const rawFile = imageInput.files[0];
+                if (!rawFile) return;
                 
                 // Show loading state on image button
                 imageBtn.disabled = true;
                 imageBtn.classList.add('opacity-70');
 
-                const formData = new FormData();
-                formData.append('image', file);
-                formData.append('content', '');
-                const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
-                fetch("{% url 'send_message' room.slug %}", {
-                    method: 'POST',
-                    headers: { 'X-CSRFToken': csrf },
-                    body: formData,
-                })
-                .then(res => res.json())
-                .then(data => {
+                try {
+                    const file = await compressImageIfNeeded(rawFile);
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    formData.append('content', '');
+                    const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
+                    const res = await fetch("{% url 'send_message' room.slug %}", {
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrf },
+                        body: formData,
+                    });
+
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        throw new Error(data.error || `Ошибка сервера (${res.status})`);
+                    }
+
                     if (data.status === 'success') {
                         renderMessage(data.message);
                         lastMessageId = Math.max(lastMessageId, data.message.id);
@@ -608,16 +657,14 @@
                     } else {
                         alert(data.error || 'Ошибка отправки изображения');
                     }
-                })
-                .catch(err => {
-                    console.error('Ошибка сети при отправке изображения: ', err);
-                    alert('Не удалось отправить изображение. Проверьте подключение к сети.');
-                })
-                .finally(() => {
+                } catch (err) {
+                    console.error('Ошибка отправки изображения: ', err);
+                    alert(err.message || 'Ошибка отправки изображения');
+                } finally {
                     imageBtn.disabled = false;
                     imageBtn.classList.remove('opacity-70');
                     imageInput.value = '';
-                });
+                }
             });
         }
 
@@ -648,24 +695,29 @@
                             if (e.data && e.data.size > 0) audioChunks.push(e.data);
                         };
 
-                        mediaRecorder.onstop = () => {
+                        mediaRecorder.onstop = async () => {
                             clearTimeout(recordingTimer);
                             const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
                             if (audioBlob.size === 0) return;
 
-                            const formData = new FormData();
-                            const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
-                            formData.append('voice', audioBlob, `voice.${ext}`);
-                            formData.append('content', '');
-                            const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            try {
+                                const formData = new FormData();
+                                const ext = mimeType.includes('mp4') ? 'm4a' : 'webm';
+                                formData.append('voice', audioBlob, `voice.${ext}`);
+                                formData.append('content', '');
+                                const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
 
-                            fetch("{% url 'send_message' room.slug %}", {
-                                method: 'POST',
-                                headers: { 'X-CSRFToken': csrf },
-                                body: formData,
-                            })
-                            .then(res => res.json())
-                            .then(data => {
+                                const res = await fetch("{% url 'send_message' room.slug %}", {
+                                    method: 'POST',
+                                    headers: { 'X-CSRFToken': csrf },
+                                    body: formData,
+                                });
+
+                                const data = await res.json().catch(() => ({}));
+                                if (!res.ok) {
+                                    throw new Error(data.error || `Ошибка сервера (${res.status})`);
+                                }
+
                                 if (data.status === 'success') {
                                     renderMessage(data.message);
                                     lastMessageId = Math.max(lastMessageId, data.message.id);
@@ -675,13 +727,12 @@
                                 } else {
                                     alert(data.error || 'Ошибка отправки голосового сообщения');
                                 }
-                            })
-                            .catch(err => {
-                                console.error('Ошибка сети при отправке голосового: ', err);
-                                alert('Не удалось отправить голосовое сообщение.');
-                            });
-
-                            stream.getTracks().forEach(track => track.stop());
+                            } catch (err) {
+                                console.error('Ошибка отправки голосового: ', err);
+                                alert(err.message || 'Ошибка отправки голосового сообщения');
+                            } finally {
+                                stream.getTracks().forEach(track => track.stop());
+                            }
                         };
 
                         mediaRecorder.start();
