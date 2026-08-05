@@ -172,7 +172,7 @@
                             {% if msg.user == user %}Вы{% else %}{{ msg.user.username }}{% endif %}
                         </span>
                         
-                        <div class="relative group pb-6">
+                        <div class="relative group pb-1.5">
                             <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
                                 {% if msg.content %}
                                     {{ msg.content|linebreaksbr }}
@@ -432,7 +432,7 @@
                 <span class="text-[10px] text-slate-550 mb-1 px-1 font-medium">
                     ${isMe ? 'Вы' : escapeHTML(msg.username)}
                 </span>
-                <div class="relative group pb-6">
+                <div class="relative group pb-1.5">
                     <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
                         ${safeContent}
                         ${imagesHTML}

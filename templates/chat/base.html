@@ -142,23 +142,34 @@
          }
          
          /* Fix emoji alignment in reactions */
+         .reaction-badge {
+             display: inline-flex !important;
+             align-items: center !important;
+             justify-content: center !important;
+             line-height: 1 !important;
+         }
          .reaction-badge span {
-             display: inline-block;
-             line-height: 1;
-             vertical-align: middle;
-         }
-         .reaction-picker button span {
-             display: inline-block;
-             line-height: 1;
-             vertical-align: middle;
-         }
-         .message-content emoji, .message-emoji, [data-emoji] {
-             display: inline-block;
-             vertical-align: middle;
-             line-height: 1;
+             display: inline-flex !important;
+             align-items: center !important;
+             justify-content: center !important;
+             line-height: 1 !important;
          }
          .reaction-picker button {
-             line-height: 1;
+             display: inline-flex !important;
+             align-items: center !important;
+             justify-content: center !important;
+             line-height: 1 !important;
+         }
+         .reaction-picker button span {
+             display: inline-flex !important;
+             align-items: center !important;
+             justify-content: center !important;
+             line-height: 1 !important;
+         }
+         .message-content emoji, .message-emoji, [data-emoji] {
+             display: inline-flex !important;
+             align-items: center !important;
+             line-height: 1 !important;
          }
      </style>
     {% block extra_head %}{% endblock %}
