@@ -140,6 +140,23 @@
          .scrollbar-none::-webkit-scrollbar {
              display: none;
          }
+         
+         /* Fix emoji alignment in reactions */
+         .reaction-badge span {
+             display: inline-block;
+             line-height: 1;
+             vertical-align: middle;
+         }
+         .reaction-picker button span {
+             display: inline-block;
+             line-height: 1;
+             vertical-align: middle;
+         }
+         .message-content emoji, .message-emoji, [data-emoji] {
+             display: inline-block;
+             vertical-align: middle;
+             line-height: 1;
+         }
      </style>
     {% block extra_head %}{% endblock %}
 </head>
