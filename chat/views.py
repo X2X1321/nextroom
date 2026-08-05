@@ -1050,29 +1050,38 @@ def send_message(request, slug):
             }
         })
 
-    if user_obj:
-        message = Message.objects.create(
-            room=room,
-            user=user_obj,
-            content=content,
-            message_type=message_type,
-            image=image,
-            voice=voice
-        )
-        _update_user_activity(user_obj)
-    else:
-        message = Message.objects.create(
-            room=room,
-            user=None,
-            guest_session=guest_obj,
-            guest_name=guest_obj.guest_name,
-            content=content,
-            message_type=message_type,
-            image=image,
-            voice=voice
-        )
-        guest_obj.messages_count += 1
-        guest_obj.save(update_fields=['messages_count', 'last_activity'])
+    try:
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'chat_images'), exist_ok=True)
+        os.makedirs(os.path.join(settings.MEDIA_ROOT, 'chat_voices'), exist_ok=True)
+    except Exception:
+        pass
+
+    try:
+        if user_obj:
+            message = Message.objects.create(
+                room=room,
+                user=user_obj,
+                content=content,
+                message_type=message_type,
+                image=image,
+                voice=voice
+            )
+            _update_user_activity(user_obj)
+        else:
+            message = Message.objects.create(
+                room=room,
+                user=None,
+                guest_session=guest_obj,
+                guest_name=guest_obj.guest_name,
+                content=content,
+                message_type=message_type,
+                image=image,
+                voice=voice
+            )
+            guest_obj.messages_count += 1
+            guest_obj.save(update_fields=['messages_count', 'last_activity'])
+    except Exception as exc:
+        return JsonResponse({'error': f'Ошибка сохранения файла: {str(exc)}'}, status=400)
     
     response_data = {
         'status': 'success',
@@ -1591,4 +1600,9 @@ def favicon_view(request):
         with open(favicon_path, 'rb') as f:
             return HttpResponse(f.read(), content_type='image/x-icon')
     return HttpResponse(status=404)
+
+
+def media_serve_view(request, path):
+    from django.views.static import serve
+    return serve(request, path, document_root=settings.MEDIA_ROOT)
 
