@@ -330,20 +330,27 @@
   <div class="wope-vignette"></div>
 </div>
 
-<!-- Main Page Wrapper -->
-<div class="relative z-10 flex flex-col justify-center items-center py-16 px-4 sm:py-24 lg:px-8 flex-grow w-full min-h-[85vh] overflow-hidden">
+<!-- Wrapper for Hero & Stats with Spline Background -->
+<div class="relative z-10 flex flex-col justify-center items-center w-full overflow-hidden pb-16 sm:pb-24">
     
-    <!-- Spline 3D Background -->
-    <div class="absolute inset-0 z-0 pointer-events-auto flex items-center justify-center">
+    <!-- Spline 3D Background (pointer-events-none ensures scroll works anywhere) -->
+    <div class="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
         <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"></script>
-        <spline-viewer url="https://prod.spline.design/NdnEXj2bTwLzGO7A/scene.splinecode" style="width: 100%; height: 100%;"></spline-viewer>
+        <spline-viewer url="https://prod.spline.design/NdnEXj2bTwLzGO7A/scene.splinecode" style="width: 100%; height: 100%; pointer-events: none;"></spline-viewer>
+    </div>
+
+    <!-- Stars Overlay on top of Spline -->
+    <div class="absolute inset-0 z-10 pointer-events-none">
+      <div class="wope-stars-1"></div>
+      <div class="wope-stars-2"></div>
+      <div class="wope-stars-3"></div>
     </div>
 
     <!-- Fade mask at the bottom to blend with the rest of the page -->
-    <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#060512] to-transparent z-10 pointer-events-none"></div>
+    <div class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#060512] to-transparent z-10 pointer-events-none"></div>
 
-    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1 relative z-20 pointer-events-none">
-
+    <!-- Hero Content -->
+    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1 relative z-20 pointer-events-none pt-16 sm:pt-24 px-4 lg:px-8">
         <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center pointer-events-auto">
             <span id="typed-text">Создай свою комнату</span><span class="animate-pulse text-indigo-400 font-light ml-0.5">|</span>
         </h1>
@@ -375,12 +382,13 @@
               active:hover:translate-y-1.5 active:hover:[box-shadow:0_0px_0_0_#4f46e5]">
                 <span class='flex flex-col justify-center items-center h-full text-white font-semibold text-base'>
                     Войти в аккаунт
+                </span>
             </a>
         </div>
     </div>
 
     <!-- Platform Stats -->
-    <div class="mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full sr sr-delay-2">
+    <div class="relative z-20 mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full sr sr-delay-2 pointer-events-auto">
         <dl class="grid grid-cols-1 gap-4 sm:gap-6 text-center sm:grid-cols-3">
             <div class="card-lift flex flex-col gap-y-2 p-5 sm:p-6 rounded-2xl glass-panel">
                 <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
@@ -399,6 +407,7 @@
             </div>
         </dl>
     </div>
+</div>
 
 
     <!-- Featured Rooms Section -->
