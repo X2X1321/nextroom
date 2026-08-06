@@ -35,7 +35,7 @@
             {% endif %}
 
             <!-- Mobile sidebar toggle -->
-            <button id="mobile-sidebar-toggle" class="sm:hidden inline-flex items-center justify-center rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition bg-slate-900 border border-slate-800">
+            <button id="mobile-sidebar-toggle" class="md:hidden inline-flex items-center justify-center rounded-lg px-2.5 py-2 text-xs font-semibold text-slate-300 hover:text-white transition bg-slate-900 border border-slate-800">
                 О комнате
             </button>
         </div>
@@ -957,22 +957,29 @@
     const roomSidebar = document.getElementById('room-sidebar');
     const closeSidebarBtn = document.getElementById('close-sidebar');
     
-    function openSidebar() {
-        if (roomSidebar) {
+    function toggleMobileSidebar() {
+        if (!roomSidebar) return;
+        const isHidden = roomSidebar.classList.contains('hidden');
+        if (isHidden) {
             roomSidebar.classList.remove('hidden');
             roomSidebar.classList.add('flex');
+            if (mobileSidebarToggle) mobileSidebarToggle.textContent = 'Скрыть';
+        } else {
+            roomSidebar.classList.add('hidden');
+            roomSidebar.classList.remove('flex');
+            if (mobileSidebarToggle) mobileSidebarToggle.textContent = 'О комнате';
         }
     }
     
     function closeSidebar() {
-        if (roomSidebar) {
-            roomSidebar.classList.add('hidden');
-            roomSidebar.classList.remove('flex');
-        }
+        if (!roomSidebar) return;
+        roomSidebar.classList.add('hidden');
+        roomSidebar.classList.remove('flex');
+        if (mobileSidebarToggle) mobileSidebarToggle.textContent = 'О комнате';
     }
     
     if (mobileSidebarToggle) {
-        mobileSidebarToggle.addEventListener('click', openSidebar);
+        mobileSidebarToggle.addEventListener('click', toggleMobileSidebar);
     }
     if (closeSidebarBtn) {
         closeSidebarBtn.addEventListener('click', closeSidebar);
@@ -1038,7 +1045,7 @@
             const data = await res.json();
             if (data.status === 'success') {
                 showToast(data.message, 'success');
-                fetchMessages(); // Immediately try to fetch new message
+                if (typeof pollMessages === 'function') pollMessages(); // Immediately try to fetch new message
             } else {
                 showToast(data.error || 'Ошибка запуска игры', 'error');
             }
