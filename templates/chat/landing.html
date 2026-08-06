@@ -276,12 +276,12 @@
 
 {% block content %}
 <!-- ===== WOPE-STYLE SYNTHWAVE BACKGROUND ===== -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="background-color: #000000;" aria-hidden="true">
-  <!-- Glowing horizon orb 1 - reduced opacity to blend with Spline -->
-  <div class="anim-orb absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] rounded-full bg-indigo-600/8 blur-[140px]"></div>
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="background-color: #060512;" aria-hidden="true">
+  <!-- Glowing horizon orb 1 -->
+  <div class="anim-orb absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]"></div>
   
-  <!-- Purple synthwave horizon glow 2 - softened -->
-  <div class="anim-orb-2 absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,_rgba(168,85,247,0.28)_0%,_rgba(126,34,206,0.15)_35%,_rgba(76,29,149,0.06)_70%,_transparent_100%)]"></div>
+  <!-- Purple synthwave horizon glow 2 -->
+  <div class="anim-orb-2 absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,_rgba(168,85,247,0.45)_0%,_rgba(126,34,206,0.25)_35%,_rgba(76,29,149,0.1)_70%,_transparent_100%)]"></div>
 
   <!-- Twinkling Stars (Multi-layered 3D) -->
   <div class="wope-stars-1"></div>
@@ -330,36 +330,21 @@
   <div class="wope-vignette"></div>
 </div>
 
-<!-- Wrapper for Hero & Stats with Spline Background -->
-<div class="relative z-10 flex flex-col justify-center items-center w-full overflow-hidden pb-16 sm:pb-24">
-    
-    <!-- Spline 3D Background (pointer-events-none ensures scroll works anywhere) -->
-    <!-- We make it 60px taller and pull it up slightly so the logo at the bottom gets cut off by overflow-hidden -->
-    <div class="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
-        <style>spline-viewer::part(logo) { display: none !important; }</style>
-        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"></script>
-        <spline-viewer url="https://prod.spline.design/NdnEXj2bTwLzGO7A/scene.splinecode" style="width: 100%; height: calc(100% + 70px); transform: translateY(35px); pointer-events: none;"></spline-viewer>
-    </div>
+<!-- Main Page Wrapper -->
+<div class="relative z-10 flex flex-col justify-center items-center py-16 px-4 sm:py-24 lg:px-8 flex-grow w-full">
 
-    <!-- Stars Overlay on top of Spline -->
-    <div class="absolute inset-0 z-10 pointer-events-none">
-      <div class="wope-stars-1"></div>
-      <div class="wope-stars-2"></div>
-      <div class="wope-stars-3"></div>
-    </div>
+    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1">
 
-    <!-- Hero Content -->
-    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1 relative z-20 pointer-events-none pt-16 sm:pt-24 px-4 lg:px-8">
-        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center pointer-events-auto">
+        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center">
             <span id="typed-text">Создай свою комнату</span><span class="animate-pulse text-indigo-400 font-light ml-0.5">|</span>
         </h1>
 
-        <p class="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-slate-400 max-w-xl px-2 sm:px-0 pointer-events-auto">
+        <p class="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-slate-400 max-w-xl px-2 sm:px-0">
             Общайтесь с ведущими языковыми моделями прямо в ваших комнатах. Подключайте собственные API ключи и
             используйте умных ассистентов в совместных обсуждениях.
         </p>
 
-        <div class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full pointer-events-auto">
+        <div class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full">
             <!-- Основная кнопка -->
             <a href="{% url 'dashboard' %}" class="button w-full max-w-xs sm:w-auto px-8 py-4 bg-indigo-500 rounded-xl cursor-pointer select-none
               active:translate-y-1.5 active:[box-shadow:0_0px_0_0_#4f46e5]
@@ -387,7 +372,7 @@
     </div>
 
     <!-- Platform Stats -->
-    <div class="relative z-20 mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full sr sr-delay-2 pointer-events-auto">
+    <div class="mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full sr sr-delay-2">
         <dl class="grid grid-cols-1 gap-4 sm:gap-6 text-center sm:grid-cols-3">
             <div class="card-lift flex flex-col gap-y-2 p-5 sm:p-6 rounded-2xl glass-panel">
                 <dd class="stat-value text-3xl font-extrabold tracking-tight text-white sm:text-4xl"
