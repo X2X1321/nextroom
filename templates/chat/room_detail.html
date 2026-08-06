@@ -1022,6 +1022,16 @@
                 },
                 body: JSON.stringify({})
             });
+            
+            if (!res.ok) {
+                const text = await res.text();
+                console.error("Server error response:", text);
+                let errorMsg = 'Ошибка сервера: ' + res.status;
+                if (text.includes('CSRF')) errorMsg = 'Ошибка CSRF (обновите страницу)';
+                showToast(errorMsg, 'error');
+                return;
+            }
+
             const data = await res.json();
             if (data.status === 'success') {
                 showToast(data.message, 'success');
