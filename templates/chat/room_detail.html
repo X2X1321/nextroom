@@ -78,7 +78,7 @@
                     </a>
                     
                     {% if room.slug == 'room-5' %}
-                        <button onclick="startMovieGame()" class="w-full rounded-xl bg-purple-900 border border-purple-700 hover:bg-purple-800 py-2.5 px-4 text-xs font-semibold text-purple-200 hover:text-white transition flex items-center justify-center gap-1.5 mt-1">
+                        <button type="button" onclick="startMovieGame()" class="w-full rounded-xl bg-purple-900 border border-purple-700 hover:bg-purple-800 py-2.5 px-4 text-xs font-semibold text-purple-200 hover:text-white transition flex items-center justify-center gap-1.5 mt-1">
                             <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span>Начать "Угадай фильм"</span>
                         </button>
@@ -567,7 +567,7 @@
         });
 
         // Polling loop
-        function pollMessages() {
+        window.pollMessages = function pollMessages() {
             fetch(`{% url 'get_messages' room.slug %}?after_id=${lastMessageId}`)
             .then(res => {
                 if (res.status === 403) {
@@ -1036,6 +1036,7 @@
             
             const res = await fetch("{% url 'start_movie_game' room.slug %}", {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: {
                     'X-CSRFToken': token,
                     'Content-Type': 'application/json'
@@ -1045,13 +1046,13 @@
             const data = await res.json();
             if (data.status === 'success') {
                 showToast(data.message, 'success');
-                if (typeof pollMessages === 'function') pollMessages(); // Immediately try to fetch new message
+                if (typeof window.pollMessages === 'function') window.pollMessages(); // Immediately try to fetch new message
             } else {
                 showToast(data.error || 'Ошибка запуска игры', 'error');
             }
         } catch (e) {
             console.error(e);
-            showToast('Сетевая ошибка', 'error');
+            showToast('Ошибка: ' + (e.message || 'Сетевая ошибка'), 'error');
         }
     }
 </script>
