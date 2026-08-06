@@ -21,22 +21,7 @@
         </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-2">
-        <section class="glass-panel rounded-3xl p-6">
-            <h2 class="text-lg font-bold text-white mb-4">Промпт для моделей</h2>
-            <form action="{% url 'ai_management' %}" method="POST" class="space-y-4">
-                {% csrf_token %}
-                <div>
-                    <label for="custom_prompt" class="block text-sm font-medium text-slate-300">Дополнительные правила</label>
-                    <textarea id="custom_prompt" name="custom_prompt" rows="4" placeholder="Опишите, как должна общаться модель в чате." class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">{{ custom_prompt }}</textarea>
-                </div>
-                <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-                    <span class="relative z-10">Сохранить промпт</span>
-                </button>
-            </form>
-        </section>
+    <div class="grid gap-6">
 
         <section class="glass-panel rounded-3xl p-6">
             <h2 class="text-lg font-bold text-white mb-4">API ключи</h2>
