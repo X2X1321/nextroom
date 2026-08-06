@@ -209,47 +209,61 @@
 {% endblock %}
 
 {% block content %}
-<!-- ===== WOPE-STYLE BACKGROUND ===== -->
-<div class="wope-bg" aria-hidden="true">
+<!-- ===== WOPE-STYLE SYNTHWAVE BACKGROUND ===== -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="background-color: #060512;" aria-hidden="true">
+  <!-- Glowing horizon orb 1 -->
+  <div class="anim-orb absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]"></div>
+  
+  <!-- Purple synthwave horizon glow 2 -->
+  <div class="anim-orb-2 absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,_rgba(168,85,247,0.45)_0%,_rgba(126,34,206,0.25)_35%,_rgba(76,29,149,0.1)_70%,_transparent_100%)]"></div>
+
+  <!-- Twinkling Stars -->
   <div class="wope-stars"></div>
-  <div class="wope-glow"></div>
-  <!-- Perspective grid SVG -->
+
+  <!-- Perspective SVG grid horizon -->
   <div class="wope-grid">
-    <svg viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- Horizontal lines (perspective) -->
-      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(120,60,220,.22)" stroke-width="1"/>
-      <line x1="108" y1="340" x2="1332" y2="340" stroke="rgba(120,60,220,.18)" stroke-width=".8"/>
-      <line x1="216" y1="270" x2="1224" y2="270" stroke="rgba(120,60,220,.15)" stroke-width=".7"/>
-      <line x1="310" y1="210" x2="1130" y2="210" stroke="rgba(120,60,220,.12)" stroke-width=".6"/>
-      <line x1="390" y1="158" x2="1050" y2="158" stroke="rgba(120,60,220,.09)" stroke-width=".5"/>
-      <line x1="456" y1="112" x2="984" y2="112"  stroke="rgba(120,60,220,.07)" stroke-width=".4"/>
-      <line x1="510" y1="72"  x2="930" y2="72"   stroke="rgba(120,60,220,.05)" stroke-width=".35"/>
-      <line x1="552" y1="38"  x2="888" y2="38"   stroke="rgba(120,60,220,.04)" stroke-width=".3"/>
-      <line x1="584" y1="10"  x2="856" y2="10"   stroke="rgba(120,60,220,.03)" stroke-width=".25"/>
-      <!-- Vertical converging lines -->
-      <line x1="720" y1="0" x2="0"   y2="420" stroke="rgba(140,80,240,.2)" stroke-width=".7"/>
-      <line x1="720" y1="0" x2="180" y2="420" stroke="rgba(140,80,240,.17)" stroke-width=".6"/>
-      <line x1="720" y1="0" x2="360" y2="420" stroke="rgba(140,80,240,.14)" stroke-width=".55"/>
-      <line x1="720" y1="0" x2="540" y2="420" stroke="rgba(140,80,240,.12)" stroke-width=".5"/>
-      <line x1="720" y1="0" x2="720" y2="420" stroke="rgba(160,100,255,.25)" stroke-width=".8"/>
-      <line x1="720" y1="0" x2="900" y2="420" stroke="rgba(140,80,240,.12)" stroke-width=".5"/>
-      <line x1="720" y1="0" x2="1080" y2="420" stroke="rgba(140,80,240,.14)" stroke-width=".55"/>
-      <line x1="720" y1="0" x2="1260" y2="420" stroke="rgba(140,80,240,.17)" stroke-width=".6"/>
-      <line x1="720" y1="0" x2="1440" y2="420" stroke="rgba(140,80,240,.2)" stroke-width=".7"/>
-      <!-- Horizon glow line -->
-      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(180,100,255,.6)" stroke-width="1.5"/>
-      <!-- Glow filter -->
+    <svg viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
+      <!-- Horizontal perspective lines -->
+      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(192,132,252,0.4)" stroke-width="1.5"/>
+      <line x1="108" y1="340" x2="1332" y2="340" stroke="rgba(168,85,247,0.3)" stroke-width="1.2"/>
+      <line x1="216" y1="270" x2="1224" y2="270" stroke="rgba(168,85,247,0.24)" stroke-width="1"/>
+      <line x1="310" y1="210" x2="1130" y2="210" stroke="rgba(168,85,247,0.18)" stroke-width="0.8"/>
+      <line x1="390" y1="158" x2="1050" y2="158" stroke="rgba(168,85,247,0.14)" stroke-width="0.7"/>
+      <line x1="456" y1="112" x2="984" y2="112" stroke="rgba(168,85,247,0.1)" stroke-width="0.6"/>
+      <line x1="510" y1="72" x2="930" y2="72" stroke="rgba(168,85,247,0.08)" stroke-width="0.5"/>
+      <line x1="552" y1="38" x2="888" y2="38" stroke="rgba(168,85,247,0.05)" stroke-width="0.4"/>
+      
+      <!-- Vertical converging grid lines -->
+      <line x1="720" y1="0" x2="0" y2="420" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+      <line x1="720" y1="0" x2="180" y2="420" stroke="rgba(168,85,247,0.25)" stroke-width="0.9"/>
+      <line x1="720" y1="0" x2="360" y2="420" stroke="rgba(168,85,247,0.22)" stroke-width="0.8"/>
+      <line x1="720" y1="0" x2="540" y2="420" stroke="rgba(168,85,247,0.2)" stroke-width="0.7"/>
+      <line x1="720" y1="0" x2="720" y2="420" stroke="rgba(216,180,254,0.4)" stroke-width="1.2"/>
+      <line x1="720" y1="0" x2="900" y2="420" stroke="rgba(168,85,247,0.2)" stroke-width="0.7"/>
+      <line x1="720" y1="0" x2="1080" y2="420" stroke="rgba(168,85,247,0.22)" stroke-width="0.8"/>
+      <line x1="720" y1="0" x2="1260" y2="420" stroke="rgba(168,85,247,0.25)" stroke-width="0.9"/>
+      <line x1="720" y1="0" x2="1440" y2="420" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+
+      <!-- Glowing horizon beam -->
       <defs>
-        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge>
+            <feMergeNode in="blur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
       </defs>
-      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(200,120,255,.9)" stroke-width="2" filter="url(#glow)"/>
+      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(232,121,249,0.95)" stroke-width="3" filter="url(#neon-glow)"/>
     </svg>
   </div>
+  
   <div class="wope-scanline"></div>
   <div class="wope-vignette"></div>
 </div>
 
-<div class="relative isolate overflow-hidden flex flex-col justify-center items-center py-20 px-6 sm:py-32 lg:px-8 flex-grow">
+<!-- Main Page Wrapper -->
+<div class="relative z-10 flex flex-col justify-center items-center py-16 px-4 sm:py-24 lg:px-8 flex-grow w-full">
 
     <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1">
 
