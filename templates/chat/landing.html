@@ -237,35 +237,37 @@
     /* --- Typewriter Effect --- */
     const phrases = ["Создай свою комнату", "Общайся с друзьями", "Выполняй достижения"];
     let phraseIdx = 0;
-    let charIdx = phrases[0].length;
+    let charIdx = 0;
     let isDeleting = false;
     const typedEl = document.getElementById('typed-text');
 
     if (typedEl) {
+      typedEl.textContent = '';
       function typeLoop() {
         const currentPhrase = phrases[phraseIdx];
+        
         if (isDeleting) {
-          typedEl.textContent = currentPhrase.substring(0, charIdx - 1);
           charIdx--;
+          typedEl.textContent = currentPhrase.substring(0, charIdx);
         } else {
-          typedEl.textContent = currentPhrase.substring(0, charIdx + 1);
           charIdx++;
+          typedEl.textContent = currentPhrase.substring(0, charIdx);
         }
 
-        let delay = isDeleting ? 40 : 90;
+        let delay = isDeleting ? 45 : 85;
 
         if (!isDeleting && charIdx === currentPhrase.length) {
-          delay = 1800; // Pause at end of phrase
           isDeleting = true;
+          delay = 2000; // Pause 2 seconds after completing phrase
         } else if (isDeleting && charIdx === 0) {
           isDeleting = false;
           phraseIdx = (phraseIdx + 1) % phrases.length;
-          delay = 400; // Pause before typing new phrase
+          delay = 450; // Pause before starting next phrase
         }
 
         setTimeout(typeLoop, delay);
       }
-      setTimeout(typeLoop, 1800);
+      typeLoop();
     }
 
   });
