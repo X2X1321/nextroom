@@ -276,7 +276,7 @@
 
 {% block content %}
 <!-- ===== WOPE-STYLE SYNTHWAVE BACKGROUND ===== -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="background-color: #060512;" aria-hidden="true">
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="background-color: #000000;" aria-hidden="true">
   <!-- Glowing horizon orb 1 -->
   <div class="anim-orb absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]"></div>
   
@@ -335,9 +335,13 @@
     
     <!-- Spline 3D Background (pointer-events-none ensures scroll works anywhere) -->
     <div class="absolute inset-0 z-0 pointer-events-none flex items-center justify-center">
+        <style>spline-viewer::part(logo) { display: none !important; }</style>
         <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"></script>
         <spline-viewer url="https://prod.spline.design/NdnEXj2bTwLzGO7A/scene.splinecode" style="width: 100%; height: 100%; pointer-events: none;"></spline-viewer>
     </div>
+
+    <!-- Black patch to cover Spline logo if the CSS part selector fails -->
+    <div class="absolute bottom-1 right-2 w-40 h-12 bg-black z-10 pointer-events-none"></div>
 
     <!-- Stars Overlay on top of Spline -->
     <div class="absolute inset-0 z-10 pointer-events-none">
@@ -345,9 +349,6 @@
       <div class="wope-stars-2"></div>
       <div class="wope-stars-3"></div>
     </div>
-
-    <!-- Fade mask at the bottom to blend with the rest of the page -->
-    <div class="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#060512] to-transparent z-10 pointer-events-none"></div>
 
     <!-- Hero Content -->
     <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1 relative z-20 pointer-events-none pt-16 sm:pt-24 px-4 lg:px-8">
