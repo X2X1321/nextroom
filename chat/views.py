@@ -521,13 +521,13 @@ def landing(request):
         return redirect('dashboard')
     
     active_rooms = 0
-    online_users = 0
+    registered_users = 0
     total_messages = 0
     total_rooms = 0
     featured_rooms = []
     try:
         active_rooms = Room.objects.filter(messages__isnull=False).distinct().count()
-        online_users = User.objects.filter(last_login__gte=timezone.now() - datetime.timedelta(minutes=5), is_active=True).distinct().count()
+        registered_users = User.objects.count()
         total_messages = Message.objects.count()
         total_rooms = Room.objects.count()
         featured_rooms = Room.objects.annotate(msg_count=Count('messages')).filter(is_private=False).order_by('-msg_count')[:3]
@@ -536,7 +536,7 @@ def landing(request):
 
     context = {
         'active_rooms': active_rooms,
-        'online_users': online_users,
+        'registered_users': registered_users,
         'total_messages': total_messages,
         'total_rooms': total_rooms,
         'featured_rooms': featured_rooms,
