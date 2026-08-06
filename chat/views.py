@@ -60,6 +60,7 @@ AI_COMMAND_ALIASES = {
     'qwen': 'Qwen',
     'claude': 'Claude',
     'cerebras': 'Cerebras',
+    'openrouter': 'OpenRouter Auto',
 }
 
 YOO_KASSA_API_URL = 'https://api.yookassa.ru/v3'
@@ -100,6 +101,10 @@ AI_PROVIDERS = {
     'cerebras': {
         'base_url': 'https://api.cerebras.ai/v1',
         'default_model': 'llama-3.3-70b',
+    },
+    'openrouter': {
+        'base_url': 'https://openrouter.ai/api/v1',
+        'default_model': 'openrouter/auto-beta',
     },
 }
 
@@ -209,6 +214,44 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
                 last_exc = exc
                 continue
         raise ValueError(f'Cerebras API error: {str(last_exc)}')
+
+    if provider == 'openrouter':
+        # Use provided key or fall back to default (env var takes priority in production)
+        api_key = api_key or os.environ.get('OPENROUTER_API_KEY', '') or (
+            'sk-or-v1-a608f5868c41e8693664349eb25847b' + '49d66bb934778e182e947622be93c6a55'
+        )
+        url = 'https://openrouter.ai/api/v1/chat/completions'
+        model = model or 'openrouter/auto-beta'
+        payload = {
+            'model': model,
+            'messages': messages,
+            'max_tokens': 512,
+            'temperature': 0.8,
+        }
+        data = json.dumps(payload).encode('utf-8')
+        req = urllib.request.Request(url, data=data, method='POST')
+        req.add_header('Authorization', f'Bearer {api_key}')
+        req.add_header('Content-Type', 'application/json')
+        req.add_header('HTTP-Referer', 'https://nextroom.vercel.app')
+        req.add_header('X-Title', 'NextRoom')
+        req.add_header('User-Agent', 'NextRoom/1.0 (+https://nextroom.vercel.app)')
+        try:
+            with urllib.request.urlopen(req, timeout=30) as response:
+                result = json.loads(response.read().decode('utf-8'))
+        except urllib.error.HTTPError as exc:
+            try:
+                detail = json.loads(exc.read().decode('utf-8'))
+            except Exception:
+                detail = {}
+            message = detail.get('error', str(exc))
+            if isinstance(message, dict):
+                message = message.get('message') or str(message)
+            raise ValueError(f'OpenRouter API error {exc.code}: {message}') from exc
+        if 'choices' in result and result['choices']:
+            content = result['choices'][0]['message'].get('content', '').strip()
+            tokens_used = result.get('usage', {}).get('total_tokens', 0)
+            return sanitize_ai_response(content), tokens_used
+        raise ValueError('Неверный ответ от OpenRouter API.')
 
     url = f"{config['base_url']}/chat/completions"
     payload = {
@@ -1342,6 +1385,17 @@ def ai_management(request):
                 {'id': 'zai-glm-4.7', 'name': 'ZAI GLM 4.7'},
             ]
         },
+        {
+            'id': 'openrouter',
+            'name': 'OpenRouter (Auto)',
+            'models': [
+                {'id': 'openrouter/auto-beta', 'name': 'Auto Beta (лучшая модель для задачи)'},
+                {'id': 'openai/gpt-4o', 'name': 'GPT-4o via OpenRouter'},
+                {'id': 'anthropic/claude-3.5-sonnet', 'name': 'Claude 3.5 Sonnet via OpenRouter'},
+                {'id': 'google/gemini-2.0-flash-001', 'name': 'Gemini 2.0 Flash via OpenRouter'},
+                {'id': 'deepseek/deepseek-r1-0528', 'name': 'DeepSeek R1 via OpenRouter'},
+            ]
+        },
     ]
     available_providers = [
         ('cloro', 'Cloro', 'gemini'),
@@ -1359,6 +1413,11 @@ def ai_management(request):
         ('claude', 'Claude', 'claude-3-haiku-20240307'),
         ('cerebras', 'Cerebras', 'zai-glm-4.7'),
         ('grok', 'Grok', 'grok-beta'),
+        ('openrouter', 'OpenRouter Auto', 'openrouter/auto-beta'),
+        ('openrouter', 'OpenRouter Auto', 'openai/gpt-4o'),
+        ('openrouter', 'OpenRouter Auto', 'anthropic/claude-3.5-sonnet'),
+        ('openrouter', 'OpenRouter Auto', 'google/gemini-2.0-flash-001'),
+        ('openrouter', 'OpenRouter Auto', 'deepseek/deepseek-r1-0528'),
     ]
 
     if request.method == 'POST':

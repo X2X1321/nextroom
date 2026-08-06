@@ -18,6 +18,7 @@ AI_PROVIDER_CHOICES = [
     ('qwen', 'Qwen'),
     ('claude', 'Claude'),
     ('cerebras', 'Cerebras'),
+    ('openrouter', 'OpenRouter'),
 ]
 
 SUBSCRIPTION_PLANS = [
