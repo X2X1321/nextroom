@@ -285,28 +285,7 @@
     </div>
 </div>
 
-<script>
-    const sidebarToggle = document.getElementById('mobile-sidebar-toggle');
-    const sidebar = document.getElementById('room-sidebar');
-    if (sidebarToggle && sidebar) {
-        sidebarToggle.addEventListener('click', () => {
-            const isHidden = sidebar.classList.contains('hidden');
-            sidebar.classList.toggle('hidden', !isHidden);
-            sidebar.classList.toggle('absolute', isHidden);
-            sidebar.classList.toggle('inset-0', isHidden);
-            sidebar.classList.toggle('z-30', isHidden);
-            sidebar.classList.toggle('bg-slate-950/95', isHidden);
-            sidebar.classList.toggle('backdrop-blur-md', isHidden);
-            sidebar.classList.toggle('p-4', isHidden);
-            sidebar.classList.toggle('md:relative', !isHidden);
-            sidebar.classList.toggle('md:inset-auto', !isHidden);
-            sidebar.classList.toggle('md:z-auto', !isHidden);
-            sidebar.classList.toggle('md:bg-transparent', !isHidden);
-            sidebar.classList.toggle('md:backdrop-blur-none', !isHidden);
-            sidebarToggle.textContent = isHidden ? 'Скрыть' : 'О комнате';
-        });
-    }
-</script>
+
 {% endblock %}
 
 {% block extra_js %}
