@@ -331,21 +331,29 @@
 </div>
 
 <!-- Main Page Wrapper -->
-<div class="relative z-10 flex flex-col justify-center items-center py-16 px-4 sm:py-24 lg:px-8 flex-grow w-full">
+<div class="relative z-10 flex flex-col justify-center items-center py-16 px-4 sm:py-24 lg:px-8 flex-grow w-full min-h-[85vh] overflow-hidden">
+    
+    <!-- Spline 3D Background -->
+    <div class="absolute inset-0 z-0 pointer-events-auto flex items-center justify-center">
+        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.12.98/build/spline-viewer.js"></script>
+        <spline-viewer url="https://prod.spline.design/NdnEXj2bTwLzGO7A/scene.splinecode" style="width: 100%; height: 100%;"></spline-viewer>
+    </div>
 
-    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1">
+    <!-- Fade mask at the bottom to blend with the rest of the page -->
+    <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#060512] to-transparent z-10 pointer-events-none"></div>
 
-        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center">
+    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1 relative z-20 pointer-events-none">
+
+        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center pointer-events-auto">
             <span id="typed-text">Создай свою комнату</span><span class="animate-pulse text-indigo-400 font-light ml-0.5">|</span>
         </h1>
 
-        <p class="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-slate-400 max-w-xl px-2 sm:px-0">
+        <p class="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-slate-400 max-w-xl px-2 sm:px-0 pointer-events-auto">
             Общайтесь с ведущими языковыми моделями прямо в ваших комнатах. Подключайте собственные API ключи и
             используйте умных ассистентов в совместных обсуждениях.
         </p>
 
-        <div
-            class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full">
+        <div class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full pointer-events-auto">
             <!-- Основная кнопка -->
             <a href="{% url 'dashboard' %}" class="button w-full max-w-xs sm:w-auto px-8 py-4 bg-indigo-500 rounded-xl cursor-pointer select-none
               active:translate-y-1.5 active:[box-shadow:0_0px_0_0_#4f46e5]
