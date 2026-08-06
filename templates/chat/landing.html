@@ -619,7 +619,7 @@
     </div>
 
     <!-- 3D Galaxy Graph of all rooms (bottom) -->
-    <div class="w-full mt-12 mb-8 sr sr-delay-2">
+    <div class="w-full mt-4 mb-8 sr sr-delay-2">
         <div class="text-center mb-2">
             <p class="text-slate-400 text-sm">Граф всех комнат, доступных в NextRoom. Нажмите на узел, чтобы присоединиться.</p>
         </div>
@@ -667,7 +667,7 @@
                 } else { tooltip.classList.add('hidden'); }
             })
             .onNodeClick(node => {
-                if (!node.isHub && node.slug) window.location.href = '/accounts/login/?next=/room/' + node.slug + '/';
+                if (!node.isHub && node.slug) window.location.href = '/login/?next=/room/' + node.slug + '/';
             });
         el.addEventListener('mousemove', e => {
             const rect = el.getBoundingClientRect();
