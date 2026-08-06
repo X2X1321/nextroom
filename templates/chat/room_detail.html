@@ -985,10 +985,41 @@
         }
     });
 
+    // Show toast function for client-side alerts
+    function showToast(message, type = 'success') {
+        const container = document.getElementById('toast-container');
+        if (!container) {
+            alert(message);
+            return;
+        }
+        
+        const toast = document.createElement('div');
+        const colorClasses = type === 'error' 
+            ? 'border-red-500/30 text-red-200 bg-red-950/20'
+            : 'border-emerald-500/30 text-emerald-200 bg-emerald-950/20';
+            
+        toast.className = `toast-item flex items-center p-4 rounded-xl border glass-panel ${colorClasses} shadow-2xl transition duration-300 transform translate-x-0`;
+        toast.innerHTML = `
+            <div class="ml-3 text-sm font-medium">
+                ${message}
+            </div>
+            <button type="button" class="ml-auto -mx-1.5 -my-1.5 bg-transparent text-slate-400 hover:text-white rounded-lg focus:ring-2 focus:ring-slate-400 p-1.5 inline-flex h-8 w-8 transition" onclick="this.parentElement.remove()">
+                <span class="sr-only">Закрыть</span>
+                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            </button>
+        `;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.classList.add('opacity-0', 'translate-x-10');
+            setTimeout(() => toast.remove(), 300);
+        }, 5000);
+    }
+
     // Start movie game function
     async function startMovieGame() {
         {% if not user.is_authenticated %}
-        showToast('Вы не можете участвовать в игре так как вы не зарегистрированы', 'error');
+        window.location.href = "{% url 'login' %}?next={{ request.path }}";
         return;
         {% endif %}
         
