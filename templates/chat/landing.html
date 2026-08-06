@@ -623,14 +623,9 @@
         <div class="text-center mb-2">
             <p class="text-slate-400 text-sm">Граф всех комнат, доступных в NextRoom. Нажмите на узел, чтобы присоединиться.</p>
         </div>
-        <!-- Wrapper: pointer-events-none with padding so corners/edges are scrollable -->
-        <div class="relative" style="height: 520px; pointer-events: none;">
-            <!-- Inner interactive canvas: slightly inset so scroll works in the frame zone -->
-            <div class="absolute" style="inset: 40px; pointer-events: auto;">
-                <div id="room-graph" style="width:100%;height:100%;"></div>
-            </div>
-            <!-- Tooltip sits above everything -->
-            <div id="graph-tooltip" class="absolute hidden px-3 py-2 rounded-xl text-xs font-semibold text-white z-50" style="pointer-events: none; background: rgba(30,27,75,0.95); border: 1px solid rgba(139,92,246,0.4); backdrop-filter: blur(8px);"></div>
+        <div class="relative overflow-hidden" style="height: 520px; background: transparent;">
+            <div id="room-graph" style="width:100%;height:100%;"></div>
+            <div id="graph-tooltip" class="absolute hidden px-3 py-2 rounded-xl text-xs font-semibold text-white pointer-events-none z-50" style="background: rgba(30,27,75,0.95); border: 1px solid rgba(139,92,246,0.4); backdrop-filter: blur(8px);"></div>
         </div>
     </div>
     <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
