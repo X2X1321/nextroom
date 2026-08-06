@@ -35,44 +35,63 @@
   }
 
   /* Multi-layer intense Star twinkling */
-  @keyframes twinkle-a {
-    0%, 100% { opacity: 0.15; transform: scale(0.85); }
-    50%       { opacity: 1.0;  transform: scale(1.25); filter: drop-shadow(0 0 6px rgba(255,255,255,0.9)); }
+  @keyframes star-pulse-1 {
+    0%, 100% { opacity: 0.2; transform: scale(0.7); }
+    50%       { opacity: 1.0; transform: scale(1.4); filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 14px #c084fc); }
   }
-  @keyframes twinkle-b {
-    0%, 100% { opacity: 1.0;  transform: scale(1.2); filter: drop-shadow(0 0 5px rgba(216,180,254,0.9)); }
-    50%       { opacity: 0.1;  transform: scale(0.8); }
+  @keyframes star-pulse-2 {
+    0%, 100% { opacity: 1.0; transform: scale(1.3); filter: drop-shadow(0 0 10px #e879f9) drop-shadow(0 0 16px #a855f7); }
+    50%       { opacity: 0.15; transform: scale(0.6); }
+  }
+  @keyframes star-pulse-3 {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    40%       { opacity: 1.0; transform: scale(1.5); filter: drop-shadow(0 0 12px #60a5fa) drop-shadow(0 0 20px #818cf8); }
   }
 
   .wope-stars-1 {
     position: absolute;
     inset: 0;
-    animation: twinkle-a 2.4s ease-in-out infinite;
+    animation: star-pulse-1 2.2s ease-in-out infinite;
     background-image:
-      radial-gradient(2px 2px at 12% 18%, rgba(255,255,255,0.95) 0%, transparent 100%),
-      radial-gradient(2.5px 2.5px at 38% 12%, rgba(232,121,249,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 68% 22%, rgba(255,255,255,1) 0%, transparent 100%),
-      radial-gradient(2.5px 2.5px at 88% 15%, rgba(192,132,252,0.95) 0%, transparent 100%),
-      radial-gradient(2px 2px at 22% 42%, rgba(255,255,255,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 58% 32%, rgba(216,180,254,0.95) 0%, transparent 100%),
-      radial-gradient(2.5px 2.5px at 82% 48%, rgba(255,255,255,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 4%  36%, rgba(232,121,249,0.85) 0%, transparent 100%);
+      radial-gradient(3px 3px at 8% 12%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(4px 4px at 28% 22%, #f472b6 0%, rgba(244,114,182,0) 100%),
+      radial-gradient(3.5px 3.5px at 52% 8%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(4px 4px at 74% 18%, #c084fc 0%, rgba(192,132,252,0) 100%),
+      radial-gradient(3px 3px at 92% 14%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(3.5px 3.5px at 18% 45%, #e879f9 0%, rgba(232,121,249,0) 100%),
+      radial-gradient(4px 4px at 64% 38%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(3px 3px at 84% 52%, #a855f7 0%, rgba(168,85,247,0) 100%);
   }
 
   .wope-stars-2 {
     position: absolute;
     inset: 0;
-    animation: twinkle-b 3.2s ease-in-out infinite;
-    animation-delay: 1.2s;
+    animation: star-pulse-2 3.1s ease-in-out infinite;
+    animation-delay: 0.8s;
     background-image:
-      radial-gradient(2.5px 2.5px at 25% 8%, rgba(255,255,255,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 50% 16%, rgba(192,132,252,0.95) 0%, transparent 100%),
-      radial-gradient(2.5px 2.5px at 78% 8%, rgba(255,255,255,0.95) 0%, transparent 100%),
-      radial-gradient(2px 2px at 15% 28%, rgba(232,121,249,0.9) 0%, transparent 100%),
-      radial-gradient(2.5px 2.5px at 44% 48%, rgba(255,255,255,1) 0%, transparent 100%),
-      radial-gradient(2px 2px at 94% 28%, rgba(216,180,254,0.9) 0%, transparent 100%),
-      radial-gradient(2px 2px at 32% 60%, rgba(255,255,255,0.85) 0%, transparent 100%);
+      radial-gradient(3.5px 3.5px at 15% 6%, #e0e7ff 0%, rgba(224,231,255,0) 100%),
+      radial-gradient(4.5px 4.5px at 35% 32%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(3px 3px at 62% 12%, #c084fc 0%, rgba(192,132,252,0) 100%),
+      radial-gradient(4px 4px at 82% 28%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(3px 3px at 42% 56%, #f472b6 0%, rgba(244,114,182,0) 100%),
+      radial-gradient(3.5px 3.5px at 95% 42%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(3px 3px at 5% 58%, #818cf8 0%, rgba(129,140,248,0) 100%);
   }
+
+  .wope-stars-3 {
+    position: absolute;
+    inset: 0;
+    animation: star-pulse-3 2.7s ease-in-out infinite;
+    animation-delay: 1.5s;
+    background-image:
+      radial-gradient(4px 4px at 22% 16%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(3px 3px at 45% 24%, #e879f9 0%, rgba(232,121,249,0) 100%),
+      radial-gradient(4px 4px at 79% 36%, #38bdf8 0%, rgba(56,189,248,0) 100%),
+      radial-gradient(3.5px 3.5px at 89% 8%, #ffffff 0%, rgba(255,255,255,0) 100%),
+      radial-gradient(3px 3px at 12% 52%, #a855f7 0%, rgba(168,85,247,0) 100%),
+      radial-gradient(4px 4px at 70% 50%, #ffffff 0%, rgba(255,255,255,0) 100%);
+  }
+
 
 
   /* Purple horizon glow */
@@ -202,7 +221,6 @@
     document.querySelectorAll('.faq-trigger').forEach(btn => {
       btn.addEventListener('click', () => {
         const expanded = btn.getAttribute('aria-expanded') === 'true';
-        // close all
         document.querySelectorAll('.faq-trigger').forEach(b => {
           b.setAttribute('aria-expanded', 'false');
           b.nextElementSibling.classList.remove('open');
@@ -213,9 +231,42 @@
         }
       });
     });
-    // Open first by default
     const first = document.querySelector('.faq-trigger');
     if (first) { first.setAttribute('aria-expanded','true'); first.nextElementSibling.classList.add('open'); }
+
+    /* --- Typewriter Effect --- */
+    const phrases = ["Создай свою комнату", "Общайся с друзьями", "Выполняй достижения"];
+    let phraseIdx = 0;
+    let charIdx = phrases[0].length;
+    let isDeleting = false;
+    const typedEl = document.getElementById('typed-text');
+
+    if (typedEl) {
+      function typeLoop() {
+        const currentPhrase = phrases[phraseIdx];
+        if (isDeleting) {
+          typedEl.textContent = currentPhrase.substring(0, charIdx - 1);
+          charIdx--;
+        } else {
+          typedEl.textContent = currentPhrase.substring(0, charIdx + 1);
+          charIdx++;
+        }
+
+        let delay = isDeleting ? 40 : 90;
+
+        if (!isDeleting && charIdx === currentPhrase.length) {
+          delay = 1800; // Pause at end of phrase
+          isDeleting = true;
+        } else if (isDeleting && charIdx === 0) {
+          isDeleting = false;
+          phraseIdx = (phraseIdx + 1) % phrases.length;
+          delay = 400; // Pause before typing new phrase
+        }
+
+        setTimeout(typeLoop, delay);
+      }
+      setTimeout(typeLoop, 1800);
+    }
 
   });
 </script>
@@ -230,9 +281,10 @@
   <!-- Purple synthwave horizon glow 2 -->
   <div class="anim-orb-2 absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,_rgba(168,85,247,0.45)_0%,_rgba(126,34,206,0.25)_35%,_rgba(76,29,149,0.1)_70%,_transparent_100%)]"></div>
 
-  <!-- Twinkling Stars (Multi-layered) -->
+  <!-- Twinkling Stars (Multi-layered 3D) -->
   <div class="wope-stars-1"></div>
   <div class="wope-stars-2"></div>
+  <div class="wope-stars-3"></div>
 
   <!-- Perspective SVG grid horizon -->
   <div class="wope-grid">
@@ -281,8 +333,8 @@
 
     <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1">
 
-        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1]">
-            Создай свою комнату <br>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center">
+            <span id="typed-text">Создай свою комнату</span><span class="animate-pulse text-indigo-400 font-light ml-0.5">|</span>
         </h1>
 
         <p class="mt-4 text-base sm:text-lg leading-7 sm:leading-8 text-slate-400 max-w-xl px-2 sm:px-0">
