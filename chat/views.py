@@ -525,14 +525,27 @@ def landing(request):
     total_messages = 0
     total_rooms = 0
     featured_rooms = []
+    all_rooms = []
     try:
         active_rooms = Room.objects.filter(messages__isnull=False).distinct().count()
         registered_users = User.objects.count()
         total_messages = Message.objects.count()
         total_rooms = Room.objects.count()
-        featured_rooms = Room.objects.annotate(msg_count=Count('messages')).filter(is_private=False).order_by('-msg_count')[:3]
+        featured_rooms = Room.objects.annotate(msg_count=Count('messages')).filter(is_private=False).order_by('-msg_count')[:6]
+        all_rooms_qs = Room.objects.annotate(msg_count=Count('messages')).filter(is_private=False).order_by('-msg_count')
+        import json as _json
+        all_rooms = _json.dumps([
+            {
+                'id': r.id,
+                'name': r.name,
+                'slug': r.slug,
+                'msg_count': r.msg_count,
+                'category': r.get_category_display() if hasattr(r, 'get_category_display') else '',
+            }
+            for r in all_rooms_qs
+        ])
     except Exception:
-        pass
+        all_rooms = '[]'
 
     context = {
         'active_rooms': active_rooms,
@@ -540,6 +553,7 @@ def landing(request):
         'total_messages': total_messages,
         'total_rooms': total_rooms,
         'featured_rooms': featured_rooms,
+        'all_rooms_json': all_rooms,
     }
     return render(request, 'chat/landing.html', context)
 
