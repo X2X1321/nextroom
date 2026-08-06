@@ -15,18 +15,133 @@
   .card-lift { transition: transform .25s ease, box-shadow .25s ease; }
   .card-lift:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(99,102,241,.18); }
 
-  /* Floating animated gradient orb (behind hero) */
+  /* ===== WOPE-STYLE BACKGROUND ===== */
   @keyframes orb-drift {
     0%, 100% { transform: translate(0, 0) scale(1); }
     33%       { transform: translate(30px, -20px) scale(1.05); }
     66%       { transform: translate(-20px, 10px) scale(.97); }
   }
-  .anim-orb { animation: orb-drift 9s ease-in-out infinite; }
+  .anim-orb   { animation: orb-drift 9s ease-in-out infinite; }
   .anim-orb-2 { animation: orb-drift 12s ease-in-out infinite reverse; animation-delay: 3s; }
 
-  /* Stat counter glow on reveal */
+  /* Wope synthwave background */
+  .wope-bg {
+    position: fixed;
+    inset: 0;
+    z-index: -20;
+    background: #080714;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  /* Stars layer */
+  .wope-stars {
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,.55) 0%, transparent 100%),
+      radial-gradient(1px 1px at 25% 8%,  rgba(255,255,255,.35) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 40% 20%, rgba(255,255,255,.45) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 5%,  rgba(255,255,255,.3)  0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 18%, rgba(255,255,255,.5)  0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 80% 10%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,.35) 0%, transparent 100%),
+      radial-gradient(1px 1px at 15% 35%, rgba(255,255,255,.3)  0%, transparent 100%),
+      radial-gradient(1px 1px at 35% 45%, rgba(255,255,255,.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 60% 38%, rgba(255,255,255,.3)  0%, transparent 100%),
+      radial-gradient(1px 1px at 75% 30%, rgba(255,255,255,.2)  0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 42%, rgba(255,255,255,.25) 0%, transparent 100%),
+      radial-gradient(1px 1px at 5%  50%, rgba(255,255,255,.2)  0%, transparent 100%),
+      radial-gradient(1px 1px at 45% 55%, rgba(255,255,255,.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 92% 12%, rgba(180,180,255,.4)  0%, transparent 100%),
+      radial-gradient(1px 1px at 3%  28%, rgba(180,180,255,.35) 0%, transparent 100%);
+  }
+
+  /* Purple horizon glow */
+  .wope-glow {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    height: 55%;
+    background: radial-gradient(ellipse 85% 55% at 50% 100%,
+      rgba(120, 60, 220, .55) 0%,
+      rgba(80, 30, 160, .3)  30%,
+      rgba(50, 10, 100, .12) 55%,
+      transparent 75%
+    );
+    animation: orb-drift 14s ease-in-out infinite;
+  }
+
+  /* Perspective grid */
+  .wope-grid {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56%;
+    overflow: hidden;
+  }
+  .wope-grid svg {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Top vignette */
+  .wope-vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 120% 60% at 50% 0%, rgba(8,7,20,.0) 0%, rgba(8,7,20,.85) 80%);
+  }
+
+  /* Thin top gradient line */
+  .wope-scanline {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(140,100,255,.5) 30%, rgba(180,120,255,.8) 50%, rgba(140,100,255,.5) 70%, transparent 100%);
+  }
+
+  /* Stat counter glow */
   .stat-value { transition: text-shadow .4s ease; }
   .stat-value.visible { text-shadow: 0 0 28px rgba(129,140,248,.45); }
+
+  /* ===== FAQ ACCORDION ===== */
+  .faq-item { border-bottom: 1px solid rgba(51,65,85,.5); }
+  .faq-trigger {
+    width: 100%; display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem 0; cursor: pointer; background: none; border: none; text-align: left;
+    color: #f1f5f9; font-size: .9rem; font-weight: 600;
+    transition: color .2s ease;
+  }
+  .faq-trigger:hover { color: #a5b4fc; }
+  .faq-icon {
+    flex-shrink: 0; width: 20px; height: 20px;
+    border: 1.5px solid rgba(99,102,241,.5); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .3s ease, border-color .2s ease, background .2s ease;
+  }
+  .faq-trigger[aria-expanded="true"] .faq-icon {
+    transform: rotate(45deg);
+    background: rgba(99,102,241,.15);
+    border-color: rgba(99,102,241,.8);
+  }
+  .faq-body {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height .35s cubic-bezier(.16,1,.3,1), padding .3s ease;
+  }
+  .faq-body.open { max-height: 600px; }
+  .faq-body-inner { padding-bottom: 1rem; color: #94a3b8; font-size: .85rem; line-height: 1.7; }
+  .faq-body-inner ol { list-style: decimal; padding-left: 1.25rem; margin-top: .5rem; }
+  .faq-body-inner ol li { margin-bottom: .35rem; }
+  .faq-body-inner code {
+    background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.25);
+    border-radius: 4px; padding: 1px 6px; font-family: monospace; color: #a5b4fc; font-size: .82rem;
+  }
 </style>
 {% endblock %}
 
@@ -64,21 +179,71 @@
     }, { threshold: 0.5 });
     document.querySelectorAll('.stat-value').forEach(el => counterObs.observe(el));
 
+    /* --- FAQ Accordion --- */
+    document.querySelectorAll('.faq-trigger').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const expanded = btn.getAttribute('aria-expanded') === 'true';
+        // close all
+        document.querySelectorAll('.faq-trigger').forEach(b => {
+          b.setAttribute('aria-expanded', 'false');
+          b.nextElementSibling.classList.remove('open');
+        });
+        if (!expanded) {
+          btn.setAttribute('aria-expanded', 'true');
+          btn.nextElementSibling.classList.add('open');
+        }
+      });
+    });
+    // Open first by default
+    const first = document.querySelector('.faq-trigger');
+    if (first) { first.setAttribute('aria-expanded','true'); first.nextElementSibling.classList.add('open'); }
+
   });
 </script>
 {% endblock %}
 
 {% block content %}
-<div
-    class="relative isolate overflow-hidden flex flex-col justify-center items-center py-20 px-6 sm:py-32 lg:px-8 flex-grow">
-    <!-- Animated gradient orbs -->
-    <div class="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80" aria-hidden="true">
-        <div class="anim-orb relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-10 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]">
-        </div>
-    </div>
-    <div class="absolute inset-x-0 bottom-0 -z-10 overflow-hidden blur-3xl" aria-hidden="true">
-        <div class="anim-orb-2 relative left-[60%] aspect-[1155/678] w-[30rem] rotate-[-20deg] bg-gradient-to-tr from-[#6366f1] to-[#a78bfa] opacity-[.07]"></div>
-    </div>
+<!-- ===== WOPE-STYLE BACKGROUND ===== -->
+<div class="wope-bg" aria-hidden="true">
+  <div class="wope-stars"></div>
+  <div class="wope-glow"></div>
+  <!-- Perspective grid SVG -->
+  <div class="wope-grid">
+    <svg viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Horizontal lines (perspective) -->
+      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(120,60,220,.22)" stroke-width="1"/>
+      <line x1="108" y1="340" x2="1332" y2="340" stroke="rgba(120,60,220,.18)" stroke-width=".8"/>
+      <line x1="216" y1="270" x2="1224" y2="270" stroke="rgba(120,60,220,.15)" stroke-width=".7"/>
+      <line x1="310" y1="210" x2="1130" y2="210" stroke="rgba(120,60,220,.12)" stroke-width=".6"/>
+      <line x1="390" y1="158" x2="1050" y2="158" stroke="rgba(120,60,220,.09)" stroke-width=".5"/>
+      <line x1="456" y1="112" x2="984" y2="112"  stroke="rgba(120,60,220,.07)" stroke-width=".4"/>
+      <line x1="510" y1="72"  x2="930" y2="72"   stroke="rgba(120,60,220,.05)" stroke-width=".35"/>
+      <line x1="552" y1="38"  x2="888" y2="38"   stroke="rgba(120,60,220,.04)" stroke-width=".3"/>
+      <line x1="584" y1="10"  x2="856" y2="10"   stroke="rgba(120,60,220,.03)" stroke-width=".25"/>
+      <!-- Vertical converging lines -->
+      <line x1="720" y1="0" x2="0"   y2="420" stroke="rgba(140,80,240,.2)" stroke-width=".7"/>
+      <line x1="720" y1="0" x2="180" y2="420" stroke="rgba(140,80,240,.17)" stroke-width=".6"/>
+      <line x1="720" y1="0" x2="360" y2="420" stroke="rgba(140,80,240,.14)" stroke-width=".55"/>
+      <line x1="720" y1="0" x2="540" y2="420" stroke="rgba(140,80,240,.12)" stroke-width=".5"/>
+      <line x1="720" y1="0" x2="720" y2="420" stroke="rgba(160,100,255,.25)" stroke-width=".8"/>
+      <line x1="720" y1="0" x2="900" y2="420" stroke="rgba(140,80,240,.12)" stroke-width=".5"/>
+      <line x1="720" y1="0" x2="1080" y2="420" stroke="rgba(140,80,240,.14)" stroke-width=".55"/>
+      <line x1="720" y1="0" x2="1260" y2="420" stroke="rgba(140,80,240,.17)" stroke-width=".6"/>
+      <line x1="720" y1="0" x2="1440" y2="420" stroke="rgba(140,80,240,.2)" stroke-width=".7"/>
+      <!-- Horizon glow line -->
+      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(180,100,255,.6)" stroke-width="1.5"/>
+      <!-- Glow filter -->
+      <defs>
+        <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(200,120,255,.9)" stroke-width="2" filter="url(#glow)"/>
+    </svg>
+  </div>
+  <div class="wope-scanline"></div>
+  <div class="wope-vignette"></div>
+</div>
+
+<div class="relative isolate overflow-hidden flex flex-col justify-center items-center py-20 px-6 sm:py-32 lg:px-8 flex-grow">
 
     <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1">
 
@@ -156,8 +321,114 @@
             </p>
         </div>
 
-        <!-- How It Works Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+        <!-- How It Works Grid → replaced by FAQ accordion -->
+        <!-- Featured Rooms moved to here (position swap) -->
+        <div class="mb-12 sr sr-delay-2">
+            <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white text-center mb-6 sm:mb-8">Популярные открытые комнаты</h2>
+            <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {% for room in featured_rooms %}
+                <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel hover:border-indigo-500/30 transition group">
+                    <div>
+                        <div class="flex justify-between items-start mb-4">
+                            <span class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20 capitalize">{{ room.get_category_display }}</span>
+                            <span class="text-xs text-slate-500 flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/></svg>
+                                {{ room.msg_count }}
+                            </span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 transition">{{ room.name }}</h3>
+                        <p class="mt-2 text-sm text-slate-400 line-clamp-2">{% if room.description %}{{ room.description }}{% else %}Без описания.{% endif %}</p>
+                    </div>
+                    <div class="mt-6">
+                        <a href="{% url 'login' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-indigo-500/20 py-2 text-xs font-semibold text-slate-300 group-hover:text-white transition">Войти и присоединиться</a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel border-rose-500/20 border"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-rose-400/10 px-2 py-1 text-xs font-semibold text-rose-400 ring-1 ring-inset ring-rose-400/20">Игры</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>Рекомендованное</span></div><h3 class="text-lg font-bold text-white">Мир Minecraft &amp; CS2</h3><p class="mt-2 text-sm text-slate-400">Совместные игры, поиск напарников и обсуждение любимых серверов.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
+                <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20">Общение</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>Популярное</span></div><h3 class="text-lg font-bold text-white">Знакомства и общение</h3><p class="mt-2 text-sm text-slate-400">Найди новых друзей, общайся на любые темы и делись хорошим настроением.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
+                <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">Фильмы</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>Активное</span></div><h3 class="text-lg font-bold text-white">Клуб киноманов</h3><p class="mt-2 text-sm text-slate-400">Обсуждаем новинки кино, делимся рецензиями и советуем лучшие сериалы.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- FAQ Accordion (replaces the two how-to cards) -->
+        <div class="mb-12 sr sr-delay-1">
+            <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-6">Частые вопросы</h3>
+            <div class="mx-auto max-w-2xl glass-panel rounded-3xl border border-slate-800 px-6 sm:px-8 py-2">
+
+                <!-- FAQ 1 -->
+                <div class="faq-item">
+                    <button class="faq-trigger" aria-expanded="false">
+                        <span>Как настроить API-интеграцию?</span>
+                        <span class="faq-icon">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
+                        </span>
+                    </button>
+                    <div class="faq-body">
+                        <div class="faq-body-inner">
+                            <p>Подключение занимает пару минут:</p>
+                            <ol>
+                                <li>Перейдите в <strong>Личный кабинет</strong> и откройте вкладку управления нейросетями.</li>
+                                <li>Выберите нужного AI-провайдера и укажите ваш личный <strong>API-ключ</strong>.</li>
+                                <li>В настройках любой созданной вами комнаты отметьте галочками модели, которые вы хотите сделать доступными для участников.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="faq-item">
+                    <button class="faq-trigger" aria-expanded="false">
+                        <span>Как общаться с нейросетью в чате?</span>
+                        <span class="faq-icon">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
+                        </span>
+                    </button>
+                    <div class="faq-body">
+                        <div class="faq-body-inner">
+                            <p>После того как владелец комнаты подключил нейросеть, любой участник чата может обратиться к ней напрямую:</p>
+                            <ol>
+                                <li>Начните сообщение с упоминания модели через <strong>@</strong> (например, <code>@gpt</code> или <code>@deepseek</code>).</li>
+                                <li>Введите ваш вопрос или задачу после упоминания (например: <em>«@gpt какая сегодня погода»</em>).</li>
+                                <li>Нейросеть мгновенно обработает ваш запрос и отправит ответ прямо в общий диалог комнаты.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="faq-item">
+                    <button class="faq-trigger" aria-expanded="false">
+                        <span>Можно ли использовать NextRoom без регистрации?</span>
+                        <span class="faq-icon">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
+                        </span>
+                    </button>
+                    <div class="faq-body">
+                        <div class="faq-body-inner">
+                            <p>Да. Вы можете зайти в гостевом режиме и сразу присоединиться к открытым комнатам. Регистрация нужна только для создания собственных комнат, подключения AI-интеграций и сохранения истории.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="faq-item" style="border-bottom:none">
+                    <button class="faq-trigger" aria-expanded="false">
+                        <span>Какие нейросети поддерживаются?</span>
+                        <span class="faq-icon">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
+                        </span>
+                    </button>
+                    <div class="faq-body">
+                        <div class="faq-body-inner">
+                            <p>В настоящее время поддерживаются: <code>@gpt</code> (ChatGPT), <code>@claude</code> (Anthropic), <code>@deepseek</code>, <code>@grok</code> (xAI), <code>@qwen</code> (Alibaba), <code>@groq</code>, <code>@cerebras</code>, <code>@openrouter</code>. Список постоянно пополняется.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
             <!-- Left Card: How to use API -->
             <div class="card-lift glass-panel p-6 sm:p-8 rounded-3xl premium-card flex flex-col justify-between">
                 <div>
@@ -467,188 +738,5 @@
         </div>
     </div>
 
-    <!-- Featured Rooms Section -->
-    <div class="mx-auto mt-16 sm:mt-20 max-w-5xl px-4 sm:px-6 lg:px-8 w-full sr sr-delay-2">
-        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white text-center mb-6 sm:mb-8">Популярные открытые
-            комнаты</h2>
-        <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {% for room in featured_rooms %}
-            <div
-                class="flex flex-col justify-between p-6 rounded-2xl glass-panel hover:border-indigo-500/30 transition group">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span
-                            class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20 capitalize">
-                            {{ room.get_category_display }}
-                        </span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
-                            </svg>
-                            {{ room.msg_count }}
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 transition">{{ room.name }}</h3>
-                    <p class="mt-2 text-sm text-slate-400 line-clamp-2">
-                        {% if room.description %}{{ room.description }}{% else %}Без описания.{% endif %}
-                    </p>
-                </div>
-                <div class="mt-6">
-                    <a href="{% url 'login' %}"
-                        class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-indigo-500/20 py-2 text-xs font-semibold text-slate-300 group-hover:text-white transition">
-                        Войти и присоединиться
-                    </a>
-                </div>
-            </div>
-            {% empty %}
-            <!-- Mock Rooms for placeholder visualization if DB is empty -->
-            <div
-                class="flex flex-col justify-between p-6 rounded-2xl glass-panel border-indigo-500/20 border premium-card">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span
-                            class="inline-flex items-center rounded-md bg-rose-400/10 px-2 py-1 text-xs font-semibold text-rose-400 ring-1 ring-inset ring-rose-400/20">
-                            Игры
-                        </span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
-                            Рекомендованное
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Мир Minecraft & CS2</h3>
-                    <p class="mt-2 text-sm text-slate-400">
-                        Совместные игры, поиск напарников и обсуждение любимых серверов.
-                    </p>
-                </div>
-                <div class="mt-6">
-                    <a href="{% url 'register' %}"
-                        class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">
-                        Создать аккаунт
-                    </a>
-                </div>
-            </div>
-            <div class="flex flex-col justify-between p-6 rounded-2xl glass-panel premium-card">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span
-                            class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20">
-                            Общение
-                        </span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
-                            Популярное
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Знакомства и общение</h3>
-                    <p class="mt-2 text-sm text-slate-400">
-                        Найди новых друзей, общайся на любые темы и делись хорошим настроением.
-                    </p>
-                </div>
-                <div class="mt-6">
-                    <a href="{% url 'register' %}"
-                        class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">
-                        Создать аккаунт
-                    </a>
-                </div>
-            </div>
-            <div class="flex flex-col justify-between p-6 rounded-2xl glass-panel premium-card">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span
-                            class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">
-                            Фильмы
-                        </span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Активное
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Клуб киноманов</h3>
-                    <p class="mt-2 text-sm text-slate-400">
-                        Обсуждаем новинки кино, делимся рецензиями и советуем лучшие сериалы.
-                    </p>
-                </div>
-                <div class="mt-6">
-                    <a href="{% url 'register' %}"
-                        class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">
-                        Создать аккаунт
-                    </a>
-                </div>
-            </div>
-            <div class="flex flex-col justify-between p-6 rounded-2xl glass-panel premium-card">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span
-                            class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">
-                            Фильмы
-                        </span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Активное
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Путешествия</h3>
-                    <p class="mt-2 text-sm text-slate-400">
-                        Делимся впечатлениями о поездках, советами по маршрутам и фотографиями.
-                    </p>
-                </div>
-                <div class="mt-6">
-                    <a href="{% url 'register' %}"
-                        class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">
-                        Создать аккаунт
-                    </a>
-                </div>
-            </div>
-            <div class="flex flex-col justify-between p-6 rounded-2xl glass-panel premium-card">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span
-                            class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">
-                            Общение
-                        </span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Активное
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Качалка</h3>
-                    <p class="mt-2 text-sm text-slate-400">
-                        Обсуждаем тренировки, делимся достижениями и мотивируем друг друга.
-                    </p>
-                </div>
-                <div class="mt-6">
-                    <a href="{% url 'register' %}"
-                        class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">
-                        Создать аккаунт
-                    </a>
-                </div>
-            </div>
-            <div class="flex flex-col justify-between p-6 rounded-2xl glass-panel premium-card">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span
-                            class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">
-                            Общение
-                        </span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Активное
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white">Литературный клуб</h3>
-                    <p class="mt-2 text-sm text-slate-400">
-                        Обсуждаем книги, делимся рецензиями и советуем лучшие произведения.
-                    </p>
-                </div>
-                <div class="mt-6">
-                    <a href="{% url 'register' %}"
-                        class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">
-                        Создать аккаунт
-                    </a>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
 </div>
 {% endblock %}
