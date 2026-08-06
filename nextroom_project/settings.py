@@ -90,7 +90,7 @@ DATABASES = {
 }
 
 
-DATABASE_URL = os.environ.get('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL') or os.environ.get('DATABASE_URL_UNPOOLED') or os.environ.get('DATABASE_URL_DATABASE_URL')
 if DATABASE_URL:
     url = urllib.parse.urlparse(DATABASE_URL)
     DATABASES['default'] = {

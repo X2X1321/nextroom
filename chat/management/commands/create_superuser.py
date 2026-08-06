@@ -3,26 +3,31 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+import os
+
 class Command(BaseCommand):
-    help = 'Create a staff/admin user with username=admin and password=183564 if it does not already exist.'
+    help = 'Create a staff/admin user from environment variables if it does not already exist.'
 
     def handle(self, *args, **options):
-        if User.objects.filter(username='admin').exists():
-            user = User.objects.get(username='admin')
+        admin_username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
+        admin_password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '183564')
+
+        if User.objects.filter(username=admin_username).exists():
+            user = User.objects.get(username=admin_username)
             if not user.is_staff or not user.is_superuser:
                 user.is_staff = True
                 user.is_superuser = True
-                user.set_password('183564')
+                user.set_password(admin_password)
                 user.save()
-                self.stdout.write(self.style.SUCCESS('Updated existing admin user with staff/superuser flags and password 183564.'))
+                self.stdout.write(self.style.SUCCESS(f'Updated existing admin user with staff/superuser flags.'))
             else:
-                user.set_password('183564')
+                user.set_password(admin_password)
                 user.save()
-                self.stdout.write(self.style.WARNING('Admin already exists. Password reset to 183564.'))
+                self.stdout.write(self.style.WARNING(f'Admin already exists. Password reset.'))
             return
         user = User.objects.create_superuser(
-            username='admin',
-            email='admin@example.com',
-            password='183564',
+            username=admin_username,
+            email=f'{admin_username}@example.com',
+            password=admin_password,
         )
-        self.stdout.write(self.style.SUCCESS(f'Superuser created: {user.username} / 183564'))
+        self.stdout.write(self.style.SUCCESS(f'Superuser created: {user.username}'))
