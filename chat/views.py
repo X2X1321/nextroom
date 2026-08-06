@@ -1168,6 +1168,37 @@ def send_message(request, slug):
             guest_obj.save(update_fields=['messages_count', 'last_activity'])
     except Exception as exc:
         return JsonResponse({'error': f'Ошибка сохранения файла: {str(exc)}'}, status=400)
+        
+    from .models import MovieGame
+    active_game = MovieGame.objects.filter(room=room, is_active=True).first()
+    if active_game and content:
+        guess = content.strip().lower()
+        answer = active_game.movie_name.strip().lower()
+        bot_user = get_ai_bot_user()
+        
+        if answer in guess or guess == answer:
+            active_game.is_active = False
+            active_game.save()
+            winner_name = user_obj.username if user_obj else guest_obj.guest_name
+            bot_msg = f"🏆 Победитель: @{winner_name}\nФильм: {active_game.movie_name}"
+            Message.objects.create(room=room, user=bot_user, content=bot_msg, message_type='text')
+        else:
+            active_game.attempts_since_last_hint += 1
+            active_game.total_attempts += 1
+            
+            if active_game.attempts_since_last_hint >= 10:
+                active_game.attempts_since_last_hint = 0
+                active_game.current_hint_index += 1
+                
+                if active_game.current_hint_index < len(active_game.hints):
+                    hint = active_game.hints[active_game.current_hint_index]
+                    bot_msg = f"Подсказка №{active_game.current_hint_index + 1}:\n{hint}"
+                    Message.objects.create(room=room, user=bot_user, content=bot_msg, message_type='text')
+                else:
+                    active_game.is_active = False
+                    bot_msg = f"Игра окончена, никто не угадал.\nЭто был фильм: {active_game.movie_name}"
+                    Message.objects.create(room=room, user=bot_user, content=bot_msg, message_type='text')
+            active_game.save()
     
     response_data = {
         'status': 'success',
@@ -1781,6 +1812,57 @@ def ai_usage_chart(request):
     })
 
 
+import random
+
+MOVIE_DB = [
+    {"title": "Назад в будущее", "hints": ["Главный герой путешествует во времени.", "Машина времени сделана из DeLorean.", "Док Браун - безумный ученый."]},
+    {"title": "Матрица", "hints": ["Главный герой выбирает между красной и синей таблеткой.", "Мир вокруг - иллюзия.", "Главного героя зовут Нео."]},
+    {"title": "Терминатор 2", "hints": ["Киборг из будущего защищает подростка.", "Враг состоит из жидкого металла.", "Фраза 'I'll be back'."]},
+    {"title": "Титаник", "hints": ["Трагическая история любви на корабле.", "Корабль сталкивается с айсбергом.", "Главные герои - Джек и Роза."]},
+    {"title": "Начало", "hints": ["Герои проникают в сны других людей.", "Главного героя играет Леонардо ДиКаприо.", "Тотем - крутящийся волчок."]},
+    {"title": "Интерстеллар", "hints": ["Команда отправляется в космос искать новый дом для человечества.", "Сильное влияние гравитации на время.", "Черная дыра Гаргантюа."]},
+    {"title": "Крестный отец", "hints": ["Фильм о мафиозной семье Корлеоне.", "Глава семьи - дон Вито.", "Фраза: 'Я сделаю ему предложение, от которого он не сможет отказаться'."]},
+    {"title": "Гарри Поттер", "hints": ["Мальчик, который выжил.", "Учится в школе магии Хогвартс.", "Главный злодей - Волан-де-Морт."]},
+    {"title": "Властелин колец", "hints": ["Братство отправляется уничтожить Кольцо Всевластья.", "Главный герой - хоббит Фродо.", "Маг Гэндальф Серый."]},
+    {"title": "Темный рыцарь", "hints": ["Супергерой в костюме летучей мыши.", "Главный антагонист - Джокер.", "Действие происходит в Готэме."]},
+    {"title": "Форрест Гамп", "hints": ["Жизнь как коробка шоколадных конфет.", "Главный герой случайно участвует в важнейших событиях истории США.", "Крик: 'Беги, Форрест, беги!'"]},
+    {"title": "Аватар", "hints": ["Действие происходит на планете Пандора.", "Местные жители - синие гуманоиды На'ви.", "Герой управляет искусственным телом."]},
+    {"title": "Бойцовский клуб", "hints": ["Первое правило - никому не рассказывать.", "Главный герой страдает бессонницей.", "Его альтер-эго - Тайлер Дерден."]},
+    {"title": "Пятый элемент", "hints": ["Действие в далеком будущем.", "Герой Брюса Уиллиса - таксист Корбен Даллас.", "Совершенное существо - Лилу."]},
+    {"title": "Криминальное чтиво", "hints": ["Фильм Квентина Тарантино с несколькими сюжетными линиями.", "Танец Джона Траволты и Умы Турман.", "Знаменитый диалог о бургерах."]}
+]
+
+def start_movie_game(request, slug):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    room = get_object_or_404(Room, slug=slug)
+    
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Вы не можете участвовать в игре так как вы не зарегистрированы'}, status=403)
+        
+    # Check if a game is already active
+    from .models import MovieGame
+    active_game = MovieGame.objects.filter(room=room, is_active=True).first()
+    if active_game:
+        return JsonResponse({'error': 'Игра уже запущена! Угадайте текущий фильм.'}, status=400)
+        
+    movie_data = random.choice(MOVIE_DB)
+    game = MovieGame.objects.create(
+        room=room,
+        started_by=request.user,
+        movie_name=movie_data['title'],
+        hints=movie_data['hints']
+    )
+    
+    # Send the first message from AI
+    bot_user = get_ai_bot_user()
+    first_hint = game.hints[0]
+    bot_message = f"Я загадал фильм.\n\nПодсказка №1:\n{first_hint}\n\nУ вас есть 10 попыток."
+    
+    Message.objects.create(room=room, user=bot_user, content=bot_message, message_type='text')
+    
+    return JsonResponse({'status': 'success', 'message': 'Игра началась!'})
 def sitemap(request):
     from django.urls import reverse
     

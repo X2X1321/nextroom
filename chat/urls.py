@@ -14,6 +14,7 @@ urlpatterns = [
     path('room/<slug:slug>/ai-integrations/', views.manage_room_ai_integrations, name='manage_room_ai_integrations'),
     path('room/<slug:slug>/messages/', views.get_messages, name='get_messages'),
     path('room/<slug:slug>/send/', views.send_message, name='send_message'),
+    path('room/<slug:slug>/start_game/', views.start_movie_game, name='start_movie_game'),
     path('profile/', views.profile, name='profile'),
     path('profile/add-integration/', views.add_ai_integration, name='add_ai_integration'),
     path('profile/subscribe/', views.create_yookassa_subscription, name='create_yookassa_subscription'),

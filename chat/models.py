@@ -403,3 +403,22 @@ def _calculate_streak(user):
         else:
             break
     return streak
+
+
+class MovieGame(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name='movie_games')
+    started_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_active = models.BooleanField(default=True)
+    movie_name = models.CharField(max_length=255)
+    hints = JSONField(default=list)
+    current_hint_index = models.IntegerField(default=0)
+    attempts_since_last_hint = models.IntegerField(default=0)
+    total_attempts = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Game in {self.room.name}: {self.movie_name} ({'Active' if self.is_active else 'Finished'})"
+
