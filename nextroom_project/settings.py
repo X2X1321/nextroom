@@ -190,6 +190,6 @@ GROQ_API_URL = os.environ.get('GROQ_API_URL', 'https://api.groq.com/openai/v1')
 CEREBRAS_API_KEY = os.environ.get('CEREBRAS_API_KEY', '')
 
 # Yookassa payment gateway settings
-YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID', '1293287')
-YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY', 'live_LUlJpXlfNoNruDN9BVI2V0ixagw3sce7FAX4d3dcSIE')
+YOOKASSA_SHOP_ID = os.environ.get('YOOKASSA_SHOP_ID')
+YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
 
