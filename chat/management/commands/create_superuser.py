@@ -9,8 +9,12 @@ class Command(BaseCommand):
     help = 'Create a staff/admin user from environment variables if it does not already exist.'
 
     def handle(self, *args, **options):
-        admin_username = os.environ.get('DJANGO_SUPERUSER_USERNAME', 'admin')
-        admin_password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '183564')
+        admin_username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+        admin_password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+
+        if not admin_username or not admin_password:
+            self.stdout.write(self.style.WARNING('DJANGO_SUPERUSER_USERNAME or DJANGO_SUPERUSER_PASSWORD not set in environment. Skipping superuser creation.'))
+            return
 
         if User.objects.filter(username=admin_username).exists():
             user = User.objects.get(username=admin_username)
