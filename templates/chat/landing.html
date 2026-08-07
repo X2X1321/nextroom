@@ -170,7 +170,7 @@
   .faq-body {
     overflow: hidden;
     max-height: 0;
-    transition: max-height .35s cubic-bezier(.16,1,.3,1), padding .3s ease;
+    transition: all .45s ease-in-out;
   }
   .faq-body.open { max-height: 600px; }
   .faq-body-inner { padding-bottom: 1rem; color: #94a3b8; font-size: .85rem; line-height: 1.7; }
@@ -356,7 +356,7 @@
 <!-- Main Page Wrapper -->
 <div class="relative z-10 flex flex-col justify-center items-center py-16 px-4 sm:py-24 lg:px-8 flex-grow w-full">
 
-    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1">
+    <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1 w-full">
 
         <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center" style="font-family: 'Tektur', sans-serif; font-optical-sizing: auto; font-variation-settings: 'wdth' 100;">
             <span id="typed-text">Создай свою комнату</span><span class="animate-pulse text-indigo-400 font-light ml-0.5">|</span>
@@ -660,13 +660,18 @@
     </div>
 
     <!-- 3D Galaxy Graph of all rooms (bottom) -->
-    <div class="w-full mt-10 mb-8 sr sr-delay-2 lg:hidden">
-        <div class="text-center relative z-10 pointer-events-none">
-            <p class="text-slate-400 text-sm">Граф всех комнат, доступных в NextRoom.</p>
-        </div>
-        <div class="relative overflow-hidden -mt-16" style="height: 520px; background: transparent;">
-            <div id="room-graph" style="width:100%;height:100%;"></div>
-            <div id="graph-tooltip" class="absolute hidden px-3 py-2 rounded-xl text-xs font-semibold text-white pointer-events-none z-50" style="background: rgba(30,27,75,0.95); border: 1px solid rgba(139,92,246,0.4); backdrop-filter: blur(8px);"></div>
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 w-full mt-10 mb-12 sr sr-delay-2 lg:hidden">
+        <div class="glass-panel rounded-3xl border border-indigo-500/20 overflow-hidden relative premium-card">
+            <div class="p-5 sm:p-6 text-center border-b border-indigo-500/20 relative z-10 bg-slate-950/60 backdrop-blur-md">
+                <h3 class="text-xl font-bold text-white mb-2" style="font-family: 'Tektur', sans-serif;">Галактика Комнат</h3>
+                <p class="text-[13px] text-slate-300 leading-relaxed">
+                    Интерактивная 3D-карта платформы. Каждая точка — это активная комната. Вращайте и масштабируйте галактику жестами, чтобы исследовать пространства, и нажимайте на узлы для моментального присоединения к чату.
+                </p>
+            </div>
+            <div class="relative overflow-hidden bg-slate-950/20 flex justify-center items-center" style="height: 400px; width: 100%;">
+                <div id="room-graph" style="width:100%;height:100%;" class="cursor-grab active:cursor-grabbing"></div>
+                <div id="graph-tooltip" class="absolute hidden px-3 py-2 rounded-xl text-xs font-semibold text-white pointer-events-none z-50 shadow-xl" style="background: rgba(30,27,75,0.95); border: 1px solid rgba(139,92,246,0.4); backdrop-filter: blur(8px);"></div>
+            </div>
         </div>
     </div>
     <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
