@@ -51,7 +51,31 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@100..900&family=Tektur:wght@400..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bitcount+Prop+Single:wght@100..900&family=Rubik+Maze&family=Rubik+Scribble&family=Tektur:wght@400..900&display=swap" rel="stylesheet">
+    <style>
+        /* Tektur Cyrillic Only for body text */
+        @font-face {
+          font-family: 'TekturCyrillicOnly';
+          font-style: normal;
+          font-weight: 400 900;
+          font-stretch: 100%;
+          font-display: swap;
+          src: url(https://fonts.gstatic.com/s/tektur/v6/XoH62YHtS7q969kXCjzlV0aSkS_o8OacszacvGHE.woff2) format('woff2');
+          unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+        }
+        @font-face {
+          font-family: 'TekturCyrillicOnly';
+          font-style: normal;
+          font-weight: 400 900;
+          font-stretch: 100%;
+          font-display: swap;
+          src: url(https://fonts.gstatic.com/s/tektur/v6/XoH62YHtS7q969kXCjzlV0aSkS_o8Oacsz-cvGHE.woff2) format('woff2');
+          unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+        }
+        body {
+          font-family: 'TekturCyrillicOnly', 'Inter', sans-serif;
+        }
+    </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=copy_all,check,image,mic,download,add,emoji_emotions" />
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
