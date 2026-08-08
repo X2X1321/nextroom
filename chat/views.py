@@ -1539,75 +1539,101 @@ def image_generation_chat(request):
     return render(request, 'chat/image_generation_chat.html', {'profile': profile})
 
 
-def _generate_with_horde(prompt, timeout=10, target_model=None):
-    """AI Horde image generation. Returns base64 image data URI or raises."""
-    api_key = os.environ.get('HORDE_API_KEY', '0000000000')
+def _generate_with_horde(prompt, timeout=90, target_model=None):
+    """AI Horde image generation with manual fallback. Returns image URL/base64."""
+    api_key = os.environ.get('HORDE_API_KEY', 'qvsynPrtzjRYAgHemtIzkQ')
     base_url = os.environ.get('AI_HORDE_API_BASE_URL', 'https://aihorde.net/api/v2')
     
+    fallback_models = [
+        "stable_diffusion",
+        "AlbedoBase XL (SDXL)",
+        "WAI-NSFW-illustrious-SDXL",
+        "ICBINP - I Can't Believe It's Not Photography",
+        "CyberRealistic Pony",
+        "WAI-ANI-NSFW-PONYXL",
+        "Juggernaut XL",
+        "AlbedoBase XL 3.1",
+        "Prefect Pony",
+        "Flux.1-Schnell fp8 (Compact)",
+        "Nova Flat XL",
+        "Anything v5",
+        "Dreamshaper"
+    ]
+    
     if target_model:
-        models = [target_model]
+        models_to_try = [target_model]
     else:
-        models_str = os.environ.get('AI_HORDE_MODELS', 'Deliberate,Realistic Vision,Anything v5')
-        models = [m.strip() for m in models_str.split(',') if m.strip()]
-    sampler = os.environ.get('AI_HORDE_SAMPLER', 'k_dpmpp_2s_a')
+        models_to_try = fallback_models
+        
+    sampler = os.environ.get('AI_HORDE_SAMPLER', 'k_euler_a')
     cfg_scale = float(os.environ.get('AI_HORDE_CFG_SCALE', '7'))
     width = int(os.environ.get('AI_HORDE_WIDTH', '512'))
     height = int(os.environ.get('AI_HORDE_HEIGHT', '512'))
     steps = int(os.environ.get('AI_HORDE_STEPS', '20'))
 
-    headers = {
-        'apikey': api_key,
-        'Content-Type': 'application/json',
-        'Client-Agent': 'NextRoom:1.0:nextroom.vercel.app',
-    }
-    payload = json.dumps({
-        'prompt': prompt,
-        'params': {
-            'sampler_name': sampler,
-            'cfg_scale': cfg_scale,
-            'width': width,
-            'height': height,
-            'steps': steps,
-            'n': 1,
-        },
-        'models': models,
-        'nsfw': False,
-        'trusted_workers': False,
-        'slow_workers': True,
-        'r2': True,
-    }).encode('utf-8')
+    # Optimal timeout per model based on benchmark
+    MODEL_TIMEOUT = 25 
+    
+    for model in models_to_try:
+        headers = {
+            'apikey': api_key,
+            'Content-Type': 'application/json',
+            'Client-Agent': 'NextRoom:1.0:test',
+            'User-Agent': 'Mozilla/5.0',
+        }
+        payload = json.dumps({
+            'prompt': prompt,
+            'params': {
+                'sampler_name': sampler,
+                'cfg_scale': cfg_scale,
+                'width': width,
+                'height': height,
+                'steps': steps,
+                'n': 1,
+            },
+            'models': [model],
+            'nsfw': False,
+            'trusted_workers': False,
+            'slow_workers': True,
+            'r2': True,
+        }).encode('utf-8')
 
-    req = urllib.request.Request(f'{base_url}/generate/async', data=payload, method='POST')
-    for k, v in headers.items():
-        req.add_header(k, v)
+        try:
+            req = urllib.request.Request(f'{base_url}/generate/async', data=payload, method='POST')
+            for k, v in headers.items():
+                req.add_header(k, v)
+            
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                job = json.loads(resp.read().decode())
+            
+            job_id = job.get('id')
+            if not job_id:
+                continue
+                
+            start_time = time.time()
+            while time.time() - start_time < MODEL_TIMEOUT:
+                time.sleep(2.5)
+                check_url = f'{base_url}/generate/check/{job_id}'
+                req_check = urllib.request.Request(check_url, headers={'apikey': api_key, 'User-Agent': 'Mozilla/5.0'})
+                try:
+                    with urllib.request.urlopen(req_check, timeout=5) as resp:
+                        status = json.loads(resp.read().decode())
+                    if status.get('done'):
+                        status_url = f'{base_url}/generate/status/{job_id}'
+                        req_status = urllib.request.Request(status_url, headers={'apikey': api_key, 'User-Agent': 'Mozilla/5.0'})
+                        with urllib.request.urlopen(req_status, timeout=10) as resp2:
+                            result = json.loads(resp2.read().decode())
+                        generations = result.get('generations', [])
+                        if generations and generations[0].get('img'):
+                            return generations[0]['img'], generations[0].get('model', model), width, height
+                    elif status.get('faulted'):
+                        break # try next model
+                except Exception:
+                    pass
+        except Exception as exc:
+            continue
 
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        job = json.loads(resp.read().decode())
-    job_id = job.get('id')
-    if not job_id:
-        raise ValueError('AI Horde: no job id returned')
-
-    # Poll for result (max 10s total budget)
-    deadline = time.time() + timeout
-    check_url = f'{base_url}/generate/check/{job_id}'
-    status_url = f'{base_url}/generate/status/{job_id}'
-    while time.time() < deadline:
-        time.sleep(1.5)
-        req_check = urllib.request.Request(check_url, headers={'apikey': api_key})
-        with urllib.request.urlopen(req_check, timeout=5) as resp:
-            status = json.loads(resp.read().decode())
-        if status.get('done'):
-            req_status = urllib.request.Request(status_url, headers={'apikey': api_key})
-            with urllib.request.urlopen(req_status, timeout=8) as resp:
-                result = json.loads(resp.read().decode())
-            generations = result.get('generations', [])
-            if generations and generations[0].get('img'):
-                img_data = generations[0]['img']
-                model_used = generations[0].get('model', models[0])
-                # img_data may be a URL (r2=True) or base64
-                return img_data, model_used, width, height
-            raise ValueError('AI Horde: empty generations list')
-    raise TimeoutError('AI Horde: timed out waiting for generation')
+    raise TimeoutError('AI Horde: all fallback models failed or timed out')
 
 
 def _generate_with_huggingface(prompt, timeout=10):
