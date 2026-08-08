@@ -64,11 +64,12 @@
                     <option value="@cf/black-forest-labs/flux-1-schnell">Flux 1 Schnell</option>
                     <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0</option>
                     <option value="@cf/leonardo/lucid-origin">Leonardo Lucid Origin</option>
-                    <option value="@cf/black-forest-labs/flux-2-dev">Flux 2 Dev</option>
-                    <option value="@cf/black-forest-labs/flux-2-klein-4b">Flux 2 Klein 4B</option>
-                    <option value="@cf/black-forest-labs/flux-2-klein-9b">Flux 2 Klein 9B</option>
                     <option value="pollinations-flux">Pollinations Flux</option>
                     <option value="pollinations-turbo">Pollinations Turbo</option>
+                    <option value="horde-uncensored">AI Horde (Случайная модель)</option>
+                    <option value="horde-Deliberate">AI Horde: Deliberate (Быстрая)</option>
+                    <option value="horde-Dreamshaper">AI Horde: Dreamshaper</option>
+                    <option value="horde-Anything v5">AI Horde: Anything v5 (Аниме)</option>
                 </select>
             </div>
             <div class="w-full sm:w-48">
@@ -198,6 +199,19 @@
                 const pollModel = model === 'pollinations-flux' ? 'flux' : 'turbo';
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${pollModel}&nologo=true&width=${width}&height=${height}&seed=${Math.floor(Math.random()*100000)}`;
                 renderSuccess(url);
+            } else if (model.startsWith('horde-')) {
+                // AI Horde (Backend Proxy)
+                const res = await fetch("{% url 'generate_image' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+                    body: JSON.stringify({ prompt: prompt, model: model }),
+                });
+                const data = await res.json();
+                if (res.ok && data.image_url) {
+                    renderSuccess(data.image_url);
+                } else {
+                    throw new Error(data.error || 'Ошибка генерации через AI Horde.');
+                }
             }
         } catch (err) {
             loadingDiv.classList.add('hidden');

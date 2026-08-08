@@ -1539,12 +1539,16 @@ def image_generation_chat(request):
     return render(request, 'chat/image_generation_chat.html', {'profile': profile})
 
 
-def _generate_with_horde(prompt, timeout=10):
+def _generate_with_horde(prompt, timeout=10, target_model=None):
     """AI Horde image generation. Returns base64 image data URI or raises."""
-    api_key = os.environ.get('HORDE_API_KEY', 'l-HYLLpgL4PFJxntXP82lw')
+    api_key = os.environ.get('HORDE_API_KEY', '0000000000')
     base_url = os.environ.get('AI_HORDE_API_BASE_URL', 'https://aihorde.net/api/v2')
-    models_str = os.environ.get('AI_HORDE_MODELS', 'Deliberate,Realistic Vision,Anything v5')
-    models = [m.strip() for m in models_str.split(',') if m.strip()]
+    
+    if target_model:
+        models = [target_model]
+    else:
+        models_str = os.environ.get('AI_HORDE_MODELS', 'Deliberate,Realistic Vision,Anything v5')
+        models = [m.strip() for m in models_str.split(',') if m.strip()]
     sampler = os.environ.get('AI_HORDE_SAMPLER', 'k_dpmpp_2s_a')
     cfg_scale = float(os.environ.get('AI_HORDE_CFG_SCALE', '7'))
     width = int(os.environ.get('AI_HORDE_WIDTH', '512'))
@@ -1650,9 +1654,12 @@ def generate_image(request):
     
     # If explicitly requested Horde
     model_param = data.get('model', '')
-    if model_param == 'horde-uncensored':
+    if model_param.startswith('horde-'):
+        target_model = model_param[6:]
+        if target_model == 'uncensored':
+            target_model = None
         try:
-            img_data, model_used, width, height = _generate_with_horde(prompt, timeout=20)
+            img_data, model_used, width, height = _generate_with_horde(prompt, timeout=20, target_model=target_model)
             # Since AI Horde generation takes long, we rely on the async wait inside _generate_with_horde
             # Here it returns the actual image URL or base64.
             return JsonResponse({
@@ -1790,7 +1797,7 @@ def image_gen_stats(request):
 
     avg_time = images.aggregate(avg=Avg('generation_time'))['avg'] or 0
     speed_score = max(0, min(100, int((1 - min(avg_time / 15, 1)) * 100)))
-    actual_speed = f"{avg_time:.1f} сек"
+    actual_speed = f"{int(avg_time * 1000)} ms"
 
     success_count = images.exclude(image_url__isnull=True).exclude(image_url__exact='').count()
     success_score = int((success_count / total) * 100) if total else 0
