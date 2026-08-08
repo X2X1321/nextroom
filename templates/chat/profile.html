@@ -3,9 +3,9 @@
 {% block title %}Личный кабинет — NextRoom{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-8">
-    <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-start">
-        <section class="glass-panel rounded-3xl p-6">
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-5">
+    <div class="grid gap-6 lg:grid-cols-[1.2fr_0.8fr] items-stretch">
+        <section class="glass-panel rounded-3xl p-6 h-full">
             <div class="flex flex-col gap-6">
                 <div class="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
                     <div class="max-w-2xl">
@@ -49,8 +49,8 @@
             </div>
         </section>
 
-        <aside class="flex flex-col gap-4">
-            <div class="glass-panel rounded-3xl p-6">
+        <aside class="flex flex-col h-full">
+            <div class="glass-panel rounded-3xl p-6 h-full flex flex-col justify-center">
                 <h2 class="text-lg font-bold text-white mb-1">Календарь активности</h2>
                 <p class="text-xs text-slate-400 mb-4">Последние 30 дней. Цифра — количество сообщений за день.</p>
                 <div class="grid grid-cols-7 gap-1.5 mb-1">
@@ -126,7 +126,7 @@
                     </div>
                 </a>
                 {% empty %}
-                <p class="text-sm text-slate-400">Вы ещё не посещали ни одной комнаты. Попробуйте присоединиться к интересной беседе!</p>
+                <p class="text-sm text-slate-400">Вы ещё не посещали ни одной комнаты.</p>
                 {% endfor %}
             </div>
         </section>
