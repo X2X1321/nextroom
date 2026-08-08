@@ -75,6 +75,13 @@
         body {
           font-family: 'TekturCyrillicOnly', 'Inter', sans-serif;
         }
+
+        /* Prevent auto-zoom on iOS Safari/Chrome when tapping input fields */
+        @media screen and (max-width: 767px) {
+          input, textarea, select {
+            font-size: 16px !important;
+          }
+        }
     </style>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=copy_all,check,image,mic,download,add,emoji_emotions" />
     <!-- Tailwind CSS CDN -->
