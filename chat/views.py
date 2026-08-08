@@ -1546,18 +1546,18 @@ def _generate_with_horde(prompt, timeout=90, target_model=None):
     
     fallback_models = [
         "stable_diffusion",
-        "AlbedoBase XL (SDXL)",
-        "WAI-NSFW-illustrious-SDXL",
-        "ICBINP - I Can't Believe It's Not Photography",
-        "CyberRealistic Pony",
-        "WAI-ANI-NSFW-PONYXL",
         "Juggernaut XL",
+        "Dreamshaper",
+        "AlbedoBase XL (SDXL)",
         "AlbedoBase XL 3.1",
+        "ICBINP - I Can't Believe It's Not Photography",
+        "WAI-NSFW-illustrious-SDXL",
+        "WAI-ANI-NSFW-PONYXL",
+        "CyberRealistic Pony",
         "Prefect Pony",
-        "Flux.1-Schnell fp8 (Compact)",
-        "Nova Flat XL",
         "Anything v5",
-        "Dreamshaper"
+        "Nova Flat XL",
+        "Flux.1-Schnell fp8 (Compact)"
     ]
     
     if target_model:
