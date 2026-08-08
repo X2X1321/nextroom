@@ -49,14 +49,6 @@
         <div id="image-error" class="hidden text-sm text-red-300"></div>
         <form id="image-form" class="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {% csrf_token %}
-            <select id="image-model" class="rounded-xl bg-slate-900 border border-slate-800 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 w-full sm:w-auto">
-                <option value="@cf/black-forest-labs/flux-1-schnell">Flux 1 Schnell (Быстрая)</option>
-                <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0 (Арт)</option>
-                <option value="@cf/leonardo/lucid-origin">Leonardo Lucid Origin</option>
-                <option value="@cf/black-forest-labs/flux-2-dev">Flux 2 Dev</option>
-                <option value="@cf/black-forest-labs/flux-2-klein-4b">Flux 2 Klein 4B</option>
-                <option value="@cf/black-forest-labs/flux-2-klein-9b">Flux 2 Klein 9B</option>
-            </select>
             <input type="text" id="image-prompt" placeholder="Например: Космонавт на марсе в стиле киберпанк" class="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
             <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
                 <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
@@ -64,7 +56,39 @@
                 <span class="relative z-10">Сгенерировать</span>
             </button>
         </form>
-        <a href="{% url 'image_history' %}" class="text-xs sm:text-sm text-indigo-400 hover:text-indigo-300">История генераций</a>
+
+        <div class="mt-4 p-4 rounded-xl bg-slate-900/40 border border-slate-800/60 flex flex-col sm:flex-row gap-3">
+            <div class="flex-1">
+                <label class="block text-xs font-semibold text-slate-400 mb-1.5 ml-1">Модель нейросети</label>
+                <select id="image-model" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs sm:text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <optgroup label="Cloudflare Workers AI (Fast & Free)">
+                        <option value="@cf/black-forest-labs/flux-1-schnell">Flux 1 Schnell (Быстрая)</option>
+                        <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0 (Арт)</option>
+                        <option value="@cf/leonardo/lucid-origin">Leonardo Lucid Origin</option>
+                        <option value="@cf/black-forest-labs/flux-2-dev">Flux 2 Dev</option>
+                        <option value="@cf/black-forest-labs/flux-2-klein-4b">Flux 2 Klein 4B</option>
+                        <option value="@cf/black-forest-labs/flux-2-klein-9b">Flux 2 Klein 9B</option>
+                    </optgroup>
+                    <optgroup label="Legacy & Community Models">
+                        <option value="pollinations-flux">Pollinations Flux (Высокое качество)</option>
+                        <option value="pollinations-turbo">Pollinations Turbo</option>
+                        <option value="horde-uncensored">AI Horde (Uncensored)</option>
+                    </optgroup>
+                </select>
+            </div>
+            <div class="w-full sm:w-48">
+                <label class="block text-xs font-semibold text-slate-400 mb-1.5 ml-1">Соотношение сторон</label>
+                <select id="image-ratio" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs sm:text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="1024x1024">1:1 (Квадрат)</option>
+                    <option value="1024x576">16:9 (Широкий)</option>
+                    <option value="576x1024">9:16 (Вертикальный)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-4 text-right">
+            <a href="{% url 'image_history' %}" class="text-xs sm:text-sm font-medium text-indigo-400 hover:text-indigo-300 transition">Посмотреть историю генераций &rarr;</a>
+        </div>
     </div>
 
     <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6">
@@ -92,6 +116,17 @@
                 <tr><th scope="row">Генераций за неделю</th><td>0</td></tr>
             </tbody>
         </table>
+
+        <!-- Топ моделей -->
+        <div class="mt-8 border-t border-slate-800/60 pt-6">
+            <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                Топ используемых моделей
+            </h3>
+            <div id="top-models-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <div class="text-xs text-slate-500">Загрузка...</div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -108,56 +143,83 @@
         e.preventDefault();
         const prompt = promptInput.value.trim();
         const model = document.getElementById('image-model').value;
+        const ratio = document.getElementById('image-ratio').value;
         if (!prompt) return;
 
         resultDiv.classList.add('hidden');
         errorDiv.classList.add('hidden');
         loadingDiv.classList.remove('hidden');
 
-        try {
-            // Запрос напрямую к вашему воркеру Cloudflare
-            const res = await fetch("https://nextroom.vitenikpavel.workers.dev/", {
+        const startTime = Date.now();
+        const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        
+        const saveStats = (modelName, promptText, genTime) => {
+            fetch("{% url 'save_image_stat' %}", {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ prompt: prompt, model: model }),
-            });
-            
-            if (res.ok) {
-                // Cloudflare AI возвращает саму картинку в виде потока байтов (Blob)
-                const imageBlob = await res.blob();
-                const imageUrl = URL.createObjectURL(imageBlob);
-                
-                imageEl.src = imageUrl;
-                downloadLink.href = imageUrl;
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+                body: JSON.stringify({ model_name: modelName, prompt: promptText, generation_time: genTime })
+            }).catch(e => console.error('Failed to save stats:', e));
+        };
 
-                imageEl.onload = () => {
-                    loadingDiv.classList.add('hidden');
-                    imageEl.classList.remove('opacity-0');
-                    imageEl.classList.add('opacity-100');
-                    resultDiv.classList.remove('hidden');
-                };
-
-                imageEl.onerror = () => {
-                    loadingDiv.classList.add('hidden');
-                    errorDiv.textContent = 'Не удалось отобразить изображение.';
-                    errorDiv.classList.remove('hidden');
-                };
-            } else {
-                let errorMsg = 'Не удалось сгенерировать изображение. Попробуйте выбрать другую модель.';
-                try {
-                    const errorData = await res.json();
-                    if (errorData.error) errorMsg = errorData.error;
-                } catch(e) {}
-                
+        const renderSuccess = (url) => {
+            imageEl.src = url;
+            downloadLink.href = url;
+            imageEl.onload = () => {
                 loadingDiv.classList.add('hidden');
-                errorDiv.textContent = errorMsg;
+                imageEl.classList.remove('opacity-0');
+                imageEl.classList.add('opacity-100');
+                resultDiv.classList.remove('hidden');
+                saveStats(model, prompt, (Date.now() - startTime) / 1000);
+            };
+            imageEl.onerror = () => {
+                loadingDiv.classList.add('hidden');
+                errorDiv.textContent = 'Не удалось отобразить изображение.';
                 errorDiv.classList.remove('hidden');
+            };
+        };
+
+        try {
+            if (model.startsWith('@cf/')) {
+                // Cloudflare Worker
+                const res = await fetch("https://nextroom.vitenikpavel.workers.dev/", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt, model: model }),
+                });
+                
+                if (res.ok) {
+                    const imageBlob = await res.blob();
+                    renderSuccess(URL.createObjectURL(imageBlob));
+                } else {
+                    let errorMsg = 'Ошибка генерации в Cloudflare.';
+                    try { const errorData = await res.json(); if (errorData.error) errorMsg = errorData.error; } catch(e) {}
+                    throw new Error(errorMsg);
+                }
+            } else if (model.startsWith('pollinations')) {
+                // Pollinations (direct URL)
+                const dims = ratio.split('x');
+                const width = dims[0];
+                const height = dims[1];
+                const pollModel = model === 'pollinations-flux' ? 'flux' : 'turbo';
+                const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${pollModel}&nologo=true&width=${width}&height=${height}&seed=${Math.floor(Math.random()*100000)}`;
+                renderSuccess(url);
+            } else if (model === 'horde-uncensored') {
+                // AI Horde (Backend Proxy)
+                const res = await fetch("{% url 'generate_image' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+                    body: JSON.stringify({ prompt: prompt, model: model }),
+                });
+                const data = await res.json();
+                if (res.ok && data.image_url) {
+                    renderSuccess(data.image_url);
+                } else {
+                    throw new Error(data.error || 'Ошибка генерации через AI Horde.');
+                }
             }
         } catch (err) {
             loadingDiv.classList.add('hidden');
-            errorDiv.textContent = 'Ошибка соединения.';
+            errorDiv.textContent = err.message || 'Произошла непредвиденная ошибка.';
             errorDiv.classList.remove('hidden');
         }
     });
@@ -229,6 +291,24 @@
             const tbody = document.getElementById('ai-stats-table-body');
             if (tbody && values.length) {
                 tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${values[idx] || 0}</td></tr>`).join('');
+            }
+
+            // Рендерим Топ моделей
+            const topModelsContainer = document.getElementById('top-models-container');
+            if (topModelsContainer && data.top_models) {
+                if (data.top_models.length === 0) {
+                    topModelsContainer.innerHTML = '<div class="text-xs text-slate-500 col-span-full">Пока нет данных о генерациях.</div>';
+                } else {
+                    topModelsContainer.innerHTML = data.top_models.map((m, idx) => `
+                        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 flex items-center justify-between ${idx === 0 ? 'ring-1 ring-indigo-500/50 bg-indigo-950/20' : ''}">
+                            <div class="flex items-center gap-2 overflow-hidden">
+                                <span class="flex-shrink-0 w-5 h-5 rounded-full bg-slate-800 text-[10px] font-bold text-slate-400 flex items-center justify-center border border-slate-700">${idx + 1}</span>
+                                <span class="text-xs font-medium text-slate-300 truncate" title="${m.model_name}">${m.model_name.replace('@cf/', '').replace('pollinations', 'Pollinations').replace('horde', 'AI Horde')}</span>
+                            </div>
+                            <span class="text-xs font-bold text-indigo-400 ml-2 bg-indigo-500/10 px-2 py-0.5 rounded-lg flex-shrink-0">${m.count} фото</span>
+                        </div>
+                    `).join('');
+                }
             }
         } catch (e) {
             console.error('Failed to load image generation stats radar chart', e);

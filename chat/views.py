@@ -1647,6 +1647,23 @@ def generate_image(request):
     prompt = data.get('prompt', '').strip()
     if not prompt:
         return JsonResponse({'error': 'Prompt is required'}, status=400)
+    
+    # If explicitly requested Horde
+    model_param = data.get('model', '')
+    if model_param == 'horde-uncensored':
+        try:
+            img_data, model_used, width, height = _generate_with_horde(prompt, timeout=20)
+            # Since AI Horde generation takes long, we rely on the async wait inside _generate_with_horde
+            # Here it returns the actual image URL or base64.
+            return JsonResponse({
+                'status': 'success',
+                'image_url': img_data,
+                'model_used': model_used,
+                'fallback_urls': []
+            })
+        except Exception as exc:
+            logging.warning(f'AI Horde image gen failed: {exc}')
+            return JsonResponse({'error': f'Horde generation failed: {exc}'}, status=500)
 
     encoded_prompt = urllib.parse.quote(prompt)
     pollinations_providers = [
@@ -1788,12 +1805,15 @@ def image_gen_stats(request):
 
     week_score = min(100, week_count * 2)
 
+    top_models = list(images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').annotate(count=Count('id')).order_by('-count')[:5])
+
     return JsonResponse({
         'labels': ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'],
         'datasets': [{
             'label': 'Генерация изображений',
             'data': [speed_score, success_score, volume_score, coverage_score, resolution_score, week_score],
-        }]
+        }],
+        'top_models': top_models
     })
 
 
@@ -1956,4 +1976,42 @@ def favicon_view(request):
 def media_serve_view(request, path):
     from django.views.static import serve
     return serve(request, path, document_root=settings.MEDIA_ROOT)
+
+from django.views.decorators.http import require_POST
+
+@require_POST
+def save_image_stat(request):
+    try:
+        data = json.loads(request.body)
+        model_name = data.get('model_name', 'unknown')
+        prompt = data.get('prompt', '')
+        generation_time = float(data.get('generation_time', 0.0))
+        
+        if request.user.is_authenticated:
+            profile = get_user_profile(request.user)
+            GeneratedImage.objects.create(
+                profile=profile,
+                prompt=prompt,
+                model_name=model_name,
+                generation_time=generation_time,
+                image_url='[cloudflare_blob]' if model_name.startswith('@cf') else '[pollinations_url]',
+                width=1024,
+                height=1024
+            )
+        else:
+            guest = get_or_create_guest_session(request)
+            GeneratedImage.objects.create(
+                guest_session=guest,
+                prompt=prompt,
+                model_name=model_name,
+                generation_time=generation_time,
+                image_url='[cloudflare_blob]' if model_name.startswith('@cf') else '[pollinations_url]',
+                width=1024,
+                height=1024
+            )
+            guest.images_count += 1
+            guest.save(update_fields=['images_count', 'last_activity'])
+        return JsonResponse({'status': 'success'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 

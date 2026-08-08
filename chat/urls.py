@@ -33,6 +33,7 @@ urlpatterns = [
     path('image-chat/generate/', views.generate_image, name='generate_image'),
     path('image-chat/history/', views.image_history, name='image_history'),
     path('image-chat/stats/', views.image_gen_stats, name='image_gen_stats'),
+    path('image-chat/save-stat/', views.save_image_stat, name='save_image_stat'),
     path('ai-management/usage-chart/', views.ai_usage_chart, name='ai_usage_chart'),
     path('sitemap.xml', views.sitemap, name='sitemap'),
     path('robots.txt', views.robots_txt, name='robots_txt'),
