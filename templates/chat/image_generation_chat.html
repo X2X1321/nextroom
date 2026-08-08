@@ -61,19 +61,14 @@
             <div class="flex-1">
                 <label class="block text-xs font-semibold text-slate-400 mb-1.5 ml-1">Модель нейросети</label>
                 <select id="image-model" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs sm:text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <optgroup label="Cloudflare Workers AI (Fast & Free)">
-                        <option value="@cf/black-forest-labs/flux-1-schnell">Flux 1 Schnell (Быстрая)</option>
-                        <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0 (Арт)</option>
-                        <option value="@cf/leonardo/lucid-origin">Leonardo Lucid Origin</option>
-                        <option value="@cf/black-forest-labs/flux-2-dev">Flux 2 Dev</option>
-                        <option value="@cf/black-forest-labs/flux-2-klein-4b">Flux 2 Klein 4B</option>
-                        <option value="@cf/black-forest-labs/flux-2-klein-9b">Flux 2 Klein 9B</option>
-                    </optgroup>
-                    <optgroup label="Legacy & Community Models">
-                        <option value="pollinations-flux">Pollinations Flux (Высокое качество)</option>
-                        <option value="pollinations-turbo">Pollinations Turbo</option>
-                        <option value="horde-uncensored">AI Horde (Uncensored)</option>
-                    </optgroup>
+                    <option value="@cf/black-forest-labs/flux-1-schnell">Flux 1 Schnell</option>
+                    <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0</option>
+                    <option value="@cf/leonardo/lucid-origin">Leonardo Lucid Origin</option>
+                    <option value="@cf/black-forest-labs/flux-2-dev">Flux 2 Dev</option>
+                    <option value="@cf/black-forest-labs/flux-2-klein-4b">Flux 2 Klein 4B</option>
+                    <option value="@cf/black-forest-labs/flux-2-klein-9b">Flux 2 Klein 9B</option>
+                    <option value="pollinations-flux">Pollinations Flux</option>
+                    <option value="pollinations-turbo">Pollinations Turbo</option>
                 </select>
             </div>
             <div class="w-full sm:w-48">
@@ -203,19 +198,6 @@
                 const pollModel = model === 'pollinations-flux' ? 'flux' : 'turbo';
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${pollModel}&nologo=true&width=${width}&height=${height}&seed=${Math.floor(Math.random()*100000)}`;
                 renderSuccess(url);
-            } else if (model === 'horde-uncensored') {
-                // AI Horde (Backend Proxy)
-                const res = await fetch("{% url 'generate_image' %}", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-                    body: JSON.stringify({ prompt: prompt, model: model }),
-                });
-                const data = await res.json();
-                if (res.ok && data.image_url) {
-                    renderSuccess(data.image_url);
-                } else {
-                    throw new Error(data.error || 'Ошибка генерации через AI Horde.');
-                }
             }
         } catch (err) {
             loadingDiv.classList.add('hidden');
@@ -289,8 +271,9 @@
             }
 
             const tbody = document.getElementById('ai-stats-table-body');
-            if (tbody && values.length) {
-                tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${values[idx] || 0}</td></tr>`).join('');
+            const actualValues = data.actual_values || values;
+            if (tbody && actualValues.length) {
+                tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${actualValues[idx] || 0}</td></tr>`).join('');
             }
 
             // Рендерим Топ моделей

@@ -1784,28 +1784,41 @@ def image_gen_stats(request):
             'datasets': [{
                 'label': 'Генерация изображений',
                 'data': [0, 0, 0, 0, 0, 0],
-            }]
+            }],
+            'actual_values': ['0 сек', '0%', '0', 'Нет данных', '0x0', '0']
         })
 
     avg_time = images.aggregate(avg=Avg('generation_time'))['avg'] or 0
     speed_score = max(0, min(100, int((1 - min(avg_time / 15, 1)) * 100)))
+    actual_speed = f"{avg_time:.1f} сек"
 
     success_count = images.exclude(image_url__isnull=True).exclude(image_url__exact='').count()
     success_score = int((success_count / total) * 100) if total else 0
+    actual_success = f"{success_score}%"
 
     volume_score = min(100, total)
+    actual_volume = str(total)
 
     models_used = images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').distinct().count()
     coverage_score = min(100, models_used * 20)
 
-    avg_width = images.aggregate(avg=Avg('width'))['avg'] or 0
-    avg_height = images.aggregate(avg=Avg('height'))['avg'] or 0
+    top_models = list(images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').annotate(count=Count('id')).order_by('-count')[:5])
+    if top_models:
+        top_model_name = top_models[0]['model_name'].replace('@cf/black-forest-labs/', '').replace('@cf/leonardo/', '').replace('pollinations-', '').title()
+    else:
+        top_model_name = "Нет данных"
+    actual_model = top_model_name
+
+    avg_width = int(images.aggregate(avg=Avg('width'))['avg'] or 0)
+    avg_height = int(images.aggregate(avg=Avg('height'))['avg'] or 0)
     avg_pixels = (avg_width * avg_height) if avg_width and avg_height else 0
     resolution_score = min(100, int(avg_pixels / 20000))
+    actual_resolution = f"{avg_width}x{avg_height}" if avg_width else "Неизвестно"
 
     week_score = min(100, week_count * 2)
+    actual_week = str(week_count)
 
-    top_models = list(images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').annotate(count=Count('id')).order_by('-count')[:5])
+    actual_values = [actual_speed, actual_success, actual_volume, actual_model, actual_resolution, actual_week]
 
     return JsonResponse({
         'labels': ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'],
@@ -1813,7 +1826,8 @@ def image_gen_stats(request):
             'label': 'Генерация изображений',
             'data': [speed_score, success_score, volume_score, coverage_score, resolution_score, week_score],
         }],
-        'top_models': top_models
+        'top_models': top_models,
+        'actual_values': actual_values
     })
 
 
