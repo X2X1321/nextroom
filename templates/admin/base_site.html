@@ -10,13 +10,32 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-    /* NextRoom Dark Theme Core Styles for All Django Admin Pages */
+    /* 1. Global Reset & Universal Black Outline/Square Elimination */
+    *, *:focus, *:active, *:focus-visible {
+        outline: none !important;
+        outline-style: none !important;
+        outline-width: 0 !important;
+        -webkit-tap-highlight-color: transparent !important;
+    }
+
     html, body {
         background-color: #090d16 !important;
         color: #f1f5f9 !important;
         font-family: 'Inter', sans-serif !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
 
+    /* Reset default button appearances & eliminate black borders */
+    button, input[type="submit"], input[type="button"], input[type="reset"], .button, a.button, .addlink, .changelink, .deletelink, .object-tools a {
+        outline: none !important;
+        box-shadow: none !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        border-style: solid !important;
+    }
+
+    /* 2. Header & Top Navigation Bar */
     #header {
         background: #0f172a !important;
         border-bottom: 1px solid #1e293b !important;
@@ -35,7 +54,7 @@
         color: #ffffff !important;
     }
 
-    /* Breadcrumbs Bar */
+    /* 3. Breadcrumbs Bar */
     .breadcrumbs {
         background: rgba(15, 23, 42, 0.6) !important;
         border-bottom: 1px solid #1e293b !important;
@@ -54,7 +73,7 @@
         color: #ffffff !important;
     }
 
-    /* Main Container & Headings */
+    /* 4. Main Container & Headings */
     #container {
         background: #090d16 !important;
         min-height: 100vh !important;
@@ -73,15 +92,18 @@
         margin-bottom: 16px !important;
     }
 
-    /* Action Buttons (Add Object, Change, Views site) - NO Green! */
+    /* 5. Action Buttons (Add Object, Change, View site) - No Green, No Black Outlines! */
     .object-tools {
         margin-bottom: 16px !important;
+        float: none !important;
+        display: flex !important;
+        gap: 8px !important;
     }
 
     .object-tools li {
         list-style: none !important;
         display: inline-block !important;
-        margin-left: 8px !important;
+        margin: 0 !important;
     }
 
     .object-tools a, .addlink, .changelink, .viewsitelink {
@@ -97,6 +119,7 @@
         align-items: center !important;
         gap: 6px !important;
         transition: all 0.2s ease !important;
+        outline: none !important;
     }
 
     .object-tools a:hover, .addlink:hover {
@@ -127,6 +150,7 @@
         border-radius: 8px !important;
         text-decoration: none !important;
         transition: all 0.2s ease !important;
+        outline: none !important;
     }
 
     .deletelink:hover {
@@ -134,7 +158,7 @@
         color: #ffffff !important;
     }
 
-    /* Modules, Cards & Change Lists */
+    /* 6. Modules, Cards & Change Lists Layout */
     .module, #changelist {
         background: rgba(15, 23, 42, 0.75) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -143,6 +167,24 @@
         margin-bottom: 24px !important;
         backdrop-filter: blur(12px) !important;
         box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    #changelist {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: flex-start !important;
+        position: relative !important;
+        width: 100% !important;
+    }
+
+    #changelist #changelist-form {
+        flex: 1 1 0% !important;
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    #changelist.filtered #changelist-form {
+        max-width: calc(100% - 240px) !important;
     }
 
     .module h2, .module caption {
@@ -156,7 +198,114 @@
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* Table Styling for Inner Pages */
+    /* 7. Bulletproof Search Toolbar (`#toolbar` & `#changelist-search`) Layout */
+    #toolbar {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 14px 20px !important;
+        display: block !important;
+        clear: both !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    #toolbar form, #changelist-search {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    #toolbar form > div, #changelist-search > div {
+        display: flex !important;
+        align-items: center !important;
+        flex-wrap: wrap !important;
+        gap: 10px !important;
+        width: 100% !important;
+    }
+
+    #toolbar label, #changelist-search label {
+        display: inline-flex !important;
+        align-items: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        color: #94a3b8 !important;
+        font-size: 13px !important;
+    }
+
+    #toolbar label img, #changelist-search label img {
+        display: none !important;
+    }
+
+    #searchbar, input[name="q"], #toolbar input[type="text"] {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+        padding: 8px 14px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+        min-width: 280px !important;
+        height: 38px !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    #searchbar:focus, input[name="q"]:focus, #toolbar input[type="text"]:focus {
+        border-color: #6366f1 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+    }
+
+    #toolbar input[type="submit"], #changelist-search input[type="submit"] {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        border: 1px solid #6366f1 !important;
+        padding: 0 18px !important;
+        height: 38px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        cursor: pointer !important;
+        margin: 0 !important;
+        outline: none !important;
+        box-shadow: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        transition: all 0.2s ease !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+    }
+
+    #toolbar input[type="submit"]:hover, #changelist-search input[type="submit"]:hover {
+        background: #4338ca !important;
+        border-color: #4f46e5 !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.35) !important;
+    }
+
+    #toolbar span.quiet, #changelist-search span.quiet {
+        font-size: 12px !important;
+        color: #94a3b8 !important;
+        margin-left: 8px !important;
+    }
+
+    #toolbar a, #changelist-search a {
+        color: #818cf8 !important;
+        font-size: 12px !important;
+        text-decoration: none !important;
+        margin-left: 6px !important;
+    }
+
+    #toolbar a:hover, #changelist-search a:hover {
+        color: #ffffff !important;
+        text-decoration: underline !important;
+    }
+
+    /* 8. Table Styling for Inner Pages */
     table {
         width: 100% !important;
         border-collapse: collapse !important;
@@ -200,48 +349,7 @@
         text-decoration: underline !important;
     }
 
-    /* Toolbar & Search Bar (`#toolbar`) */
-    #toolbar {
-        background: rgba(15, 23, 42, 0.6) !important;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-        padding: 14px 20px !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 12px !important;
-    }
-
-    #toolbar form input[type="text"] {
-        background: rgba(15, 23, 42, 0.8) !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-        color: #ffffff !important;
-        padding: 8px 14px !important;
-        border-radius: 8px !important;
-        font-size: 13px !important;
-    }
-
-    #toolbar form input[type="text"]:focus {
-        border-color: #6366f1 !important;
-        outline: none !important;
-        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
-    }
-
-    #toolbar form input[type="submit"] {
-        background: #4f46e5 !important;
-        color: #ffffff !important;
-        border: none !important;
-        padding: 8px 16px !important;
-        border-radius: 8px !important;
-        font-weight: 600 !important;
-        font-size: 13px !important;
-        cursor: pointer !important;
-        transition: background 0.2s ease !important;
-    }
-
-    #toolbar form input[type="submit"]:hover {
-        background: #4338ca !important;
-    }
-
-    /* Actions Bar (`.actions`) */
+    /* 9. Actions Bar (`.actions`) */
     .actions {
         background: rgba(15, 23, 42, 0.4) !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -260,30 +368,35 @@
         padding: 6px 12px !important;
         border-radius: 8px !important;
         font-size: 13px !important;
+        outline: none !important;
     }
 
     .actions button, .actions .button {
         background: #4f46e5 !important;
         color: #ffffff !important;
-        border: none !important;
+        border: 1px solid #6366f1 !important;
         padding: 6px 14px !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
         font-size: 12px !important;
         cursor: pointer !important;
         transition: background 0.2s ease !important;
+        outline: none !important;
+        box-shadow: none !important;
     }
 
     .actions button:hover, .actions .button:hover {
         background: #4338ca !important;
     }
 
-    /* Sidebar Filters (`#changelist-filter`) */
+    /* 10. Sidebar Filters (`#changelist-filter`) */
     #changelist-filter {
         background: rgba(15, 23, 42, 0.75) !important;
         border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
         padding: 20px !important;
         width: 240px !important;
+        flex-shrink: 0 !important;
+        box-sizing: border-box !important;
     }
 
     #changelist-filter h2 {
@@ -324,7 +437,7 @@
         font-weight: 700 !important;
     }
 
-    /* Pagination Bar (`.paginator`) */
+    /* 11. Pagination Bar (`.paginator`) */
     .paginator {
         background: rgba(15, 23, 42, 0.9) !important;
         border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -343,6 +456,7 @@
         padding: 4px 8px !important;
         border-radius: 6px !important;
         background: rgba(99, 102, 241, 0.1) !important;
+        outline: none !important;
     }
 
     .paginator a:hover {
@@ -350,7 +464,7 @@
         color: #ffffff !important;
     }
 
-    /* Change Form Controls */
+    /* 12. Change Form Controls */
     .form-row {
         padding: 16px 20px !important;
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
@@ -371,6 +485,8 @@
         padding: 8px 12px !important;
         border-radius: 8px !important;
         font-size: 13px !important;
+        outline: none !important;
+        box-shadow: none !important;
     }
 
     input:focus, textarea:focus, select:focus {
@@ -400,11 +516,22 @@
         font-size: 13px !important;
         cursor: pointer !important;
         transition: background 0.2s ease !important;
+        outline: none !important;
+        box-shadow: none !important;
     }
 
     .submit-row input[type="submit"]:hover, .submit-row button:hover {
         background: #4338ca !important;
         box-shadow: 0 0 14px rgba(99, 102, 241, 0.35) !important;
+    }
+
+    @media (max-width: 768px) {
+        #changelist.filtered #changelist-form {
+            max-width: 100% !important;
+        }
+        #changelist-filter {
+            width: 100% !important;
+        }
     }
 </style>
 {% endblock %}
