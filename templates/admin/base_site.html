@@ -90,6 +90,7 @@
         font-weight: 700 !important;
         color: #ffffff !important;
         margin-bottom: 16px !important;
+        word-break: break-word !important;
     }
 
     /* 5. Action Buttons (Add Object, Change, View site) - No Green, No Black Outlines! */
@@ -97,6 +98,7 @@
         margin-bottom: 16px !important;
         float: none !important;
         display: flex !important;
+        flex-wrap: wrap !important;
         gap: 8px !important;
     }
 
@@ -548,16 +550,21 @@
 </div>
 {% endblock %}
 
-{% block userlinks %}
+{% block usertools %}
     {% if user.is_active and user.is_staff %}
+    <div id="user-tools" class="flex items-center flex-wrap gap-2 text-sm">
         <span class="user-greeting text-slate-300">Добро пожаловать, <strong class="text-white">{{ user.username }}</strong>.</span>
         {% if user.has_usable_password %}
-        <a href="{% url 'admin:password_change' %}" class="text-indigo-400 hover:text-indigo-300 transition ml-2">Сменить пароль</a> /
+        <span class="text-slate-600">/</span>
+        <a href="{% url 'admin:password_change' %}" class="text-indigo-400 hover:text-indigo-300 transition">Сменить пароль</a>
         {% endif %}
-        <a href="{% url 'landing' %}" target="_blank" class="text-indigo-400 hover:text-indigo-300 transition">Просмотр сайта</a> /
+        <span class="text-slate-600">/</span>
+        <a href="{% url 'landing' %}" target="_blank" class="text-indigo-400 hover:text-indigo-300 transition">Просмотр сайта</a>
+        <span class="text-slate-600">/</span>
         <form id="logout-form" action="{% url 'admin:logout' %}" method="post" style="display: inline;">
             {% csrf_token %}
-            <button type="submit" class="text-slate-400 hover:text-red-400 transition ml-1" style="background: none; border: none; font: inherit; cursor: pointer; text-decoration: underline; padding: 0;">Выйти</button>
+            <button type="submit" class="text-slate-400 hover:text-red-400 transition" style="background: none; border: none; font: inherit; cursor: pointer; padding: 0;">Выйти</button>
         </form>
+    </div>
     {% endif %}
 {% endblock %}
