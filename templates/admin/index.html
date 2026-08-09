@@ -1,0 +1,233 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                fontFamily: {
+                    sans: ['Inter', 'sans-serif'],
+                }
+            }
+        }
+    }
+</script>
+<style>
+    /* Dark Theme Reset for Admin Workspace */
+    body {
+        background-color: #090d16 !important;
+        color: #f1f5f9 !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    #header {
+        background: #0f172a !important;
+        border-bottom: 1px solid #1e293b !important;
+        color: #f8fafc !important;
+        padding: 12px 24px !important;
+    }
+    #header a {
+        color: #94a3b8 !important;
+        transition: color 0.2s;
+    }
+    #header a:hover {
+        color: #ffffff !important;
+    }
+    .module {
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        margin-bottom: 24px !important;
+        backdrop-filter: blur(12px);
+    }
+    .module table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+    .module th, .module caption {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #e2e8f0 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        padding: 14px 20px !important;
+        text-align: left !important;
+    }
+    .module td {
+        padding: 12px 20px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        color: #cbd5e1 !important;
+        font-size: 13px !important;
+    }
+    .module tr:last-child td {
+        border-bottom: none !important;
+    }
+    .module tr:hover td {
+        background: rgba(30, 41, 59, 0.4) !important;
+    }
+    .addlink, .changelink {
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        padding: 4px 10px !important;
+        border-radius: 6px !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        transition: all 0.2s ease !important;
+    }
+    .addlink {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #34d399 !important;
+        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    }
+    .addlink:hover {
+        background: rgba(16, 185, 129, 0.3) !important;
+        color: #6ee7b7 !important;
+    }
+    .changelink {
+        background: rgba(99, 102, 241, 0.15) !important;
+        color: #818cf8 !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    }
+    .changelink:hover {
+        background: rgba(99, 102, 241, 0.3) !important;
+        color: #a5b4fc !important;
+    }
+    #content {
+        padding: 24px !important;
+    }
+    .sidebar-card {
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        padding: 20px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" class="max-w-7xl mx-auto space-y-6">
+
+    <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Администрирование сайта</h1>
+            <p class="text-xs text-slate-400 mt-1">Центр управления базами данных и конфигурацией системы NextRoom</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Main Apps Column -->
+        <div class="lg:col-span-2 space-y-6">
+            {% if app_list %}
+                {% for app in app_list %}
+                    <div class="module rounded-2xl shadow-xl">
+                        <table class="w-full text-left">
+                            <caption>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-bold tracking-wide text-white">
+                                        {% if app.app_label == 'auth' %}
+                                            АУТЕНТИФИКАЦИЯ И АВТОРИЗАЦИЯ
+                                        {% elif app.app_label == 'chat' %}
+                                            ЧАТ И ОБЩЕНИЕ
+                                        {% elif app.app_label == 'social_django' %}
+                                            АВТОРИЗАЦИЯ ЧЕРЕЗ СОЦСЕТИ
+                                        {% else %}
+                                            {{ app.name|upper }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </caption>
+                            <tbody>
+                                {% for model in app.models %}
+                                    <tr>
+                                        <th scope="row" class="font-medium text-slate-200">
+                                            {% if model.admin_url %}
+                                                <a href="{{ model.admin_url }}" class="text-slate-100 hover:text-indigo-400 font-semibold transition">
+                                                    {% if model.object_name == 'User' %}Пользователи
+                                                    {% elif model.object_name == 'Group' %}Группы
+                                                    {% elif model.object_name == 'Room' %}Комнаты
+                                                    {% elif model.object_name == 'UserProfile' %}Профили пользователей
+                                                    {% elif model.object_name == 'AIIntegration' %}AI Интеграции
+                                                    {% elif model.object_name == 'Message' %}Сообщения
+                                                    {% elif model.object_name == 'RoomInvitation' %}Приглашения в комнаты
+                                                    {% elif model.object_name == 'GeneratedImage' %}Сгенерированные изображения
+                                                    {% elif model.object_name == 'GuestSession' %}Гостевые сессии
+                                                    {% elif model.object_name == 'Association' %}Ассоциации
+                                                    {% elif model.object_name == 'Nonce' %}Одноразовые ключи (Nonces)
+                                                    {% elif model.object_name == 'UserSocialAuth' %}Авторизации пользователей соцсетей
+                                                    {% else %}{{ model.name }}{% endif %}
+                                                </a>
+                                            {% else %}
+                                                {{ model.name }}
+                                            {% endif %}
+                                        </th>
+
+                                        <td class="text-right">
+                                            <div class="flex items-center justify-end gap-2">
+                                                {% if model.add_url %}
+                                                    <a href="{{ model.add_url }}" class="addlink">
+                                                        <span>Добавить</span>
+                                                    </a>
+                                                {% endif %}
+                                                {% if model.admin_url %}
+                                                    <a href="{{ model.admin_url }}" class="changelink">
+                                                        <span>Изменить</span>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-slate-400 text-sm">У вас нет прав для изменения объектов.</p>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar Actions Column -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="sidebar-card">
+                <h2 class="text-sm font-bold text-white uppercase tracking-wider mb-4 pb-2 border-b border-slate-800">
+                    Последние действия
+                </h2>
+                <h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">
+                    Мои действия
+                </h3>
+
+                {% load log %}
+                {% get_admin_log 10 as admin_log for_user user %}
+                {% if not admin_log %}
+                    <p class="text-xs text-slate-400 italic">Действий пока нет</p>
+                {% else %}
+                    <ul class="space-y-2 text-xs">
+                        {% for entry in admin_log %}
+                            <li class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-start gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 {% if entry.is_addition %}bg-emerald-400{% elif entry.is_change %}bg-indigo-400{% else %}bg-red-400{% endif %}"></span>
+                                <div>
+                                    <span class="font-semibold text-slate-200">{{ entry.object_repr }}</span>
+                                    <span class="text-slate-400 block text-[11px] mt-0.5">
+                                        {% if entry.content_type %}
+                                            {{ entry.content_type.name }}
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

@@ -64,6 +64,8 @@ class Room(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Комната'
+        verbose_name_plural = 'Комнаты'
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -86,6 +88,10 @@ class UserProfile(models.Model):
     api_keys = JSONField(default=dict, blank=True)
     visited_rooms = models.ManyToManyField(Room, related_name='visited_by', blank=True)
     custom_prompt = models.TextField(blank=True, help_text='Дополнительные правила для нейросети в чате.')
+
+    class Meta:
+        verbose_name = 'Профиль пользователя'
+        verbose_name_plural = 'Профили пользователей'
 
     def __str__(self):
         return f'{self.user.username} profile'
@@ -117,6 +123,8 @@ class AIIntegration(models.Model):
 
     class Meta:
         unique_together = ('profile', 'provider')
+        verbose_name = 'AI Интеграция'
+        verbose_name_plural = 'AI Интеграции'
 
     def __str__(self):
         return f'{self.provider} integration for {self.profile.user.username}'
@@ -140,7 +148,12 @@ class RoomInvitation(models.Model):
     invited_username = models.CharField(max_length=150, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = 'Приглашение в комнату'
+        verbose_name_plural = 'Приглашения в комнаты'
+
     def save(self, *args, **kwargs):
+
         if not self.invite_code:
             self.invite_code = secrets.token_urlsafe(10)
         super().save(*args, **kwargs)
@@ -184,6 +197,8 @@ class Message(models.Model):
 
     class Meta:
         ordering = ['created_at']
+        verbose_name = 'Сообщение'
+        verbose_name_plural = 'Сообщения'
 
     def get_reactions_summary(self):
         reactions_list = list(self.reactions.all())
@@ -241,6 +256,10 @@ class Achievement(models.Model):
     condition_type = models.CharField(max_length=30, choices=CONDITION_TYPES)
     condition_value = models.IntegerField(default=0)
 
+    class Meta:
+        verbose_name = 'Достижение'
+        verbose_name_plural = 'Достижения'
+
     def __str__(self):
         return self.name
 
@@ -252,6 +271,8 @@ class UserAchievement(models.Model):
 
     class Meta:
         unique_together = ('user', 'achievement')
+        verbose_name = 'Достижение пользователя'
+        verbose_name_plural = 'Достижения пользователей'
 
     def __str__(self):
         return f"{self.user.username} earned {self.achievement.name}"
@@ -265,6 +286,8 @@ class UserActivity(models.Model):
     class Meta:
         unique_together = ('user', 'date')
         ordering = ['-date']
+        verbose_name = 'Активность пользователя'
+        verbose_name_plural = 'Активность пользователей'
 
     def __str__(self):
         return f"{self.user.username} - {self.date}: {self.messages_count} сообщений"
@@ -279,6 +302,8 @@ class AIUsageLog(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Лог использования AI'
+        verbose_name_plural = 'Логи использования AI'
 
     def __str__(self):
         return f"{self.profile.user.username} - {self.provider} - {self.tokens_used} tokens"
@@ -297,6 +322,8 @@ class GeneratedImage(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = 'Сгенерированное изображение'
+        verbose_name_plural = 'Сгенерированные изображения'
 
     def __str__(self):
         owner = self.profile.user.username if self.profile else (self.guest_session.guest_name if self.guest_session else "Гость")
