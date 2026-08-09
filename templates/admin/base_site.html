@@ -3,6 +3,412 @@
 
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}Администрирование сайта NextRoom{% endblock %}
 
+{% block extrastyle %}
+{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    /* NextRoom Dark Theme Core Styles for All Django Admin Pages */
+    html, body {
+        background-color: #090d16 !important;
+        color: #f1f5f9 !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+
+    #header {
+        background: #0f172a !important;
+        border-bottom: 1px solid #1e293b !important;
+        color: #f8fafc !important;
+        padding: 14px 24px !important;
+    }
+
+    #header a {
+        color: #818cf8 !important;
+        font-weight: 500 !important;
+        text-decoration: none !important;
+        transition: color 0.2s ease !important;
+    }
+
+    #header a:hover {
+        color: #ffffff !important;
+    }
+
+    /* Breadcrumbs Bar */
+    .breadcrumbs {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border-bottom: 1px solid #1e293b !important;
+        padding: 10px 24px !important;
+        font-size: 12px !important;
+        color: #94a3b8 !important;
+    }
+
+    .breadcrumbs a {
+        color: #818cf8 !important;
+        text-decoration: none !important;
+        font-weight: 500 !important;
+    }
+
+    .breadcrumbs a:hover {
+        color: #ffffff !important;
+    }
+
+    /* Main Container & Headings */
+    #container {
+        background: #090d16 !important;
+        min-height: 100vh !important;
+    }
+
+    #content {
+        padding: 24px !important;
+        max-width: 1280px !important;
+        margin: 0 auto !important;
+    }
+
+    h1 {
+        font-size: 22px !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        margin-bottom: 16px !important;
+    }
+
+    /* Action Buttons (Add Object, Change, Views site) - NO Green! */
+    .object-tools {
+        margin-bottom: 16px !important;
+    }
+
+    .object-tools li {
+        list-style: none !important;
+        display: inline-block !important;
+        margin-left: 8px !important;
+    }
+
+    .object-tools a, .addlink, .changelink, .viewsitelink {
+        background: rgba(99, 102, 241, 0.15) !important;
+        color: #818cf8 !important;
+        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        padding: 6px 14px !important;
+        border-radius: 8px !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .object-tools a:hover, .addlink:hover {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.35) !important;
+    }
+
+    .changelink {
+        background: rgba(51, 65, 85, 0.4) !important;
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
+    }
+
+    .changelink:hover {
+        background: #334155 !important;
+        color: #ffffff !important;
+    }
+
+    .deletelink {
+        background: rgba(239, 68, 68, 0.15) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        padding: 6px 14px !important;
+        border-radius: 8px !important;
+        text-decoration: none !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .deletelink:hover {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+    }
+
+    /* Modules, Cards & Change Lists */
+    .module, #changelist {
+        background: rgba(15, 23, 42, 0.75) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        margin-bottom: 24px !important;
+        backdrop-filter: blur(12px) !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .module h2, .module caption {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #e2e8f0 !important;
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        padding: 14px 20px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Table Styling for Inner Pages */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
+
+    #result_list th, table th {
+        background: rgba(30, 41, 59, 0.8) !important;
+        color: #94a3b8 !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        padding: 12px 16px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    #result_list th a, table th a {
+        color: #e2e8f0 !important;
+        text-decoration: none !important;
+    }
+
+    #result_list td, table td {
+        padding: 12px 16px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        color: #cbd5e1 !important;
+        font-size: 13px !important;
+    }
+
+    #result_list tr:hover td, table tr:hover td {
+        background: rgba(30, 41, 59, 0.4) !important;
+    }
+
+    #result_list td a, table td a {
+        color: #818cf8 !important;
+        font-weight: 600 !important;
+        text-decoration: none !important;
+    }
+
+    #result_list td a:hover, table td a:hover {
+        color: #ffffff !important;
+        text-decoration: underline !important;
+    }
+
+    /* Toolbar & Search Bar (`#toolbar`) */
+    #toolbar {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 14px 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }
+
+    #toolbar form input[type="text"] {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+        padding: 8px 14px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+
+    #toolbar form input[type="text"]:focus {
+        border-color: #6366f1 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+    }
+
+    #toolbar form input[type="submit"] {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 8px 16px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        cursor: pointer !important;
+        transition: background 0.2s ease !important;
+    }
+
+    #toolbar form input[type="submit"]:hover {
+        background: #4338ca !important;
+    }
+
+    /* Actions Bar (`.actions`) */
+    .actions {
+        background: rgba(15, 23, 42, 0.4) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        padding: 12px 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        color: #94a3b8 !important;
+        font-size: 12px !important;
+    }
+
+    .actions select {
+        background: #0f172a !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        color: #f8fafc !important;
+        padding: 6px 12px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+
+    .actions button, .actions .button {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 6px 14px !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+        cursor: pointer !important;
+        transition: background 0.2s ease !important;
+    }
+
+    .actions button:hover, .actions .button:hover {
+        background: #4338ca !important;
+    }
+
+    /* Sidebar Filters (`#changelist-filter`) */
+    #changelist-filter {
+        background: rgba(15, 23, 42, 0.75) !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 20px !important;
+        width: 240px !important;
+    }
+
+    #changelist-filter h2 {
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        color: #ffffff !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+        padding-bottom: 8px !important;
+        margin-bottom: 12px !important;
+    }
+
+    #changelist-filter h3 {
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        color: #818cf8 !important;
+        margin-top: 14px !important;
+        margin-bottom: 6px !important;
+    }
+
+    #changelist-filter li {
+        font-size: 12px !important;
+        list-style: none !important;
+        padding: 3px 0 !important;
+    }
+
+    #changelist-filter li a {
+        color: #94a3b8 !important;
+        text-decoration: none !important;
+    }
+
+    #changelist-filter li a:hover {
+        color: #ffffff !important;
+    }
+
+    #changelist-filter li.selected a {
+        color: #818cf8 !important;
+        font-weight: 700 !important;
+    }
+
+    /* Pagination Bar (`.paginator`) */
+    .paginator {
+        background: rgba(15, 23, 42, 0.9) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 14px 20px !important;
+        color: #94a3b8 !important;
+        font-size: 12px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+    }
+
+    .paginator a {
+        color: #818cf8 !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        padding: 4px 8px !important;
+        border-radius: 6px !important;
+        background: rgba(99, 102, 241, 0.1) !important;
+    }
+
+    .paginator a:hover {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+    }
+
+    /* Change Form Controls */
+    .form-row {
+        padding: 16px 20px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .form-row label {
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        color: #cbd5e1 !important;
+        display: block !important;
+        margin-bottom: 6px !important;
+    }
+
+    input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="url"], textarea, select {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        color: #f8fafc !important;
+        padding: 8px 12px !important;
+        border-radius: 8px !important;
+        font-size: 13px !important;
+    }
+
+    input:focus, textarea:focus, select:focus {
+        border-color: #6366f1 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25) !important;
+    }
+
+    .submit-row {
+        background: rgba(15, 23, 42, 0.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        padding: 16px 24px !important;
+        border-radius: 16px !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+        margin-top: 24px !important;
+    }
+
+    .submit-row input[type="submit"], .submit-row button {
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        border-radius: 8px !important;
+        border: none !important;
+        padding: 10px 20px !important;
+        font-size: 13px !important;
+        cursor: pointer !important;
+        transition: background 0.2s ease !important;
+    }
+
+    .submit-row input[type="submit"]:hover, .submit-row button:hover {
+        background: #4338ca !important;
+        box-shadow: 0 0 14px rgba(99, 102, 241, 0.35) !important;
+    }
+</style>
+{% endblock %}
+
 {% block branding %}
 <div id="site-name" class="flex items-center gap-3">
     <a href="{% url 'admin:index' %}" class="flex items-center gap-2 text-white font-bold text-lg tracking-tight">
@@ -17,14 +423,14 @@
 
 {% block userlinks %}
     {% if user.is_active and user.is_staff %}
-        <span class="user-greeting">Добро пожаловать, <strong>{{ user.username }}</strong>.</span>
+        <span class="user-greeting text-slate-300">Добро пожаловать, <strong class="text-white">{{ user.username }}</strong>.</span>
         {% if user.has_usable_password %}
-        <a href="{% url 'admin:password_change' %}">Сменить пароль</a> /
+        <a href="{% url 'admin:password_change' %}" class="text-indigo-400 hover:text-indigo-300 transition ml-2">Сменить пароль</a> /
         {% endif %}
-        <a href="{% url 'landing' %}" target="_blank">Просмотр сайта</a> /
+        <a href="{% url 'landing' %}" target="_blank" class="text-indigo-400 hover:text-indigo-300 transition">Просмотр сайта</a> /
         <form id="logout-form" action="{% url 'admin:logout' %}" method="post" style="display: inline;">
             {% csrf_token %}
-            <button type="submit" class="button-logout" style="background: none; border: none; color: inherit; font: inherit; cursor: pointer; text-decoration: underline; padding: 0;">Выйти</button>
+            <button type="submit" class="text-slate-400 hover:text-red-400 transition ml-1" style="background: none; border: none; font: inherit; cursor: pointer; text-decoration: underline; padding: 0;">Выйти</button>
         </form>
     {% endif %}
 {% endblock %}

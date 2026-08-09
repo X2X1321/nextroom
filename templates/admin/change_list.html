@@ -1,0 +1,8 @@
+{% extends "admin/change_list.html" %}
+{% load i18n static admin_urls %}
+
+{% block content_title %}
+    {% if title %}
+        <h1 class="text-2xl font-bold text-white tracking-tight mb-4">{{ title }}</h1>
+    {% endif %}
+{% endblock %}
