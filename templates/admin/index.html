@@ -16,7 +16,6 @@
     }
 </script>
 <style>
-    /* Dark Theme Reset for Admin Workspace */
     body {
         background-color: #090d16 !important;
         color: #f1f5f9 !important;
@@ -29,7 +28,7 @@
         padding: 12px 24px !important;
     }
     #header a {
-        color: #94a3b8 !important;
+        color: #818cf8 !important;
         transition: color 0.2s;
     }
     #header a:hover {
@@ -69,11 +68,12 @@
     .module tr:hover td {
         background: rgba(30, 41, 59, 0.4) !important;
     }
+    /* Unified NextRoom Admin Action Buttons (No Green!) */
     .addlink, .changelink {
         font-size: 12px !important;
         font-weight: 600 !important;
-        padding: 4px 10px !important;
-        border-radius: 6px !important;
+        padding: 5px 12px !important;
+        border-radius: 8px !important;
         text-decoration: none !important;
         display: inline-flex !important;
         align-items: center !important;
@@ -81,22 +81,25 @@
         transition: all 0.2s ease !important;
     }
     .addlink {
-        background: rgba(16, 185, 129, 0.15) !important;
-        color: #34d399 !important;
-        border: 1px solid rgba(16, 185, 129, 0.3) !important;
+        background: rgba(99, 102, 241, 0.12) !important;
+        color: #818cf8 !important;
+        border: 1px solid rgba(99, 102, 241, 0.25) !important;
     }
     .addlink:hover {
-        background: rgba(16, 185, 129, 0.3) !important;
-        color: #6ee7b7 !important;
+        background: #4f46e5 !important;
+        color: #ffffff !important;
+        border-color: #6366f1 !important;
+        box-shadow: 0 0 12px rgba(99, 102, 241, 0.3) !important;
     }
     .changelink {
-        background: rgba(99, 102, 241, 0.15) !important;
-        color: #818cf8 !important;
-        border: 1px solid rgba(99, 102, 241, 0.3) !important;
+        background: rgba(51, 65, 85, 0.35) !important;
+        color: #cbd5e1 !important;
+        border: 1px solid rgba(148, 163, 184, 0.2) !important;
     }
     .changelink:hover {
-        background: rgba(99, 102, 241, 0.3) !important;
-        color: #a5b4fc !important;
+        background: #334155 !important;
+        color: #ffffff !important;
+        border-color: #64748b !important;
     }
     #content {
         padding: 24px !important;
@@ -108,6 +111,13 @@
         padding: 20px !important;
     }
 </style>
+{% endblock %}
+
+{% block nav-breadcrumbs %}
+<div class="px-6 py-2 bg-slate-900/60 border-b border-slate-800 text-xs font-medium text-slate-400">
+    <a href="{% url 'admin:index' %}" class="text-indigo-400 hover:text-indigo-300 transition">Главная</a>
+    &rsaquo; <span class="text-slate-200 font-semibold">Администрирование сайта</span>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -146,25 +156,25 @@
                             <tbody>
                                 {% for model in app.models %}
                                     <tr>
-                                        <th scope="row" class="font-medium text-slate-200">
+                                        <th scope="row" class="font-bold text-slate-200 uppercase text-xs tracking-wider">
                                             {% if model.admin_url %}
-                                                <a href="{{ model.admin_url }}" class="text-slate-100 hover:text-indigo-400 font-semibold transition">
-                                                    {% if model.object_name == 'User' %}Пользователи
-                                                    {% elif model.object_name == 'Group' %}Группы
-                                                    {% elif model.object_name == 'Room' %}Комнаты
-                                                    {% elif model.object_name == 'UserProfile' %}Профили пользователей
-                                                    {% elif model.object_name == 'AIIntegration' %}AI Интеграции
-                                                    {% elif model.object_name == 'Message' %}Сообщения
-                                                    {% elif model.object_name == 'RoomInvitation' %}Приглашения в комнаты
-                                                    {% elif model.object_name == 'GeneratedImage' %}Сгенерированные изображения
-                                                    {% elif model.object_name == 'GuestSession' %}Гостевые сессии
-                                                    {% elif model.object_name == 'Association' %}Ассоциации
-                                                    {% elif model.object_name == 'Nonce' %}Одноразовые ключи (Nonces)
-                                                    {% elif model.object_name == 'UserSocialAuth' %}Авторизации пользователей соцсетей
-                                                    {% else %}{{ model.name }}{% endif %}
+                                                <a href="{{ model.admin_url }}" class="text-slate-100 hover:text-indigo-400 transition">
+                                                    {% if model.object_name == 'User' %}ПОЛЬЗОВАТЕЛИ
+                                                    {% elif model.object_name == 'Group' %}ГРУППЫ
+                                                    {% elif model.object_name == 'Room' %}КОМНАТЫ
+                                                    {% elif model.object_name == 'UserProfile' %}ПРОФИЛИ ПОЛЬЗОВАТЕЛЕЙ
+                                                    {% elif model.object_name == 'AIIntegration' %}AI ИНТЕГРАЦИИ
+                                                    {% elif model.object_name == 'Message' %}СООБЩЕНИЯ
+                                                    {% elif model.object_name == 'RoomInvitation' %}ПРИГЛАШЕНИЯ В КОМНАТЫ
+                                                    {% elif model.object_name == 'GeneratedImage' %}СГЕНЕРИРОВАННЫЕ ИЗОБРАЖЕНИЯ
+                                                    {% elif model.object_name == 'GuestSession' %}ГОСТЕВЫЕ СЕССИИ
+                                                    {% elif model.object_name == 'Association' %}АССОЦИАЦИИ
+                                                    {% elif model.object_name == 'Nonce' %}ОДНОРАЗОВЫЕ КЛЮЧИ (NONCES)
+                                                    {% elif model.object_name == 'UserSocialAuth' %}АВТОРИЗАЦИИ ПОЛЬЗОВАТЕЛЕЙ СОЦСЕТЕЙ
+                                                    {% else %}{{ model.name|upper }}{% endif %}
                                                 </a>
                                             {% else %}
-                                                {{ model.name }}
+                                                {{ model.name|upper }}
                                             {% endif %}
                                         </th>
 
@@ -197,10 +207,10 @@
         <div class="lg:col-span-1 space-y-6">
             <div class="sidebar-card">
                 <h2 class="text-sm font-bold text-white uppercase tracking-wider mb-4 pb-2 border-b border-slate-800">
-                    Последние действия
+                    ПОСЛЕДНИЕ ДЕЙСТВИЯ
                 </h2>
                 <h3 class="text-xs font-semibold text-slate-400 mb-3 uppercase tracking-wider">
-                    Мои действия
+                    МОИ ДЕЙСТВИЯ
                 </h3>
 
                 {% load log %}
@@ -211,7 +221,7 @@
                     <ul class="space-y-2 text-xs">
                         {% for entry in admin_log %}
                             <li class="p-2 rounded-lg bg-slate-900/60 border border-slate-800 flex items-start gap-2">
-                                <span class="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 {% if entry.is_addition %}bg-emerald-400{% elif entry.is_change %}bg-indigo-400{% else %}bg-red-400{% endif %}"></span>
+                                <span class="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 {% if entry.is_addition %}bg-indigo-400{% elif entry.is_change %}bg-slate-400{% else %}bg-red-400{% endif %}"></span>
                                 <div>
                                     <span class="font-semibold text-slate-200">{{ entry.object_repr }}</span>
                                     <span class="text-slate-400 block text-[11px] mt-0.5">

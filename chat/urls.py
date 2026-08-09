@@ -40,3 +40,5 @@ urlpatterns = [
     path('favicon.ico', views.favicon_view, name='favicon'),
     path('media/<path:path>', views.media_serve_view, name='media_serve'),
 ]
+
+

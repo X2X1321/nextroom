@@ -2062,3 +2062,4 @@ def save_image_stat(request):
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
+
