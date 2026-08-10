@@ -66,8 +66,10 @@
                             <span class="relative z-10">Сохранить ключ</span>
                         </button>
 
-                        <a href="{% url 'models_pricing' %}" class="inline-flex items-center gap-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 px-4 py-3 text-sm font-medium text-slate-300 transition-colors border border-slate-700/50">
-                            Все модели и цены
+                        <a href="{% url 'models_pricing' %}" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                            <span class="relative z-10">Все модели и цены</span>
                         </a>
                     </div>
                 </form>

@@ -53,23 +53,26 @@
                             </div>
                         </td>
                         <td class="py-4 px-6 align-top">
-                            <p class="text-sm text-slate-400 line-clamp-2" title="{{ model.description }}">
-                                {{ model.description|default:"Нет описания" }}
-                            </p>
+                            <div class="relative">
+                                <p id="desc-{{ forloop.counter }}" class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">
+                                    {{ model.description|default:"Нет описания" }}
+                                </p>
+                                {% if model.description %}
+                                <button onclick="const p = document.getElementById('desc-{{ forloop.counter }}'); p.classList.toggle('line-clamp-2'); this.textContent = p.classList.contains('line-clamp-2') ? 'Развернуть' : 'Свернуть';" class="text-xs text-indigo-400 hover:text-indigo-300 mt-1 font-medium transition-colors focus:outline-none">Развернуть</button>
+                                {% endif %}
+                            </div>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap text-sm text-slate-300 font-mono">
                             {{ model.context_length|default:"-" }}
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
                             <div class="text-sm font-medium text-emerald-400 font-mono">
-                                {% widthratio model.pricing.prompt 1 1000000 as prompt_1m %}
-                                {{ prompt_1m|default:"0" }} ₽
+                                {{ model.pricing.prompt_formatted|default:"0.00" }} ₽
                             </div>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
                             <div class="text-sm font-medium text-amber-400 font-mono">
-                                {% widthratio model.pricing.completion 1 1000000 as comp_1m %}
-                                {{ comp_1m|default:"0" }} ₽
+                                {{ model.pricing.completion_formatted|default:"0.00" }} ₽
                             </div>
                         </td>
                     </tr>

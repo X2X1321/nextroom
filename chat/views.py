@@ -70,48 +70,13 @@ AI_COMMAND_ALIASES = {
 
 YOO_KASSA_API_URL = 'https://api.yookassa.ru/v3'
 
-AI_PROVIDERS = {
-    'cloro': {
-        'base_url': 'https://api.cloro.dev/v1/monitor',
-        'default_model': 'gemini',
-    },
-    'gemini': {
-        'base_url': 'https://api.cloro.dev/v1/monitor',
-        'default_model': 'gemini',
-    },
-    'gpt': {
-        'base_url': 'https://api.openai.com/v1',
-        'default_model': 'gpt-3.5-turbo',
-    },
-    'groq': {
-        'base_url': 'https://api.groq.com/openai/v1',
-        'default_model': 'llama-3.3-70b-versatile',
-    },
-    'grok': {
-        'base_url': 'https://api.x.ai/v1',
-        'default_model': 'grok-beta',
-    },
-    'deepseek': {
-        'base_url': 'https://api.deepseek.com/v1',
-        'default_model': 'deepseek-chat',
-    },
-    'qwen': {
-        'base_url': 'https://dashscope.aliyuncs.com/compatible-mode/v1',
-        'default_model': 'qwen-turbo',
-    },
-    'claude': {
-        'base_url': 'https://api.anthropic.com/v1',
-        'default_model': 'claude-3-5-sonnet-20240620',
-    },
-    'cerebras': {
-        'base_url': 'https://api.cerebras.ai/v1',
-        'default_model': 'llama-3.3-70b',
-    },
-    'openrouter': {
-        'base_url': 'https://openrouter.ai/api/v1',
-        'default_model': 'openrouter/auto-beta',
-    },
-}
+AI_PROVIDERS = {}
+for p_tuple in AVAILABLE_PROVIDERS:
+    provider_id = p_tuple[0]
+    AI_PROVIDERS[provider_id] = {
+        'base_url': 'https://routerai.ru/api/v1',
+        'default_model': 'auto',
+    }
 
 
 def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt=''):
