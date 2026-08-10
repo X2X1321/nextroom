@@ -88,6 +88,7 @@ class UserProfile(models.Model):
     custom_prompt = models.TextField(blank=True, help_text='Дополнительные правила для нейросети в чате.')
     is_bot = models.BooleanField(default=False, verbose_name="Бот", help_text="Является ли пользователь системным ботом")
     total_messages_count = models.PositiveIntegerField(default=0, verbose_name="Total Messages")
+    balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Баланс (RUB)")
 
     class Meta:
         verbose_name = 'Профиль пользователя'
@@ -476,3 +477,23 @@ class MovieGame(models.Model):
     def __str__(self):
         return f"Game in {self.room.name}: {self.movie_name} ({'Active' if self.is_active else 'Finished'})"
 
+class Payment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Ожидает оплаты'),
+        ('succeeded', 'Успешно'),
+        ('canceled', 'Отменено'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_id = models.CharField(max_length=100, unique=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'Платеж'
+        verbose_name_plural = 'Платежи'
+
+    def __str__(self):
+        return f"Платеж {self.id} - {self.user.username} - {self.amount} RUB ({self.get_status_display()})"

@@ -9,7 +9,7 @@
 {% block content %}
 <div class="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6 pb-24">
     <div class="flex items-center justify-between">
-        <div>
+        <div class="flex-1">
             <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition duration-200 group mb-3">
                 <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
@@ -19,7 +19,33 @@
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Генерация изображений</h1>
             <p class="text-sm text-slate-400 mt-1">Опишите, что нужно нарисовать, и нейросеть сгенерирует изображение.</p>
         </div>
+        {% if user.is_authenticated %}
+        <div class="hidden sm:flex flex-col items-end gap-1">
+            <span class="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Ваш баланс</span>
+            <div class="inline-flex items-center gap-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5">
+                <span class="text-emerald-400 font-bold">{{ user.profile.balance }} ₽</span>
+                <a href="{% url 'profile' %}" class="text-emerald-300 hover:text-emerald-200 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        {% endif %}
     </div>
+    {% if user.is_authenticated %}
+    <div class="flex sm:hidden justify-between items-center bg-slate-900/50 border border-slate-800 rounded-2xl p-3 -mt-2 mb-2">
+        <span class="text-xs uppercase tracking-widest text-slate-500 font-semibold">Ваш баланс</span>
+        <div class="flex items-center gap-2">
+            <span class="text-emerald-400 font-bold text-sm">{{ user.profile.balance }} ₽</span>
+            <a href="{% url 'profile' %}" class="p-1 rounded-lg bg-emerald-500/10 text-emerald-300 hover:text-emerald-200 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="glass-panel rounded-3xl p-6 flex flex-col gap-4">
         <div id="image-result" class="hidden">

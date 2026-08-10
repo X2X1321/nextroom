@@ -26,7 +26,8 @@ from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import Q, Count, Sum, Avg
 
-from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog, GeneratedImage, GuestSession
+from yookassa import Configuration, Payment as YooPayment
+from .models import Room, Message, UserProfile, AIIntegration, RoomAIIntegration, RoomInvitation, AI_PROVIDER_CHOICES, MessageReaction, Achievement, UserAchievement, UserActivity, AIUsageLog, GeneratedImage, GuestSession, Payment
 
 
 def get_or_create_guest_session(request):
@@ -2108,3 +2109,91 @@ def custom_page_not_found_view(request, exception=None):
 def custom_server_error_view(request):
     from django.shortcuts import render
     return render(request, '500.html', status=500)
+
+
+@login_required
+def topup_balance(request):
+    if request.method == 'POST':
+        try:
+            amount_str = request.POST.get('amount', '0').replace(',', '.')
+            amount = float(amount_str)
+            if amount < 10:
+                messages.error(request, 'Минимальная сумма пополнения — 10 рублей.')
+                return redirect('profile')
+
+            Configuration.account_id = os.environ.get('YOOKASSA_SHOP_ID')
+            Configuration.secret_key = os.environ.get('YOOKASSA_SECRET_KEY')
+
+            if not Configuration.account_id or not Configuration.secret_key:
+                messages.error(request, 'Оплата временно недоступна (не настроены ключи ЮKassa).')
+                return redirect('profile')
+
+            payment = YooPayment.create({
+                "amount": {
+                    "value": f"{amount:.2f}",
+                    "currency": "RUB"
+                },
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": request.build_absolute_uri(reverse('payment_return'))
+                },
+                "capture": True,
+                "description": f"Пополнение баланса NextRoom (Пользователь {request.user.username})"
+            }, str(secrets.token_hex(16)))
+
+            # Сохраняем в БД со статусом pending
+            Payment.objects.create(
+                user=request.user,
+                amount=amount,
+                payment_id=payment.id,
+                status='pending'
+            )
+
+            return redirect(payment.confirmation.confirmation_url)
+
+        except ValueError:
+            messages.error(request, 'Пожалуйста, введите корректную сумму.')
+            return redirect('profile')
+        except Exception as e:
+            logging.error(f"Payment creation error: {e}")
+            messages.error(request, f'Ошибка создания платежа: {e}')
+            return redirect('profile')
+
+    return redirect('profile')
+
+
+@login_required
+def payment_return(request):
+    Configuration.account_id = os.environ.get('YOOKASSA_SHOP_ID')
+    Configuration.secret_key = os.environ.get('YOOKASSA_SECRET_KEY')
+
+    pending_payments = Payment.objects.filter(user=request.user, status='pending')
+    
+    # If we return and there are pending payments, check their status
+    checked = False
+    for p in pending_payments:
+        try:
+            payment_info = YooPayment.find_one(p.payment_id)
+            if payment_info.status == 'succeeded':
+                p.status = 'succeeded'
+                p.save()
+                
+                profile = request.user.profile
+                profile.balance = F('balance') + p.amount
+                profile.save()
+                profile.refresh_from_db()
+                
+                messages.success(request, f'Баланс успешно пополнен на {p.amount} RUB!')
+                checked = True
+            elif payment_info.status == 'canceled':
+                p.status = 'canceled'
+                p.save()
+                messages.error(request, 'Оплата была отменена.')
+                checked = True
+        except Exception as e:
+            logging.error(f"Error checking payment status: {e}")
+            
+    if not checked and not pending_payments.exists():
+        pass
+
+    return redirect('profile')
