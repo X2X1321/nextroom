@@ -741,11 +741,20 @@ def delete_room(request, slug):
     messages.success(request, f'Комната "{room_name}" была успешно удалена.')
     return redirect('dashboard')
 
+from django.db.models import Max, Count
+
 @login_required
 def profile(request):
     profile = get_user_profile(request.user)
-    my_rooms = Room.objects.filter(creator=request.user).annotate(msg_count=Count('messages'))
-    visited_rooms = profile.visited_rooms.all()
+    my_rooms = Room.objects.filter(creator=request.user).annotate(
+        msg_count=Count('messages'),
+        last_activity=Max('messages__created_at')
+    ).order_by('-last_activity', '-created_at')
+    
+    visited_rooms = profile.visited_rooms.annotate(
+        last_activity=Max('messages__created_at')
+    ).order_by('-last_activity', '-created_at')
+    
     integrations = profile.integrations.all()
     available_providers = [
         ('gpt', 'ChatGPT', 'gpt-3.5-turbo'),
