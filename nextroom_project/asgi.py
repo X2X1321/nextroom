@@ -15,8 +15,3 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nextroom_project.settings')
 
 application = get_asgi_application()
 
-from .bootstrap import bootstrap  # noqa: E402
-try:
-    bootstrap()
-except Exception:
-    pass
