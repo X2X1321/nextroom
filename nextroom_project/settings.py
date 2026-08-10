@@ -24,14 +24,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-4oy4*jok7@v$c(#d=w8&pj+v90imq(v4zu*5u+wv40)@qwc4=n')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
+if not os.environ.get('VERCEL') and not os.environ.get('DJANGO_DEBUG', 'False') == 'True' and not SECRET_KEY:
+    raise ImproperlyConfigured("DJANGO_SECRET_KEY must not be empty in production!")
+elif not SECRET_KEY:
+    SECRET_KEY = 'django-insecure-4oy4*jok7@v$c(#d=w8&pj+v90imq(v4zu*5u+wv40)@qwc4=n'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'True') == 'True'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
 if os.environ.get('VERCEL'):
     DEBUG = False
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',') if os.environ.get('ALLOWED_HOSTS') else ['*']
+# Security Settings
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5 MB
+
+if not DEBUG:
+    # Принудительно перенаправлять все HTTP запросы на HTTPS
+    SECURE_SSL_REDIRECT = True
+    
+    # Включаем HSTS, чтобы браузеры запомнили, что сайт работает только по HTTPS (на 1 год)
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+env_hosts = os.environ.get('ALLOWED_HOSTS')
+ALLOWED_HOSTS = env_hosts.split(',') if env_hosts else []
 
 
 # Application definition
