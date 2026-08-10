@@ -217,9 +217,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
 
     if provider == 'openrouter':
         # Use provided key or fall back to default (env var takes priority in production)
-        api_key = api_key or os.environ.get('OPENROUTER_API_KEY', '') or (
-            'sk-or-v1-a608f5868c41e8693664349eb25847b' + '49d66bb934778e182e947622be93c6a55'
-        )
+        api_key = api_key or os.environ.get('OPENROUTER_API_KEY', '')
         url = 'https://openrouter.ai/api/v1/chat/completions'
         model = model or 'openrouter/auto-beta'
         payload = {
@@ -381,7 +379,7 @@ def fetch_ai_response(alias, prompt, integration):
         logging.warning(f'Primary AI provider {alias} failed ({exc}). Attempting automatic fallback...')
 
     # Attempt 2: Fallback to Cloro Gemini (always available with working default key)
-    cloro_key = getattr(settings, 'CLORO_API_KEY', '') or ('sk_live_' + '7cb45c30671b2b55fd02bf8853468c2b')
+    cloro_key = getattr(settings, 'CLORO_API_KEY', '')
     try:
         content, tokens_used = fetch_chat_completion(
             'cloro', prompt, cloro_key,
@@ -1062,21 +1060,20 @@ def send_message(request, slug):
     image = None
     voice = None
     
-    if request.FILES:
+    ALLOWED_IMAGE_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    ALLOWED_VOICE_MIME = ['audio/mpeg', 'audio/mp4', 'audio/ogg', 'audio/webm', 'video/webm', 'audio/wav', 'audio/x-wav']
+
+    if request.FILES or (request.content_type and 'multipart/form-data' in request.content_type):
         content = request.POST.get('content', '').strip()
         if 'image' in request.FILES:
             image = request.FILES['image']
+            if getattr(image, 'content_type', '') not in ALLOWED_IMAGE_MIME:
+                return JsonResponse({'error': 'Неверный формат изображения (допустимы jpg, png, webp, gif)'}, status=400)
             message_type = 'image'
         if 'voice' in request.FILES:
             voice = request.FILES['voice']
-            message_type = 'voice'
-    elif request.content_type and 'multipart/form-data' in request.content_type:
-        content = request.POST.get('content', '').strip()
-        if 'image' in request.FILES:
-            image = request.FILES['image']
-            message_type = 'image'
-        if 'voice' in request.FILES:
-            voice = request.FILES['voice']
+            if getattr(voice, 'content_type', '') not in ALLOWED_VOICE_MIME:
+                return JsonResponse({'error': 'Неверный формат аудио'}, status=400)
             message_type = 'voice'
     else:
         try:
@@ -1488,13 +1485,16 @@ def edit_ai_integration(request, pk):
         api_key = request.POST.get('api_key', '').strip()
         model_name = request.POST.get('model_name', '').strip()
         custom_prompt = request.POST.get('custom_prompt', '').strip()
-        integration.api_key = api_key
+        if api_key and api_key != '****************':
+            integration.api_key = api_key
         integration.model_name = model_name
         integration.custom_prompt = custom_prompt
         integration.save()
         messages.success(request, f'Интеграция @{integration.provider} обновлена.')
         return redirect('ai_management')
-    context = {'integration': integration}
+        
+    masked_key = '****************' if integration.api_key else ''
+    context = {'integration': integration, 'masked_key': masked_key}
     return render(request, 'chat/edit_ai_integration.html', context)
 
 
@@ -1541,7 +1541,7 @@ def image_generation_chat(request):
 
 def _generate_with_horde(prompt, timeout=90, target_model=None):
     """AI Horde image generation with manual fallback. Returns image URL/base64."""
-    api_key = os.environ.get('HORDE_API_KEY', 'qvsynPrtzjRYAgHemtIzkQ')
+    api_key = os.environ.get('HORDE_API_KEY', '')
     base_url = os.environ.get('AI_HORDE_API_BASE_URL', 'https://aihorde.net/api/v2')
     
     fallback_models = [
@@ -1638,7 +1638,7 @@ def _generate_with_horde(prompt, timeout=90, target_model=None):
 
 def _generate_with_huggingface(prompt, timeout=10):
     """Hugging Face Inference API image generation. Returns base64 data URI."""
-    api_key = os.environ.get('HF_API_KEY', 'hf_gAGeiZpbq' + 'HyLUqvRkVcjSvphwMpGcYhPTW')
+    api_key = os.environ.get('HF_API_KEY', '')
     model = os.environ.get('HF_IMAGE_MODEL', 'stabilityai/stable-diffusion-xl-base-1.0')
     # nlpconnect/vit-gpt2-image-captioning is a captioning model, not a gen model.
     # Use a proper text-to-image model instead.

@@ -54,6 +54,8 @@ if not DEBUG:
 
 env_hosts = os.environ.get('ALLOWED_HOSTS')
 ALLOWED_HOSTS = env_hosts.split(',') if env_hosts else []
+if os.environ.get('VERCEL'):
+    ALLOWED_HOSTS.append('.vercel.app')
 
 
 # Application definition
@@ -175,7 +177,15 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = '/media/'
-if os.environ.get('VERCEL') or not os.access(BASE_DIR, os.W_OK):
+if os.environ.get('AWS_ACCESS_KEY_ID') and os.environ.get('AWS_SECRET_ACCESS_KEY'):
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'us-east-1')
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+elif os.environ.get('VERCEL') or not os.access(BASE_DIR, os.W_OK):
     MEDIA_ROOT = Path('/tmp') / 'media'
 else:
     MEDIA_ROOT = BASE_DIR / 'media'

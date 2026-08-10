@@ -4,10 +4,11 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
-from django.db.models import JSONField
+from django.db.models import JSONField, Count
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.text import slugify
+from django_cryptography.fields import encrypt
 
 AI_PROVIDER_CHOICES = [
     ('cloro', 'Cloro'),
@@ -70,12 +71,9 @@ class Room(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = slugify(self.name) or 'room'
-            slug = base_slug
-            counter = 2
-            while Room.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-            self.slug = slug
+            self.slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
+            while Room.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{base_slug}-{uuid.uuid4().hex[:6]}"
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -88,6 +86,8 @@ class UserProfile(models.Model):
     api_keys = JSONField(default=dict, blank=True)
     visited_rooms = models.ManyToManyField(Room, related_name='visited_by', blank=True)
     custom_prompt = models.TextField(blank=True, help_text='Дополнительные правила для нейросети в чате.')
+    is_bot = models.BooleanField(default=False, verbose_name="Бот", help_text="Является ли пользователь системным ботом")
+    total_messages_count = models.PositiveIntegerField(default=0, verbose_name="Total Messages")
 
     class Meta:
         verbose_name = 'Профиль пользователя'
@@ -116,7 +116,7 @@ class UserProfile(models.Model):
 class AIIntegration(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='integrations')
     provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)
-    api_key = models.CharField(max_length=255)
+    api_key = encrypt(models.CharField(max_length=255))
     model_name = models.CharField(max_length=120, blank=True)
     custom_prompt = models.TextField(blank=True, verbose_name="Персональный промпт", help_text="Инструкции и роль для этой модели в чате")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -178,6 +178,14 @@ class GuestSession(models.Model):
     def __str__(self):
         return f"{self.guest_name} ({self.ip_address or self.session_key[:8]})"
 
+def get_image_upload_path(instance, filename):
+    ext = filename.split('.')[-1]
+    return f"chat_images/{uuid.uuid4()}.{ext}"
+
+def get_voice_upload_path(instance, filename):
+    ext = filename.split('.')[-1]
+    return f"chat_voices/{uuid.uuid4()}.{ext}"
+
 
 class Message(models.Model):
     MESSAGE_TYPES = [
@@ -191,8 +199,8 @@ class Message(models.Model):
     guest_name = models.CharField(max_length=100, blank=True)
     content = models.TextField(verbose_name="Message Content", blank=True)
     message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text')
-    image = models.ImageField(upload_to='chat_images/', blank=True, null=True)
-    voice = models.FileField(upload_to='chat_voices/', blank=True, null=True)
+    image = models.ImageField(upload_to=get_image_upload_path, blank=True, null=True)
+    voice = models.FileField(upload_to=get_voice_upload_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -201,13 +209,19 @@ class Message(models.Model):
         verbose_name_plural = 'Сообщения'
 
     def get_reactions_summary(self):
-        reactions_list = list(self.reactions.all())
         summary = []
+        reaction_counts = self.reactions.values('reaction').annotate(count=Count('id'))
+        count_map = {r['reaction']: r['count'] for r in reaction_counts}
+        
         for emoji in ['❤️', '🔥', '😂', '🎉']:
-            reactors = [r.user.username for r in reactions_list if r.reaction == emoji]
+            count = count_map.get(emoji, 0)
+            reactors = []
+            if count > 0:
+                top_reactors = self.reactions.filter(reaction=emoji).select_related('user')[:3]
+                reactors = [r.user.username for r in top_reactors if r.user]
             summary.append({
                 'emoji': emoji,
-                'count': len(reactors),
+                'count': count,
                 'reactors': reactors,
             })
         return summary
@@ -282,6 +296,7 @@ class UserActivity(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='activities')
     date = models.DateField()
     messages_count = models.IntegerField(default=0)
+    streak_checked_today = models.BooleanField(default=False)
 
     class Meta:
         unique_together = ('user', 'date')
@@ -394,18 +409,30 @@ def message_created_check_achievements(sender, instance, created, **kwargs):
         from django.utils import timezone
         today = timezone.now().date()
         activity, _ = UserActivity.objects.get_or_create(user=user, date=today, defaults={'messages_count': 0})
-        activity.messages_count += 1
-        activity.save()
+        activity.messages_count = models.F('messages_count') + 1
+        activity.save(update_fields=['messages_count'])
 
-        total_messages = Message.objects.filter(user=user).count()
+        profile = getattr(user, 'profile', None)
+        if profile:
+            profile.total_messages_count = models.F('total_messages_count') + 1
+            profile.save(update_fields=['total_messages_count'])
+            profile.refresh_from_db(fields=['total_messages_count'])
+            total_messages = profile.total_messages_count
+        else:
+            total_messages = 1
+            
         _check_and_grant_achievements(user, 'messages', total_messages)
 
         if instance.content.strip().startswith('@'):
             _check_and_grant_achievements(user, 'ai_messages', 1)
 
-        streak = _calculate_streak(user)
-        if streak >= 30:
-            _check_and_grant_achievements(user, 'consecutive_days', streak)
+        activity.refresh_from_db(fields=['streak_checked_today'])
+        if not activity.streak_checked_today:
+            streak = _calculate_streak(user)
+            if streak >= 30:
+                _check_and_grant_achievements(user, 'consecutive_days', streak)
+            activity.streak_checked_today = True
+            activity.save(update_fields=['streak_checked_today'])
 
 
 @receiver(post_save, sender=RoomInvitation)

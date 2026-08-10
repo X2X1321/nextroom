@@ -5,3 +5,6 @@ psycopg2-binary==2.9.9
 groq==1.0.0
 cerebras-cloud-sdk==1.0.0
 social-auth-app-django==5.4.1
+django-cryptography
+django-storages
+boto3

@@ -745,9 +745,10 @@
         </div>
     </div>
     <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+    {{ all_rooms_json|json_script:"rooms-data" }}
     <script>
     (function() {
-        const roomsData = {{ all_rooms_json|safe }};
+        const roomsData = JSON.parse(document.getElementById('rooms-data').textContent);
         const el = document.getElementById('room-graph');
         if (!el || !roomsData.length) return;
 
