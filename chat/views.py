@@ -18,6 +18,10 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.urls import reverse
+from django.db.models import F
+from django.utils.html import escape
+from ipware import get_client_ip
+from django_ratelimit.decorators import ratelimit
 from django.utils import timezone
 from django.utils.text import slugify
 from django.db.models import Q, Count, Sum, Avg
@@ -35,11 +39,9 @@ def get_or_create_guest_session(request):
         guest_name = f"Гость #{short_id}"
         request.session['guest_name'] = guest_name
 
-    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-    if x_forwarded_for:
-        ip = x_forwarded_for.split(',')[0].strip()
-    else:
-        ip = request.META.get('REMOTE_ADDR')
+    ip, is_routable = get_client_ip(request)
+    if not ip:
+        ip = '127.0.0.1'
 
     guest, _ = GuestSession.objects.get_or_create(
         session_key=session_key,
@@ -929,14 +931,17 @@ def room_detail(request, slug):
     room = get_object_or_404(Room, slug=slug)
     
     # Handle private room access code verification
-    session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
+    authorized_rooms = request.session.get('authorized_rooms', [])
+    is_authorized = room.id in authorized_rooms or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
     
     if room.is_private and not is_authorized:
         if request.method == 'POST':
             entered_code = request.POST.get('access_code', '').strip()
             if entered_code == room.access_code or RoomInvitation.objects.filter(room=room, invite_code=entered_code).exists():
-                request.session[session_key] = True
+                authorized_rooms = request.session.get('authorized_rooms', [])
+                if room.id not in authorized_rooms:
+                    authorized_rooms.append(room.id)
+                    request.session['authorized_rooms'] = authorized_rooms
                 messages.success(request, 'Доступ разрешен!')
                 return redirect('room_detail', slug=room.slug)
             else:
@@ -990,8 +995,8 @@ def get_messages(request, slug):
     room = get_object_or_404(Room, slug=slug)
     
     # Verify access to private room
-    session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
+    authorized_rooms = request.session.get('authorized_rooms', [])
+    is_authorized = room.id in authorized_rooms or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
     if not is_authorized:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
         
@@ -1010,7 +1015,7 @@ def get_messages(request, slug):
             'id': msg.id,
             'username': username,
             'is_me': is_me,
-            'content': sanitize_ai_response(msg.content) if (msg.user and msg.user.username == 'nextroom_ai') else msg.content,
+            'content': sanitize_ai_response(msg.content) if (msg.user and getattr(msg.user.profile, 'is_bot', False)) else escape(msg.content),
             'message_type': msg.message_type,
             'timestamp': msg.created_at.strftime('%H:%M'),
             'reactions': {
@@ -1042,7 +1047,10 @@ def _update_user_activity(user):
     _check_and_grant_achievements(user, 'messages', total_messages)
 
 
+@ratelimit(key='ip', rate='30/m', block=False)
 def send_message(request, slug):
+    if getattr(request, 'limited', False):
+        return JsonResponse({'error': 'Превышен лимит сообщений. Подождите.'}, status=429)
     """JSON API endpoint to send a message."""
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
@@ -1050,8 +1058,8 @@ def send_message(request, slug):
     room = get_object_or_404(Room, slug=slug)
     
     # Verify access to private room
-    session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
+    authorized_rooms = request.session.get('authorized_rooms', [])
+    is_authorized = room.id in authorized_rooms or (request.user.is_authenticated and room.creator == request.user) or not room.is_private
     if not is_authorized:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
     
@@ -1069,6 +1077,15 @@ def send_message(request, slug):
             image = request.FILES['image']
             if getattr(image, 'content_type', '') not in ALLOWED_IMAGE_MIME:
                 return JsonResponse({'error': 'Неверный формат изображения (допустимы jpg, png, webp, gif)'}, status=400)
+            
+            try:
+                from PIL import Image
+                img = Image.open(image)
+                img.verify()
+                image.seek(0)
+            except Exception:
+                return JsonResponse({'error': 'Файл поврежден или содержит вредоносный код'}, status=400)
+                
             message_type = 'image'
         if 'voice' in request.FILES:
             voice = request.FILES['voice']
@@ -1241,8 +1258,8 @@ def toggle_message_reaction(request, message_id):
     room = message.room
 
     # Verify access to private room
-    session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
+    authorized_rooms = request.session.get('authorized_rooms', [])
+    is_authorized = room.id in authorized_rooms or room.creator == request.user or not room.is_private
     if not is_authorized:
         return JsonResponse({'error': 'Unauthorized'}, status=403)
 
@@ -1291,8 +1308,8 @@ def room_stats(request, slug):
     room = get_object_or_404(Room, slug=slug)
 
     # Verify access to private room
-    session_key = f'room_auth_{room.id}'
-    is_authorized = session_key in request.session or room.creator == request.user or not room.is_private
+    authorized_rooms = request.session.get('authorized_rooms', [])
+    is_authorized = room.id in authorized_rooms or room.creator == request.user or not room.is_private
     if not is_authorized:
         return HttpResponseForbidden("У вас нет доступа к этой комнате.")
 

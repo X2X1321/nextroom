@@ -8,3 +8,5 @@ social-auth-app-django==5.4.1
 django-cryptography
 django-storages
 boto3
+django-ipware
+django-ratelimit
