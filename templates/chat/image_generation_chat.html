@@ -146,15 +146,27 @@
         const startTime = Date.now();
         const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
-        const saveStats = (modelName, promptText, genTime, imageUrl) => {
-            fetch("{% url 'save_image_stat' %}", {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-                body: JSON.stringify({ model_name: modelName, prompt: promptText, generation_time: genTime, image_url: imageUrl })
-            }).catch(e => console.error('Failed to save stats:', e));
+        const saveStats = (modelName, promptText, genTime, imageUrl, imageBlob) => {
+            const sendRequest = (bodyData) => {
+                fetch("{% url 'save_image_stat' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+                    body: JSON.stringify(bodyData)
+                }).catch(e => console.error('Failed to save stats:', e));
+            };
+
+            if (imageBlob) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    sendRequest({ model_name: modelName, prompt: promptText, generation_time: genTime, image_data: reader.result });
+                };
+                reader.readAsDataURL(imageBlob);
+            } else {
+                sendRequest({ model_name: modelName, prompt: promptText, generation_time: genTime, image_url: imageUrl });
+            }
         };
 
-        const renderSuccess = (url) => {
+        const renderSuccess = (url, imageBlob = null) => {
             imageEl.src = url;
             downloadLink.href = url;
             imageEl.onload = () => {
@@ -162,7 +174,7 @@
                 imageEl.classList.remove('opacity-0');
                 imageEl.classList.add('opacity-100');
                 resultDiv.classList.remove('hidden');
-                saveStats(model, prompt, (Date.now() - startTime) / 1000, url);
+                saveStats(model, prompt, (Date.now() - startTime) / 1000, url, imageBlob);
             };
             imageEl.onerror = () => {
                 loadingDiv.classList.add('hidden');
@@ -182,7 +194,7 @@
                 
                 if (res.ok) {
                     const imageBlob = await res.blob();
-                    renderSuccess(URL.createObjectURL(imageBlob));
+                    renderSuccess(URL.createObjectURL(imageBlob), imageBlob);
                 } else {
                     let errorMsg = 'Ошибка генерации в Cloudflare.';
                     try { const errorData = await res.json(); if (errorData.error) errorMsg = errorData.error; } catch(e) {}

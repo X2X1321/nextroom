@@ -2051,6 +2051,21 @@ def save_image_stat(request):
         prompt = data.get('prompt', '')
         generation_time = float(data.get('generation_time', 0.0))
         image_url = data.get('image_url', '')
+        image_data = data.get('image_data', None)
+        
+        if image_data:
+            import base64
+            import uuid
+            from django.core.files.base import ContentFile
+            from django.core.files.storage import default_storage
+            try:
+                format, imgstr = image_data.split(';base64,')
+                ext = format.split('/')[-1]
+                file_name = f"generated/{uuid.uuid4()}.{ext}"
+                path = default_storage.save(file_name, ContentFile(base64.b64decode(imgstr)))
+                image_url = default_storage.url(path)
+            except Exception as e:
+                print("Failed to save base64 image", e)
         
         if request.user.is_authenticated:
             profile = get_user_profile(request.user)
