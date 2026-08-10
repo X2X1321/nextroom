@@ -54,8 +54,9 @@ if not DEBUG:
 
 env_hosts = os.environ.get('ALLOWED_HOSTS')
 ALLOWED_HOSTS = env_hosts.split(',') if env_hosts else []
-if os.environ.get('VERCEL'):
-    ALLOWED_HOSTS.append('.vercel.app')
+# Always allow vercel subdomains in this environment to prevent DisallowedHost on deployments
+ALLOWED_HOSTS.append('.vercel.app')
+ALLOWED_HOSTS.append('nextroom.vercel.app')
 
 
 # Application definition
@@ -173,6 +174,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_MANIFEST_STRICT = False
 
