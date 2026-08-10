@@ -18,6 +18,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.urls import reverse
+
+from .models_catalog import MODELS_CATALOG, AVAILABLE_PROVIDERS
 from django.db.models import F
 from django.utils.html import escape
 from ipware import get_client_ip
@@ -599,6 +601,13 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
+            
+            remember_me = request.POST.get('remember_me')
+            if remember_me:
+                request.session.set_expiry(1209600) # 2 weeks
+            else:
+                request.session.set_expiry(0) # close on browser exit
+                
             messages.success(request, f'С возвращением, {username}!')
             next_url = request.GET.get('next')
             if next_url:
@@ -756,22 +765,7 @@ def profile(request):
     ).order_by('-last_activity', '-created_at')
     
     integrations = profile.integrations.all()
-    available_providers = [
-        ('gpt', 'ChatGPT', 'gpt-3.5-turbo'),
-        ('gpt', 'ChatGPT', 'gpt-4o-mini'),
-        ('gpt', 'ChatGPT', 'gpt-4o'),
-        ('groq', 'Groq', 'llama-3.3-70b-versatile'),
-        ('groq', 'Groq', 'llama-3.1-8b-instant'),
-        ('groq', 'Groq', 'mixtral-8x7b-32768'),
-        ('qwen', 'Qwen', 'qwen-turbo'),
-        ('qwen', 'Qwen', 'qwen-plus'),
-        ('deepseek', 'DeepSeek', 'deepseek-chat'),
-        ('deepseek', 'DeepSeek', 'deepseek-reasoner'),
-        ('claude', 'Claude', 'claude-3-5-sonnet-20240620'),
-        ('claude', 'Claude', 'claude-3-haiku-20240307'),
-        ('cerebras', 'Cerebras', 'zai-glm-4.7'),
-        ('grok', 'Grok', 'grok-beta'),
-    ]
+    available_providers = AVAILABLE_PROVIDERS
 
     if request.method == 'POST':
         profile.custom_prompt = request.POST.get('custom_prompt', '').strip()
@@ -1389,105 +1383,15 @@ def achievements(request):
 def ai_management(request):
     profile = get_user_profile(request.user)
     integrations = profile.integrations.all()
-    providers_structured = [
-        {
-            'id': 'cloro',
-            'name': 'Cloro',
-            'models': [
-                {'id': 'gemini', 'name': 'Extract Google Gemini'},
-            ]
-        },
-        {
-            'id': 'gpt',
-            'name': 'OpenAI (ChatGPT)',
-            'models': [
-                {'id': 'gpt-3.5-turbo', 'name': 'GPT-3.5 Turbo'},
-                {'id': 'gpt-4o-mini', 'name': 'GPT-4o Mini'},
-                {'id': 'gpt-4o', 'name': 'GPT-4o'},
-            ]
-        },
-        {
-            'id': 'groq',
-            'name': 'Groq',
-            'models': [
-                {'id': 'llama-3.3-70b-versatile', 'name': 'Llama 3.3 70B'},
-                {'id': 'llama-3.1-8b-instant', 'name': 'Llama 3.1 8B'},
-                {'id': 'mixtral-8x7b-32768', 'name': 'Mixtral 8x7b'},
-            ]
-        },
-        {
-            'id': 'grok',
-            'name': 'xAI (Grok)',
-            'models': [
-                {'id': 'grok-beta', 'name': 'Grok Beta'},
-                {'id': 'grok-2-latest', 'name': 'Grok 2'},
-            ]
-        },
-        {
-            'id': 'deepseek',
-            'name': 'DeepSeek',
-            'models': [
-                {'id': 'deepseek-chat', 'name': 'DeepSeek Chat (V3)'},
-                {'id': 'deepseek-reasoner', 'name': 'DeepSeek Reasoner (R1)'},
-            ]
-        },
-        {
-            'id': 'qwen',
-            'name': 'Aliyun (Qwen)',
-            'models': [
-                {'id': 'qwen-turbo', 'name': 'Qwen Turbo'},
-                {'id': 'qwen-plus', 'name': 'Qwen Plus'},
-            ]
-        },
-        {
-            'id': 'claude',
-            'name': 'Anthropic (Claude)',
-            'models': [
-                {'id': 'claude-3-5-sonnet-20240620', 'name': 'Claude 3.5 Sonnet'},
-                {'id': 'claude-3-haiku-20240307', 'name': 'Claude 3 Haiku'},
-            ]
-        },
-        {
-            'id': 'cerebras',
-            'name': 'Cerebras',
-            'models': [
-                {'id': 'zai-glm-4.7', 'name': 'ZAI GLM 4.7'},
-            ]
-        },
-        {
-            'id': 'openrouter',
-            'name': 'OpenRouter (Auto)',
-            'models': [
-                {'id': 'openrouter/auto-beta', 'name': 'Auto Beta (лучшая модель для задачи)'},
-                {'id': 'openai/gpt-4o', 'name': 'GPT-4o via OpenRouter'},
-                {'id': 'anthropic/claude-3.5-sonnet', 'name': 'Claude 3.5 Sonnet via OpenRouter'},
-                {'id': 'google/gemini-2.0-flash-001', 'name': 'Gemini 2.0 Flash via OpenRouter'},
-                {'id': 'deepseek/deepseek-r1-0528', 'name': 'DeepSeek R1 via OpenRouter'},
-            ]
-        },
-    ]
-    available_providers = [
-        ('cloro', 'Cloro', 'gemini'),
-        ('gpt', 'ChatGPT', 'gpt-3.5-turbo'),
-        ('gpt', 'ChatGPT', 'gpt-4o-mini'),
-        ('gpt', 'ChatGPT', 'gpt-4o'),
-        ('groq', 'Groq', 'llama-3.3-70b-versatile'),
-        ('groq', 'Groq', 'llama-3.1-8b-instant'),
-        ('groq', 'Groq', 'mixtral-8x7b-32768'),
-        ('qwen', 'Qwen', 'qwen-turbo'),
-        ('qwen', 'Qwen', 'qwen-plus'),
-        ('deepseek', 'DeepSeek', 'deepseek-chat'),
-        ('deepseek', 'DeepSeek', 'deepseek-reasoner'),
-        ('claude', 'Claude', 'claude-3-5-sonnet-20240620'),
-        ('claude', 'Claude', 'claude-3-haiku-20240307'),
-        ('cerebras', 'Cerebras', 'zai-glm-4.7'),
-        ('grok', 'Grok', 'grok-beta'),
-        ('openrouter', 'OpenRouter Auto', 'openrouter/auto-beta'),
-        ('openrouter', 'OpenRouter Auto', 'openai/gpt-4o'),
-        ('openrouter', 'OpenRouter Auto', 'anthropic/claude-3.5-sonnet'),
-        ('openrouter', 'OpenRouter Auto', 'google/gemini-2.0-flash-001'),
-        ('openrouter', 'OpenRouter Auto', 'deepseek/deepseek-r1-0528'),
-    ]
+    providers_dict = {}
+    for m in MODELS_CATALOG:
+        pid = m['provider'].lower()
+        if pid not in providers_dict:
+            providers_dict[pid] = {'id': pid, 'name': m['provider'], 'models': []}
+        providers_dict[pid]['models'].append({'id': m['id'], 'name': m['name']})
+    providers_structured = list(providers_dict.values())
+    
+    available_providers = AVAILABLE_PROVIDERS
 
     if request.method == 'POST':
         profile.custom_prompt = request.POST.get('custom_prompt', '').strip()
@@ -2206,3 +2110,10 @@ def payment_return(request):
         pass
 
     return redirect('profile')
+
+def models_pricing(request):
+    """View to display all available models and their prices."""
+    context = {
+        'models': MODELS_CATALOG
+    }
+    return render(request, 'chat/models_pricing.html', context)

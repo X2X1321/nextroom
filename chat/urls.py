@@ -30,6 +30,7 @@ urlpatterns = [
     path('ai-management/', views.ai_management, name='ai_management'),
     path('ai-management/integration/<int:pk>/edit/', views.edit_ai_integration, name='edit_ai_integration'),
     path('ai-management/integration/<int:pk>/delete/', views.delete_ai_integration, name='delete_ai_integration'),
+    path('ai-management/models/', views.models_pricing, name='models_pricing'),
     path('room/<slug:slug>/toggle-pin/', views.toggle_room_pin, name='toggle_room_pin'),
     path('image-chat/', views.image_generation_chat, name='image_generation_chat'),
     path('image-chat/generate/', views.generate_image, name='generate_image'),
