@@ -70,22 +70,22 @@
             {% endif %}
             <div class="mt-6 space-y-3">
                 {% for integration in integrations %}
-                <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-4">
-                    <div class="flex items-center justify-between gap-3">
-                        <div>
-                            <p class="text-sm font-semibold text-white">@{{ integration.provider }} {% if integration.model_name %}<span class="text-xs text-slate-400">({{ integration.model_name }})</span>{% endif %}</p>
+                <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                        <div class="overflow-hidden">
+                            <p class="text-sm font-semibold text-white truncate">@{{ integration.provider }} {% if integration.model_name %}<span class="text-xs text-slate-400">({{ integration.model_name }})</span>{% endif %}</p>
                             {% if integration.custom_prompt %}
-                                <p class="text-xs text-indigo-300 mt-1 line-clamp-1">Промпт: {{ integration.custom_prompt }}</p>
+                                <p class="text-xs text-indigo-300 mt-1 line-clamp-2 sm:line-clamp-1">Промпт: {{ integration.custom_prompt }}</p>
                             {% else %}
                                 <p class="text-xs text-slate-500 mt-1">Ключ сохранен</p>
                             {% endif %}
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 mt-2 sm:mt-0 flex-wrap">
                             <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">Готово</span>
-                            <a href="{% url 'edit_ai_integration' integration.pk %}" class="rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-slate-300 hover:text-white transition">Изменить</a>
+                            <a href="{% url 'edit_ai_integration' integration.pk %}" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-slate-300 hover:text-white transition">Изменить</a>
                             <form action="{% url 'delete_ai_integration' integration.pk %}" method="POST" class="inline" onsubmit="return confirm('Удалить интеграцию @{{ integration.provider }}?');">
                                 {% csrf_token %}
-                                <button type="submit" class="rounded-lg border border-red-900/50 bg-slate-900 px-2.5 py-1.5 text-[11px] font-semibold text-red-300 hover:text-red-200 transition">Удалить</button>
+                                <button type="submit" class="rounded-lg border border-red-900/50 bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-red-300 hover:text-red-200 transition">Удалить</button>
                             </form>
                         </div>
                     </div>
