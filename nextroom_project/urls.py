@@ -20,7 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('portal-management-hq/', admin.site.urls),
     path('', include('chat.urls')),
     path('social-auth/', include('social_django.urls', namespace='social')),
 ]
@@ -28,3 +28,7 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+handler403 = 'chat.views.custom_permission_denied_view'
+handler404 = 'chat.views.custom_page_not_found_view'
+handler500 = 'chat.views.custom_server_error_view'

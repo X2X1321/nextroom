@@ -1,0 +1,19 @@
+{% extends "chat/base.html" %}
+
+{% block title %}Страница не найдена - NextRoom{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-gray-900 border border-gray-800 rounded-3xl p-8 text-center glass-panel">
+        <h1 class="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500 mb-4">
+            404</h1>
+        <h2 class="text-2xl font-semibold text-white mb-4">Страница не найдена</h2>
+        <p class="text-gray-400 mb-8">Кажется, вы заблудились. Страница, которую вы ищете, была удалена или никогда не
+            существовала.</p>
+        <a href="{% url 'dashboard' %}"
+            class="inline-flex justify-center items-center px-6 py-3 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 w-full sm:w-auto">
+            Вернуться на главную
+        </a>
+    </div>
+</div>
+{% endblock %}
