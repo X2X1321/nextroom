@@ -48,17 +48,19 @@
         </form>
 
         <!-- Create Button -->
+        {% if user.is_authenticated %}
         <button id="open-create-modal" 
         class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group w-full sm:w-auto">
-    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-    <span class="relative z-10 flex items-center justify-center gap-2">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-        </svg>
-        Создать комнату
-    </span>
-</button>
+            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+            <span class="relative z-10 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Создать комнату
+            </span>
+        </button>
+        {% endif %}
     </div>
 
     <!-- Category Pills & Type Filters -->
@@ -168,6 +170,7 @@
 </div>
 
 <!-- CREATE ROOM MODAL -->
+{% if user.is_authenticated %}
 <div id="create-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
     <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <!-- Overlay -->
@@ -191,7 +194,7 @@
                 <!-- Name -->
                 <div>
                     <label for="room_name" class="block text-sm font-semibold text-slate-300">Название комнаты <span class="text-indigo-400">*</span></label>
-                    <input type="text" name="name" id="room_name" required placeholder="Например: Фильмы и сериалы"
+                    <input type="text" name="name" id="room_name" required maxlength="100" placeholder="Например: Фильмы и сериалы"
                         class="mt-2 block w-full rounded-xl py-3 px-4 text-sm glass-input placeholder-slate-600">
                 </div>
 
@@ -209,7 +212,7 @@
                 <!-- Description -->
                 <div>
                     <label for="room_description" class="block text-sm font-semibold text-slate-300">Описание комнаты</label>
-                    <textarea name="description" id="room_description" rows="3" placeholder="Расскажите о чем ваша комната..."
+                    <textarea name="description" id="room_description" rows="3" maxlength="500" placeholder="Расскажите о чем ваша комната..."
                         class="mt-2 block w-full rounded-xl py-3 px-4 text-sm glass-input placeholder-slate-600 resize-none"></textarea>
                 </div>
 
@@ -254,6 +257,7 @@
         </div>
     </div>
 </div>
+{% endif %}
 {% endblock %}
 
 {% block extra_js %}

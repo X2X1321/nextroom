@@ -29,25 +29,31 @@
             </div>
             <div>
                 <label for="model_name" class="block text-sm font-medium text-slate-300">Модель</label>
-                <input id="model_name" name="model_name" type="text" value="{{ integration.model_name|default:'' }}" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                <input id="model_name" name="model_name" type="text" readonly value="{{ integration.model_name|default:'' }}" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
             </div>
             <div>
                 <label for="custom_prompt" class="block text-sm font-medium text-slate-300">Персональный промпт для этой модели</label>
                 <textarea id="custom_prompt" name="custom_prompt" rows="3" placeholder="Например: Ты эксперт по программированию. Отвечай подробно и с примерами." class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-600 resize-none">{{ integration.custom_prompt|default:'' }}</textarea>
                 <p class="text-xs text-slate-500 mt-1">Персональные правила и поведение исключительно для модели @{{ integration.provider }}.</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 mt-6">
+                <!-- Кнопка сохранения отправляет основную форму -->
                 <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
                     <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
                     <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
                     <span class="relative z-10">Сохранить</span>
                 </button>
-                <a href="{% url 'delete_ai_integration' integration.pk %}" onclick="return confirm('Удалить интеграцию?')" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
-                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-red-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-red-900/40 transition duration-300"></span>
-                    <span class="relative z-10">Удалить</span>
-                </a>
             </div>
+        </form> <!-- ЗАКРЫВАЕМ ОСНОВНУЮ ФОРМУ ЗДЕСЬ -->
+
+        <!-- ОТДЕЛЬНАЯ ФОРМА ДЛЯ УДАЛЕНИЯ -->
+        <form action="{% url 'delete_ai_integration' integration.pk %}" method="POST" class="mt-4" onsubmit="return confirm('Вы уверены, что хотите безвозвратно удалить интеграцию @{{ integration.provider }}?');">
+            {% csrf_token %}
+            <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-red-400 hover:text-red-300 transition duration-300 group">
+                <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-red-900/20 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-900/80 border border-red-900/30 group-hover:bg-red-900/40 transition duration-300"></span>
+                <span class="relative z-10">Удалить интеграцию</span>
+            </button>
         </form>
     </div>
 </div>

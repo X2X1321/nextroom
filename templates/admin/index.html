@@ -3,18 +3,8 @@
 
 {% block extrastyle %}
 {{ block.super }}
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                fontFamily: {
-                    sans: ['Inter', 'sans-serif'],
-                }
-            }
-        }
-    }
-</script>
+<link rel="stylesheet" href="{% static 'css/tailwind.css' %}">
+
 <style>
     body {
         background-color: #090d16 !important;
