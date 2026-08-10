@@ -21,6 +21,22 @@ def ensure_superuser():
         except Exception:
             pass
 
+def cleanup_corrupted_integrations():
+    try:
+        from chat.models import AIIntegration
+        from django.core.signing import BadSignature
+        import struct
+        
+        # Test if the first integration can be decrypted
+        try:
+            _ = AIIntegration.objects.first()
+        except (BadSignature, struct.error, Exception):
+            # If decryption fails, the SECRET_KEY has changed.
+            # Wipe corrupted integrations to prevent server crashes.
+            AIIntegration.objects.all().delete()
+    except Exception:
+        pass
+
 
 def bootstrap():
     try:
@@ -28,3 +44,4 @@ def bootstrap():
     except Exception:
         pass
     ensure_superuser()
+    cleanup_corrupted_integrations()
