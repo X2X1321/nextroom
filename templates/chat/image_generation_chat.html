@@ -146,11 +146,11 @@
         const startTime = Date.now();
         const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
-        const saveStats = (modelName, promptText, genTime) => {
+        const saveStats = (modelName, promptText, genTime, imageUrl) => {
             fetch("{% url 'save_image_stat' %}", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
-                body: JSON.stringify({ model_name: modelName, prompt: promptText, generation_time: genTime })
+                body: JSON.stringify({ model_name: modelName, prompt: promptText, generation_time: genTime, image_url: imageUrl })
             }).catch(e => console.error('Failed to save stats:', e));
         };
 
@@ -162,7 +162,7 @@
                 imageEl.classList.remove('opacity-0');
                 imageEl.classList.add('opacity-100');
                 resultDiv.classList.remove('hidden');
-                saveStats(model, prompt, (Date.now() - startTime) / 1000);
+                saveStats(model, prompt, (Date.now() - startTime) / 1000, url);
             };
             imageEl.onerror = () => {
                 loadingDiv.classList.add('hidden');

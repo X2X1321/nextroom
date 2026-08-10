@@ -2050,6 +2050,7 @@ def save_image_stat(request):
         model_name = data.get('model_name', 'unknown')
         prompt = data.get('prompt', '')
         generation_time = float(data.get('generation_time', 0.0))
+        image_url = data.get('image_url', '')
         
         if request.user.is_authenticated:
             profile = get_user_profile(request.user)
@@ -2058,7 +2059,7 @@ def save_image_stat(request):
                 prompt=prompt,
                 model_name=model_name,
                 generation_time=generation_time,
-                image_url='[cloudflare_blob]' if model_name.startswith('@cf') else '[pollinations_url]',
+                image_url=image_url,
                 width=1024,
                 height=1024
             )
@@ -2069,7 +2070,7 @@ def save_image_stat(request):
                 prompt=prompt,
                 model_name=model_name,
                 generation_time=generation_time,
-                image_url='[cloudflare_blob]' if model_name.startswith('@cf') else '[pollinations_url]',
+                image_url=image_url,
                 width=1024,
                 height=1024
             )

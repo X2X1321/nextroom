@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e
 
+echo "Running Tailwind CSS build..."
+npx tailwindcss -i ./static/css/input.css -o ./static/css/tailwind.css --minify
+
 echo "Running collectstatic..."
 python manage.py collectstatic --noinput --clear
 
