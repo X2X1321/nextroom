@@ -179,16 +179,16 @@
                                 {% if app.app_label == 'auth' %}
                                 <tr>
                                     <th scope="row" class="font-bold text-slate-200 uppercase text-xs tracking-wider align-middle">
-                                        <a href="/admin/chat/guestsession/" class="text-slate-100 hover:text-indigo-400 transition block py-1">
+                                        <a href="{% url 'admin:chat_guestsession_changelist' %}" class="text-slate-100 hover:text-indigo-400 transition block py-1">
                                             НЕЗАРЕГИСТРИРОВАННЫЕ ПОЛЬЗОВАТЕЛИ
                                         </a>
                                     </th>
                                     <td class="text-right w-[1%] whitespace-nowrap align-middle">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="/admin/chat/guestsession/add/" class="addlink shrink-0">
+                                            <a href="{% url 'admin:chat_guestsession_add' %}" class="addlink shrink-0">
                                                 <span>Добавить</span>
                                             </a>
-                                            <a href="/admin/chat/guestsession/" class="changelink shrink-0">
+                                            <a href="{% url 'admin:chat_guestsession_changelist' %}" class="changelink shrink-0">
                                                 <span>Изменить</span>
                                             </a>
                                         </div>
