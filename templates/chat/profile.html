@@ -19,39 +19,42 @@
                         </div>
                     </div>
                     
-                    <div class="w-full flex flex-col md:flex-row flex-wrap gap-4 justify-center items-stretch">
+                    <div class="w-full flex flex-col gap-4 items-start">
                         <!-- Profile Card -->
-                        <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 text-center flex-1 min-w-[250px] max-w-sm flex flex-col justify-center">
+                        <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 text-left w-full sm:max-w-md flex flex-col justify-center">
                             <p class="text-[11px] uppercase tracking-[0.26em] text-slate-500">Профиль</p>
-                            <p class="mt-3 text-2xl font-bold text-white">{{ user.username }}</p>
+                            <p class="mt-2 text-2xl font-bold text-white">{{ user.username }}</p>
                             <p class="mt-1 text-xs text-slate-400">Участник с {{ user.date_joined|date:"d.m.Y" }}</p>
                         </div>
 
                         <!-- Balance Card -->
-                        <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 flex-1 min-w-[250px] max-w-sm flex flex-col justify-between">
-                            <div class="text-center">
+                        <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 w-full sm:max-w-md flex flex-col justify-between text-left">
+                            <div>
                                 <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Баланс</p>
-                                <p class="mt-2 text-2xl font-black text-emerald-400">{{ profile.balance }} ₽</p>
+                                <p class="mt-1 text-2xl font-black text-indigo-400">{{ profile.balance }} ₽</p>
                             </div>
                             <form action="{% url 'topup_balance' %}" method="POST" class="mt-4 flex gap-2">
                                 {% csrf_token %}
-                                <input type="number" name="amount" min="10" step="0.01" placeholder="Сумма" required class="w-full min-w-0 rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 placeholder-slate-500 outline-none">
-                                <button type="submit" class="shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-500 px-4 py-2 text-sm font-semibold text-white transition duration-200">
+                                <input type="number" name="amount" min="10" step="0.01" placeholder="Сумма" required class="w-full min-w-0 rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-500 outline-none">
+                                <button type="submit" class="shrink-0 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition duration-200">
                                     Пополнить
                                 </button>
                             </form>
                         </div>
 
                         <!-- Subscription Card -->
-                        <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 flex-1 min-w-[250px] max-w-sm text-center flex flex-col justify-between">
+                        <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 w-full sm:max-w-md text-left flex flex-col justify-between">
                             <div>
                                 <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Подписка</p>
-                                <p class="mt-2 text-2xl font-black text-white">{% if profile.is_premium %}Активна{% else %}Free{% endif %}</p>
+                                <p class="mt-1 text-2xl font-black text-white">{% if profile.is_premium %}Активна{% else %}Free{% endif %}</p>
                                 {% if profile.is_premium and profile.premium_until %}
                                 <p class="mt-1 text-xs text-slate-400">Действует до {{ profile.premium_until|date:"d.m.Y" }}</p>
                                 {% else %}
                                 <p class="mt-1 text-xs text-slate-400">Открывайте возможности прямо сейчас</p>
                                 {% endif %}
+                                <p class="mt-3 text-xs text-slate-300 leading-relaxed">
+                                    Premium-подписка даёт доступ к подключению собственных API ключей для любых нейросетей, расширенные лимиты на создание комнат и генерацию картинок без вотермарок.
+                                </p>
                             </div>
                             {% if not profile.is_premium %}
                             <form action="{% url 'create_yookassa_subscription' %}" method="POST" class="mt-4">
