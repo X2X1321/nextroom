@@ -134,26 +134,44 @@
     </div>
 
     <div class="glass-panel rounded-3xl p-6 relative">
-        <a href="https://groq.com" target="_blank" class="absolute top-6 right-6 inline-flex items-center gap-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 px-4 py-2 text-sm font-medium text-slate-300 transition-colors border border-slate-700/50">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
-            API Groq
-        </a>
         <h2 class="text-lg font-bold text-white mb-4">Советы по использованию @</h2>
         <div class="space-y-3 text-sm text-slate-400">
             <p>Чтобы обратиться к нейросети, начните сообщение с <span class="font-semibold text-white">@cloro</span>, <span class="font-semibold text-white">@gemini</span>, <span class="font-semibold text-white">@gpt</span>, <span class="font-semibold text-white">@groq</span>, <span class="font-semibold text-white">@grok</span>, <span class="font-semibold text-white">@deepseek</span>, <span class="font-semibold text-white">@qwen</span> или <span class="font-semibold text-white">@claude</span>.</p>
             <p>Например: <span class="text-indigo-300">@cloro Объясни квантовые вычисления</span> или <span class="text-indigo-300">@gemini Напиши эссе про ИИ</span></p>
             <p>После отправки запрос будет обработан выбранным провайдером и моделью, и бот ответит прямо в комнате.</p>
         </div>
-        <div class="mt-6 pt-6 border-t border-slate-700/50">
-            <h3 class="text-md font-bold text-white mb-2">Как получить API ключ Groq</h3>
-            <p class="text-sm text-slate-400 mb-2">Для использования моделей провайдера Groq вам понадобится получить бесплатный API ключ. Следуйте этим шагам:</p>
-            <ol class="list-decimal list-inside space-y-1 text-sm text-slate-400">
-                <li>Нажмите на кнопку <strong>API Groq</strong> в правом верхнем углу этой панели.</li>
-                <li>Зарегистрируйтесь или войдите в свой аккаунт на сайте Groq.</li>
-                <li>Перейдите в раздел <strong>API Keys</strong> (в меню слева).</li>
-                <li>Нажмите кнопку <strong>Create API Key</strong> и скопируйте созданный ключ.</li>
-                <li>Вставьте ключ в поле "API Ключ" на этой странице, выбрав провайдера Groq.</li>
-            </ol>
+        <div class="mt-8 pt-6 border-t border-slate-700/50">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-brand-500/20 flex items-center justify-center text-brand-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                </div>
+                <h3 class="text-lg font-bold text-white">Как получить API ключ Groq</h3>
+            </div>
+            <div class="bg-slate-800/30 rounded-2xl p-5 border border-slate-700/50">
+                <p class="text-sm text-slate-300 mb-4 leading-relaxed">Для использования сверхбыстрых моделей провайдера Groq вам понадобится бесплатный API ключ. Процесс получения займет всего пару минут:</p>
+                <ol class="space-y-3 text-sm text-slate-400 mb-6">
+                    <li class="flex gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold">1</span>
+                        <span>Нажмите на кнопку <strong>Получить API Groq</strong> ниже, чтобы перейти на сайт провайдера.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold">2</span>
+                        <span>Зарегистрируйтесь или войдите в свой аккаунт на сайте Groq.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold">3</span>
+                        <span>Перейдите в раздел <strong class="text-white">API Keys</strong> (в меню слева) и нажмите <strong class="text-white">Create API Key</strong>.</span>
+                    </li>
+                    <li class="flex gap-3">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold">4</span>
+                        <span>Скопируйте ключ и вставьте его в поле "API Ключ" на этой странице, предварительно выбрав провайдера Groq.</span>
+                    </li>
+                </ol>
+                <a href="https://groq.com" target="_blank" class="inline-flex items-center gap-2 rounded-xl bg-brand-500 hover:bg-brand-600 px-6 py-2.5 text-sm font-semibold text-white transition-all shadow-lg shadow-brand-500/25">
+                    Получить API Groq
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                </a>
+            </div>
         </div>
     </div>
 </div>
