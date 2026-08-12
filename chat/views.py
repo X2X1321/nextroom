@@ -1599,13 +1599,23 @@ def generate_image(request):
     
 
 
-    # If explicitly requested RouterAI models (Krea or Riverflow)
-    if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast'):
+
+    # If explicitly requested RouterAI models (Krea, Riverflow, Grok)
+    if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast', 'grok-imagine'):
         if not request.user.is_authenticated:
             return JsonResponse({'error': 'Login required for paid models'}, status=403)
             
         profile = request.user.profile
-        cost = Decimal('3.00') if model_param == 'krea-2-medium-turbo' else Decimal('4.25')
+        
+        if model_param == 'krea-2-medium-turbo':
+            cost = Decimal('3.00')
+            api_model = "krea/krea-2-medium-turbo"
+        elif model_param == 'riverflow-v2.5-fast':
+            cost = Decimal('4.25')
+            api_model = "sourceful/riverflow-v2.5-fast"
+        else:
+            cost = Decimal('8.00')
+            api_model = "x-ai/grok-imagine-image-quality"
         
         if profile.balance < cost:
             return JsonResponse({'error': f'Недостаточно средств. Стоимость генерации {cost} ₽.'}, status=402)
@@ -1621,7 +1631,7 @@ def generate_image(request):
         router_ratio = ratio_map.get(aspect_ratio, '1:1')
 
         payload = {
-            "model": "krea/krea-2-medium-turbo" if model_param == 'krea-2-medium-turbo' else "sourceful/riverflow-v2.5-fast",
+            "model": api_model,
             "prompt": prompt,
             "n": 1,
             "aspect_ratio": router_ratio,
@@ -1631,6 +1641,8 @@ def generate_image(request):
             payload['size'] = '2K'
             payload['background'] = 'auto'
             payload['output_format'] = 'jpeg'
+        elif model_param == 'grok-imagine':
+            payload['size'] = '1K'
             
         if input_ref:
             payload["input_references"] = [
