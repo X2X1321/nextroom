@@ -136,19 +136,42 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
     if provider == 'groq':
         try:
             from groq import Groq
+            import time
             client = Groq(api_key=api_key)
-            completion = client.chat.completions.create(
-                model=model,
-                messages=messages,
-                max_tokens=180,
-                temperature=0.8,
-            )
-            content = completion.choices[0].message.content.strip()
-            tokens_used = 0
-            usage = getattr(completion, 'usage', None)
-            if usage:
-                tokens_used = getattr(usage, 'total_tokens', 0) or (getattr(usage, 'prompt_tokens', 0) + getattr(usage, 'completion_tokens', 0))
-            return sanitize_ai_response(content), tokens_used
+            
+            models_to_try = [model]
+            if model == 'groq auto':
+                models_to_try = [
+                    'openai/gpt-oss-120b',
+                    'llama-3.1-8b-instant',
+                    'llama-3.3-70b-versatile',
+                    'meta-llama/llama-prompt-guard-2-22m',
+                    'meta-llama/llama-prompt-guard-2-86m',
+                    'openai/gpt-oss-20b',
+                    'openai/gpt-oss-safeguard-20b'
+                ]
+
+            last_exc = None
+            for m in models_to_try:
+                try:
+                    completion = client.chat.completions.create(
+                        model=m,
+                        messages=messages,
+                        max_tokens=180,
+                        temperature=0.8,
+                        timeout=5.0  # 5 seconds timeout as requested
+                    )
+                    content_text = completion.choices[0].message.content.strip()
+                    tokens_used = 0
+                    usage = getattr(completion, 'usage', None)
+                    if usage:
+                        tokens_used = getattr(usage, 'total_tokens', 0) or (getattr(usage, 'prompt_tokens', 0) + getattr(usage, 'completion_tokens', 0))
+                    return sanitize_ai_response(content_text), tokens_used
+                except Exception as e:
+                    last_exc = e
+                    continue # try next model
+            
+            raise ValueError(f'Groq API error: {str(last_exc)}')
         except Exception as exc:
             raise ValueError(f'Groq API error: {str(exc)}') from exc
 
@@ -2078,7 +2101,8 @@ def payment_return(request):
 
 def models_pricing(request):
     """View to display all available models and their prices."""
+    pricing_models = [m for m in MODELS_CATALOG if not m.get('hide_in_pricing')]
     context = {
-        'models': MODELS_CATALOG
+        'models': pricing_models
     }
     return render(request, 'chat/models_pricing.html', context)
