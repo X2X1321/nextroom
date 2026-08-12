@@ -7,12 +7,9 @@
     <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
-                <span class="text-white drop-shadow-md">Модели и Цены</span>
+                <span class="text-white drop-shadow-md">Модели и цены</span>
                 <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold uppercase tracking-wider border border-indigo-500/20">11 моделей</span>
             </h1>
-            <p class="text-slate-400 text-sm mt-1">
-                Список поддерживаемых текстовых моделей с тарификацией в рублях
-            </p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{% url 'ai_management' %}" class="inline-flex items-center gap-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 px-4 py-2 text-sm font-medium text-slate-300 transition-colors border border-slate-700/50">
@@ -40,8 +37,8 @@
                         <td class="py-4 px-6 align-top">
                             <div class="flex items-center gap-3">
                                 {% if model.logo %}
-                                <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center overflow-hidden shrink-0">
-                                    <img src="{{ model.logo }}" alt="{{ model.provider }}" class="w-5 h-5 object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/1/13/ChatGPT-Logo.png'">
+                                <div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden shrink-0 p-1">
+                                    <img src="{{ model.logo }}" alt="{{ model.provider }}" class="w-full h-full object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/1/13/ChatGPT-Logo.png'">
                                 </div>
                                 {% else %}
                                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/20 flex items-center justify-center shrink-0">
@@ -68,7 +65,7 @@
                             {{ model.context_length|default:"-" }}
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-emerald-400 font-mono">
+                            <div class="text-sm font-medium text-white font-mono">
                                 {% if model.pricing.prompt_formatted == 'бесплатно' %}
                                     бесплатно
                                 {% else %}
@@ -77,7 +74,7 @@
                             </div>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-amber-400 font-mono">
+                            <div class="text-sm font-medium text-white font-mono">
                                 {% if model.pricing.completion_formatted == 'бесплатно' %}
                                     бесплатно
                                 {% else %}
@@ -101,7 +98,7 @@
     <div class="mt-8 mb-4">
         <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-3">
             <span class="text-white drop-shadow-md">Модели для генерации изображений</span>
-            <span class="px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 text-xs font-semibold uppercase tracking-wider border border-purple-500/20">5 моделей</span>
+            <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold uppercase tracking-wider border border-indigo-500/20">5 моделей</span>
         </h2>
     </div>
 
@@ -133,7 +130,7 @@
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Krea 2 Medium Turbo. Высококачественная генерация и обработка изображений (image-to-image).</p>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-amber-400 font-mono">3.00 ₽</div>
+                            <div class="text-sm font-medium text-white font-mono">3.00 ₽</div>
                         </td>
                     </tr>
                     <!-- Riverflow -->
@@ -153,7 +150,7 @@
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Riverflow V2.5 Fast. Быстрая генерация изображений в высоком разрешении 2K с поддержкой референсов.</p>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-amber-400 font-mono">4.25 ₽</div>
+                            <div class="text-sm font-medium text-white font-mono">4.25 ₽</div>
                         </td>
                     </tr>
                     <!-- Grok -->
@@ -173,7 +170,7 @@
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Генерация изображений от x-ai (Grok Imagine Image Quality) в разрешении 1K.</p>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-amber-400 font-mono">8.00 ₽</div>
+                            <div class="text-sm font-medium text-white font-mono">8.00 ₽</div>
                         </td>
                     </tr>
                     <!-- FLUX -->
@@ -193,7 +190,7 @@
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Мощная генеративная модель от Black Forest Labs для создания фотореалистичных изображений.</p>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-amber-400 font-mono">5.50 ₽</div>
+                            <div class="text-sm font-medium text-white font-mono">5.50 ₽</div>
                         </td>
                     </tr>
                     <!-- Qwen Image -->
@@ -213,7 +210,7 @@
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Продвинутая модель генерации изображений от Qwen в разрешении 1K.</p>
                         </td>
                         <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-amber-400 font-mono">6.30 ₽</div>
+                            <div class="text-sm font-medium text-white font-mono">6.30 ₽</div>
                         </td>
                     </tr>
                 </tbody>
