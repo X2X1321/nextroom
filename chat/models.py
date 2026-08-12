@@ -11,6 +11,7 @@ from django.utils.text import slugify
 from django_cryptography.fields import encrypt
 
 AI_PROVIDER_CHOICES = [
+    ('routerai', 'RouterAI'),
     ('cloro', 'Cloro'),
     ('gpt', 'ChatGPT'),
     ('groq', 'Groq'),
