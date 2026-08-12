@@ -86,14 +86,27 @@
         <div class="mt-4 p-4 rounded-xl bg-slate-900/40 border border-slate-800/60 flex flex-col sm:flex-row gap-3">
             <div class="flex-1">
                 <label class="block text-xs font-semibold text-slate-400 mb-1.5 ml-1">Модель нейросети</label>
-                <select id="image-model" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs sm:text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                    <option value="@cf/black-forest-labs/flux-1-schnell">Flux 1 Schnell</option>
-                    <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0</option>
-                    <option value="@cf/leonardo/lucid-origin">Leonardo Lucid Origin</option>
-                    <option value="pollinations-flux">Pollinations Flux</option>
-                    <option value="pollinations-turbo">Pollinations Turbo</option>
-                    <option value="horde-uncensored">AI Horde (uncensored)</option>
-                </select>
+                <div class="flex gap-2">
+                    <select id="image-model" class="w-full rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 text-xs sm:text-sm text-slate-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="@cf/black-forest-labs/flux-1-schnell">Flux 1 Schnell (бесплатно)</option>
+                        <option value="@cf/leonardo/phoenix-1.0">Leonardo Phoenix 1.0 (бесплатно)</option>
+                        <option value="@cf/leonardo/lucid-origin">Leonardo Lucid Origin (бесплатно)</option>
+                        <option value="pollinations-flux">Pollinations Flux (бесплатно)</option>
+                        <option value="pollinations-turbo">Pollinations Turbo (бесплатно)</option>
+                        <option value="horde-uncensored">AI Horde (uncensored) (бесплатно)</option>
+                        <option value="krea-2-medium-turbo">Krea 2 Medium Turbo (3 ₽ / изображение)</option>
+                    </select>
+                    <label id="krea-upload-btn" class="hidden cursor-pointer flex-shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-xl bg-slate-800/80 border border-slate-700/50 text-indigo-400 hover:text-white hover:bg-indigo-900/40 transition duration-300" title="Загрузить референс">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        <input type="file" id="krea-image-input" class="hidden" accept="image/*">
+                    </label>
+                </div>
+                <div id="krea-upload-preview" class="hidden mt-2 flex items-center gap-2 text-xs text-slate-400">
+                    <span class="truncate max-w-[200px]" id="krea-file-name"></span>
+                    <button type="button" id="krea-remove-file" class="text-red-400 hover:text-red-300">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
             </div>
             <div class="w-full sm:w-48">
                 <label class="block text-xs font-semibold text-slate-400 mb-1.5 ml-1">Соотношение сторон</label>
@@ -157,6 +170,44 @@
     const loadingDiv = document.getElementById('image-loading');
     const errorDiv = document.getElementById('image-error');
     const downloadLink = document.getElementById('download-link');
+
+    let currentKreaB64 = null;
+    const modelSelect = document.getElementById('image-model');
+    const kreaUploadBtn = document.getElementById('krea-upload-btn');
+    const kreaImageInput = document.getElementById('krea-image-input');
+    const kreaUploadPreview = document.getElementById('krea-upload-preview');
+    const kreaFileName = document.getElementById('krea-file-name');
+    const kreaRemoveFile = document.getElementById('krea-remove-file');
+
+    modelSelect.addEventListener('change', () => {
+        if (modelSelect.value === 'krea-2-medium-turbo') {
+            kreaUploadBtn.classList.remove('hidden');
+        } else {
+            kreaUploadBtn.classList.add('hidden');
+            kreaImageInput.value = '';
+            currentKreaB64 = null;
+            kreaUploadPreview.classList.add('hidden');
+        }
+    });
+
+    kreaImageInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                currentKreaB64 = evt.target.result;
+                kreaFileName.textContent = file.name;
+                kreaUploadPreview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    kreaRemoveFile.addEventListener('click', () => {
+        kreaImageInput.value = '';
+        currentKreaB64 = null;
+        kreaUploadPreview.classList.add('hidden');
+    });
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -234,6 +285,25 @@
                 const pollModel = model === 'pollinations-flux' ? 'flux' : 'turbo';
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${pollModel}&nologo=true&width=${width}&height=${height}&seed=${Math.floor(Math.random()*100000)}`;
                 renderSuccess(url);
+            } else if (model === 'krea-2-medium-turbo') {
+                const res = await fetch("{% url 'generate_image' %}", {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+                    body: JSON.stringify({ 
+                        prompt: prompt, 
+                        model: model,
+                        aspect_ratio: ratio,
+                        input_reference_b64: currentKreaB64
+                    }),
+                });
+                const data = await res.json();
+                
+                if (!res.ok) {
+                    throw new Error(data.error || 'Failed to generate image');
+                }
+                
+                renderSuccess(data.image_url);
+                saveStats('krea', prompt, Date.now() - startTime, data.image_url);
             } else if (model.startsWith('horde-')) {
                 // AI Horde (Backend Proxy)
                 const res = await fetch("{% url 'generate_image' %}", {
