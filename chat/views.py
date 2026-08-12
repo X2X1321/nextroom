@@ -176,7 +176,16 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
             raise ValueError(f'Groq API error: {str(exc)}') from exc
 
     if provider == 'cerebras':
-        cerebras_models = [model, 'llama3.1-8b', 'llama3.1-70b'] if model else ['llama3.1-8b', 'llama3.1-70b']
+        cerebras_models = [model]
+        if model == 'cerebras/auto':
+            cerebras_models = [
+                'gemma-4-31b',
+                'openai-gpt-oss',
+                'z.ai-glm-4.7'
+            ]
+        elif not model:
+            cerebras_models = ['llama3.1-8b', 'llama3.1-70b']
+        
         last_exc = None
         for m in cerebras_models:
             if not m:
@@ -184,7 +193,7 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
             try:
                 import httpx
                 from cerebras.cloud.sdk import Cerebras
-                client = Cerebras(api_key=api_key, http_client=httpx.Client())
+                client = Cerebras(api_key=api_key, http_client=httpx.Client(timeout=6.0))
                 stream = client.chat.completions.create(
                     messages=messages,
                     model=m,

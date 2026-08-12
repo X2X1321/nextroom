@@ -18,10 +18,15 @@ MODELS_CATALOG = [
     {'id': 'openai/gpt-oss-20b', 'name': 'gpt-oss-20b', 'provider': 'Groq', 'description': 'Groq model: openai/gpt-oss-20b', 'context_length': '128K', 'pricing': {'prompt': 0.0, 'completion': 0.0, 'prompt_formatted': '0.00', 'completion_formatted': '0.00'}, 'logo': 'https://assets.routerai.ru/assets/icons/openai-4ede729e.svg', 'hide_in_pricing': True},
     {'id': 'openai/gpt-oss-safeguard-20b', 'name': 'gpt-oss-safeguard-20b', 'provider': 'Groq', 'description': 'Groq model: openai/gpt-oss-safeguard-20b', 'context_length': '128K', 'pricing': {'prompt': 0.0, 'completion': 0.0, 'prompt_formatted': '0.00', 'completion_formatted': '0.00'}, 'logo': 'https://assets.routerai.ru/assets/icons/openai-4ede729e.svg', 'hide_in_pricing': True},
     {'id': 'groq auto', 'name': 'groq auto', 'provider': 'Groq', 'description': 'Groq model: groq auto', 'context_length': '128K', 'pricing': {'prompt': 0.0, 'completion': 0.0, 'prompt_formatted': '0.00', 'completion_formatted': '0.00'}, 'logo': 'https://cdn.simpleicons.org/groq/white', 'hide_in_pricing': True},
+    {'id': 'gemma-4-31b', 'name': 'Gemma 4 31B', 'provider': 'Cerebras', 'description': 'Cerebras model: Gemma 4 31B', 'context_length': '128K', 'pricing': {'prompt': 0.0, 'completion': 0.0, 'prompt_formatted': '0.00', 'completion_formatted': '0.00'}, 'logo': 'https://assets.routerai.ru/assets/icons/google-80717409.svg', 'hide_in_pricing': True},
+    {'id': 'openai-gpt-oss', 'name': 'OpenAI GPT OSS', 'provider': 'Cerebras', 'description': 'Cerebras model: OpenAI GPT OSS', 'context_length': '128K', 'pricing': {'prompt': 0.0, 'completion': 0.0, 'prompt_formatted': '0.00', 'completion_formatted': '0.00'}, 'logo': 'https://assets.routerai.ru/assets/icons/openai-4ede729e.svg', 'hide_in_pricing': True},
+    {'id': 'z.ai-glm-4.7', 'name': 'Z.ai GLM 4.7', 'provider': 'Cerebras', 'description': 'Cerebras model: Z.ai GLM 4.7', 'context_length': '128K', 'pricing': {'prompt': 0.0, 'completion': 0.0, 'prompt_formatted': '0.00', 'completion_formatted': '0.00'}, 'logo': 'https://assets.routerai.ru/assets/icons/z-ai-f9c74318.png', 'hide_in_pricing': True},
+    {'id': 'cerebras/auto', 'name': 'cerebras auto', 'provider': 'Cerebras', 'description': 'Cerebras model: cerebras auto', 'context_length': '128K', 'pricing': {'prompt': 0.0, 'completion': 0.0, 'prompt_formatted': '0.00', 'completion_formatted': '0.00'}, 'logo': 'https://assets.routerai.ru/assets/icons/cerebras.svg', 'hide_in_pricing': True},
 ]
 
 AVAILABLE_PROVIDERS = [
     ('routerai', 'RouterAI', 'RouterAI Auto'),
     ('openrouter', 'OpenRouter', 'OpenRouter Auto Beta'),
     ('groq', 'Groq', 'groq auto'),
+    ('cerebras', 'Cerebras', 'cerebras/auto'),
 ]
