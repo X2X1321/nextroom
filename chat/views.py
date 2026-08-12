@@ -1601,8 +1601,9 @@ def generate_image(request):
 
 
 
-    # If explicitly requested RouterAI models (Krea, Riverflow, Grok, FLUX)
-    if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast', 'grok-imagine', 'flux-2-pro'):
+
+    # If explicitly requested RouterAI models (Krea, Riverflow, Grok, FLUX, Qwen)
+    if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast', 'grok-imagine', 'flux-2-pro', 'qwen-image-3-pro'):
         if not request.user.is_authenticated:
             return JsonResponse({'error': 'Login required for paid models'}, status=403)
             
@@ -1617,9 +1618,12 @@ def generate_image(request):
         elif model_param == 'grok-imagine':
             cost = Decimal('8.00')
             api_model = "x-ai/grok-imagine-image-quality"
-        else:
+        elif model_param == 'flux-2-pro':
             cost = Decimal('5.50')
             api_model = "black-forest-labs/flux.2-pro"
+        else:
+            cost = Decimal('6.30')
+            api_model = "qwen/qwen-image-3-pro"
         
         if profile.balance < cost:
             return JsonResponse({'error': f'Недостаточно средств. Стоимость генерации {cost} ₽.'}, status=402)
@@ -1645,7 +1649,7 @@ def generate_image(request):
             payload['size'] = '2K'
             payload['background'] = 'auto'
             payload['output_format'] = 'jpeg'
-        elif model_param == 'grok-imagine':
+        elif model_param in ('grok-imagine', 'qwen-image-3-pro'):
             payload['size'] = '1K'
         elif model_param == 'flux-2-pro':
             payload['output_format'] = 'jpeg'
