@@ -37,8 +37,8 @@
                         <td class="py-4 px-6 align-top">
                             <div class="flex items-center gap-3">
                                 {% if model.logo %}
-                                <div class="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden shrink-0 p-1">
-                                    <img src="{{ model.logo }}" alt="{{ model.provider }}" class="w-full h-full object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/1/13/ChatGPT-Logo.png'">
+                                <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center overflow-hidden shrink-0">
+                                    <img src="{{ model.logo }}" alt="{{ model.provider }}" class="w-5 h-5 object-contain" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/1/13/ChatGPT-Logo.png'">
                                 </div>
                                 {% else %}
                                 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/20 flex items-center justify-center shrink-0">
