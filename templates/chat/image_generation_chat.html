@@ -62,13 +62,13 @@
         <div id="image-error" class="hidden text-sm text-red-300"></div>
         <form id="image-form" class="flex flex-col sm:flex-row gap-2 sm:gap-3">
             {% csrf_token %}
-            <label id="krea-upload-btn" class="hidden order-3 sm:order-none cursor-pointer flex-shrink-0 inline-flex items-center justify-center gap-2 w-full sm:w-12 h-10 sm:h-auto py-2.5 sm:py-0 rounded-xl bg-slate-800/80 border border-slate-700/50 text-indigo-400 hover:text-white hover:bg-indigo-900/40 transition duration-300" title="Загрузить референс">
+            <label id="krea-upload-btn" class="hidden order-last sm:order-first cursor-pointer sm:flex-none inline-flex items-center justify-center gap-2 w-full sm:w-[50px] sm:min-w-[50px] sm:max-w-[50px] h-10 sm:h-auto py-2.5 sm:py-0 rounded-xl bg-slate-800/80 border border-slate-700/50 text-indigo-400 hover:text-white hover:bg-indigo-900/40 transition duration-300" title="Загрузить референс">
                 <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                 <span class="sm:hidden text-sm font-semibold">Загрузить изображение</span>
                 <input type="file" id="krea-image-input" class="hidden" accept="image/*">
             </label>
-            <input type="text" id="image-prompt" placeholder="Например: Космонавт на марсе в стиле киберпанк" class="flex-1 order-1 sm:order-none rounded-xl bg-slate-900 border border-slate-800 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
-            <button type="submit" class="relative order-2 sm:order-none inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
+            <input type="text" id="image-prompt" placeholder="Например: Космонавт на марсе в стиле киберпанк" class="flex-1 rounded-xl bg-slate-900 border border-slate-800 px-3 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+            <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group whitespace-nowrap">
                 <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
                 <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
                 <span class="relative z-10">Сгенерировать</span>
