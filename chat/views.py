@@ -1600,8 +1600,9 @@ def generate_image(request):
 
 
 
-    # If explicitly requested RouterAI models (Krea, Riverflow, Grok)
-    if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast', 'grok-imagine'):
+
+    # If explicitly requested RouterAI models (Krea, Riverflow, Grok, FLUX)
+    if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast', 'grok-imagine', 'flux-2-pro'):
         if not request.user.is_authenticated:
             return JsonResponse({'error': 'Login required for paid models'}, status=403)
             
@@ -1613,9 +1614,12 @@ def generate_image(request):
         elif model_param == 'riverflow-v2.5-fast':
             cost = Decimal('4.25')
             api_model = "sourceful/riverflow-v2.5-fast"
-        else:
+        elif model_param == 'grok-imagine':
             cost = Decimal('8.00')
             api_model = "x-ai/grok-imagine-image-quality"
+        else:
+            cost = Decimal('5.50')
+            api_model = "black-forest-labs/flux.2-pro"
         
         if profile.balance < cost:
             return JsonResponse({'error': f'Недостаточно средств. Стоимость генерации {cost} ₽.'}, status=402)
@@ -1643,6 +1647,8 @@ def generate_image(request):
             payload['output_format'] = 'jpeg'
         elif model_param == 'grok-imagine':
             payload['size'] = '1K'
+        elif model_param == 'flux-2-pro':
+            payload['output_format'] = 'jpeg'
             
         if input_ref:
             payload["input_references"] = [
@@ -1669,7 +1675,7 @@ def generate_image(request):
             profile.save()
             
             # Determine mime type based on output format
-            mime_type = 'image/jpeg' if model_param == 'riverflow-v2.5-fast' else 'image/png'
+            mime_type = 'image/jpeg' if model_param in ('riverflow-v2.5-fast', 'flux-2-pro') else 'image/png'
             
             return JsonResponse({
                 'status': 'success',
