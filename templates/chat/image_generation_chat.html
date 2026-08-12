@@ -92,6 +92,7 @@
                     <option value="pollinations-turbo">Pollinations Turbo (бесплатно)</option>
                     <option value="horde-uncensored">AI Horde (uncensored) (бесплатно)</option>
                     <option value="krea-2-medium-turbo">Krea 2 Medium Turbo (3 ₽ / изображение)</option>
+                    <option value="riverflow-v2.5-fast">Riverflow V2.5 Fast (4.25 ₽ / изображение)</option>
                 </select>
             </div>
             <div class="w-full sm:w-48">
@@ -166,7 +167,7 @@
     const kreaRemoveFile = document.getElementById('krea-remove-file');
 
     modelSelect.addEventListener('change', () => {
-        if (modelSelect.value === 'krea-2-medium-turbo') {
+        if (modelSelect.value === 'krea-2-medium-turbo' || modelSelect.value === 'riverflow-v2.5-fast') {
             kreaUploadBtn.classList.remove('hidden');
         } else {
             kreaUploadBtn.classList.add('hidden');
@@ -271,7 +272,7 @@
                 const pollModel = model === 'pollinations-flux' ? 'flux' : 'turbo';
                 const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?model=${pollModel}&nologo=true&width=${width}&height=${height}&seed=${Math.floor(Math.random()*100000)}`;
                 renderSuccess(url);
-            } else if (model === 'krea-2-medium-turbo') {
+            } else if (model === 'krea-2-medium-turbo' || model === 'riverflow-v2.5-fast') {
                 const res = await fetch("{% url 'generate_image' %}", {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
@@ -289,7 +290,8 @@
                 }
                 
                 renderSuccess(data.image_url);
-                saveStats('krea', prompt, Date.now() - startTime, data.image_url);
+                const statModel = model === 'krea-2-medium-turbo' ? 'krea' : 'riverflow';
+                saveStats(statModel, prompt, Date.now() - startTime, data.image_url);
             } else if (model.startsWith('horde-')) {
                 // AI Horde (Backend Proxy)
                 const res = await fetch("{% url 'generate_image' %}", {

@@ -1598,13 +1598,17 @@ def generate_image(request):
         return JsonResponse({'error': 'Prompt is required'}, status=400)
     
 
-    # If explicitly requested Krea
-    if model_param == 'krea-2-medium-turbo':
+
+    # If explicitly requested RouterAI models (Krea or Riverflow)
+    if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast'):
         if not request.user.is_authenticated:
             return JsonResponse({'error': 'Login required for paid models'}, status=403)
+            
         profile = request.user.profile
-        if profile.balance < 3:
-            return JsonResponse({'error': 'Недостаточно средств. Стоимость генерации 3 ₽.'}, status=402)
+        cost = Decimal('3.00') if model_param == 'krea-2-medium-turbo' else Decimal('4.25')
+        
+        if profile.balance < cost:
+            return JsonResponse({'error': f'Недостаточно средств. Стоимость генерации {cost} ₽.'}, status=402)
         
         import os, requests
         api_key = os.environ.get('ROUTER_AI_API_KEY')
@@ -1613,16 +1617,21 @@ def generate_image(request):
             
         input_ref = data.get('input_reference_b64')
         aspect_ratio = data.get('aspect_ratio', '1024x1024')
-        # Translate the aspect_ratio from '1024x1024' format to '1:1', '16:9', '9:16'
         ratio_map = {'1024x1024': '1:1', '1024x576': '16:9', '576x1024': '9:16'}
-        krea_ratio = ratio_map.get(aspect_ratio, '1:1')
+        router_ratio = ratio_map.get(aspect_ratio, '1:1')
 
         payload = {
-            "model": "krea/krea-2-medium-turbo",
+            "model": "krea/krea-2-medium-turbo" if model_param == 'krea-2-medium-turbo' else "sourceful/riverflow-v2.5-fast",
             "prompt": prompt,
             "n": 1,
-            "aspect_ratio": krea_ratio,
+            "aspect_ratio": router_ratio,
         }
+        
+        if model_param == 'riverflow-v2.5-fast':
+            payload['size'] = '2K'
+            payload['background'] = 'auto'
+            payload['output_format'] = 'jpeg'
+            
         if input_ref:
             payload["input_references"] = [
                 {"type": "image_url", "image_url": {"url": input_ref}}
@@ -1644,17 +1653,20 @@ def generate_image(request):
             img_b64 = images[0]['b64_json']
             
             # Deduct balance
-            profile.balance -= 3
+            profile.balance -= cost
             profile.save()
+            
+            # Determine mime type based on output format
+            mime_type = 'image/jpeg' if model_param == 'riverflow-v2.5-fast' else 'image/png'
             
             return JsonResponse({
                 'status': 'success',
-                'image_url': f"data:image/png;base64,{img_b64}",
-                'model_used': 'krea-2-medium-turbo',
+                'image_url': f"data:{mime_type};base64,{img_b64}",
+                'model_used': model_param,
                 'fallback_urls': []
             })
         except Exception as e:
-            return JsonResponse({'error': f'Krea generation failed: {str(e)}'}, status=500)
+            return JsonResponse({'error': f'Generation failed: {str(e)}'}, status=500)
 
     # If explicitly requested Horde
     model_param = data.get('model', '')
