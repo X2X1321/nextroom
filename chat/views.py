@@ -9,6 +9,7 @@ import threading
 import time
 import urllib.error
 import urllib.request
+from decimal import Decimal
 
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
