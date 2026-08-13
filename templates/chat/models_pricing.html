@@ -3,19 +3,19 @@
 {% block title %}Модели и цены — NextRoom{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 h-[calc(100vh-4rem)] flex flex-col">
-    <div class="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6 pb-24">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-2">
         <div>
+            <a href="{% url 'ai_management' %}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition duration-200 group mb-3">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Назад
+            </a>
             <h1 class="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
                 <span class="text-white drop-shadow-md">Модели и цены</span>
                 <span class="px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-semibold uppercase tracking-wider border border-indigo-500/20">11 моделей</span>
             </h1>
-        </div>
-        <div class="flex items-center gap-3">
-            <a href="{% url 'ai_management' %}" class="inline-flex items-center gap-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 px-4 py-2 text-sm font-medium text-slate-300 transition-colors border border-slate-700/50">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
-                Назад к управлению
-            </a>
         </div>
     </div>
 
