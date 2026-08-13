@@ -2056,11 +2056,12 @@ def save_image_stat(request):
         image_url = data.get('image_url', '')
         image_data = data.get('image_data', None)
         
+        import base64
+        import uuid
+        from django.core.files.base import ContentFile
+        from django.core.files.storage import default_storage
+
         if image_data:
-            import base64
-            import uuid
-            from django.core.files.base import ContentFile
-            from django.core.files.storage import default_storage
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
@@ -2069,6 +2070,18 @@ def save_image_stat(request):
                 image_url = default_storage.url(path)
             except Exception as e:
                 print("Failed to save base64 image", e)
+        elif image_url and image_url.startswith('http'):
+            import urllib.request
+            try:
+                req = urllib.request.Request(image_url, headers={'User-Agent': 'Mozilla/5.0'})
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    img_bytes = resp.read()
+                ext = 'jpg' if 'pollinations' in image_url else 'png'
+                file_name = f"generated/{uuid.uuid4()}.{ext}"
+                path = default_storage.save(file_name, ContentFile(img_bytes))
+                image_url = default_storage.url(path)
+            except Exception as e:
+                print("Failed to download and save external image", e)
         
         if request.user.is_authenticated:
             profile = get_user_profile(request.user)

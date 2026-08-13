@@ -233,6 +233,8 @@
                     sendRequest({ model_name: modelName, prompt: promptText, generation_time: genTime, image_data: reader.result });
                 };
                 reader.readAsDataURL(imageBlob);
+            } else if (imageUrl && imageUrl.startsWith('data:image/')) {
+                sendRequest({ model_name: modelName, prompt: promptText, generation_time: genTime, image_data: imageUrl });
             } else {
                 sendRequest({ model_name: modelName, prompt: promptText, generation_time: genTime, image_url: imageUrl });
             }
@@ -298,13 +300,6 @@
                 }
                 
                 renderSuccess(data.image_url);
-                let statModel = model;
-                if (model === 'krea-2-medium-turbo') statModel = 'krea';
-                else if (model === 'riverflow-v2.5-fast') statModel = 'riverflow';
-                else if (model === 'grok-imagine') statModel = 'grok';
-                else if (model === 'flux-2-pro') statModel = 'flux2pro';
-                else if (model === 'qwen-image-3-pro') statModel = 'qwen';
-                saveStats(statModel, prompt, Date.now() - startTime, data.image_url);
             } else if (model.startsWith('horde-')) {
                 // AI Horde (Backend Proxy)
                 const res = await fetch("{% url 'generate_image' %}", {
