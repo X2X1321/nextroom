@@ -744,17 +744,19 @@ def delete_room(request, slug):
 
 from django.db.models import Max, Count
 
+from django.db.models.functions import Coalesce
+
 @login_required
 def profile(request):
     profile = get_user_profile(request.user)
     my_rooms = Room.objects.filter(creator=request.user).annotate(
         msg_count=Count('messages'),
-        last_activity=Max('messages__created_at')
-    ).order_by('-last_activity', '-created_at')
+        last_activity=Coalesce(Max('messages__created_at'), 'created_at')
+    ).order_by('-last_activity')
     
     visited_rooms = profile.visited_rooms.annotate(
-        last_activity=Max('messages__created_at')
-    ).order_by('-last_activity', '-created_at')
+        last_activity=Coalesce(Max('messages__created_at'), 'created_at')
+    ).order_by('-last_activity')
     
     integrations = profile.integrations.all()
     available_providers = AVAILABLE_PROVIDERS
