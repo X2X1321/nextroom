@@ -2279,9 +2279,18 @@ def generate_routerai_key(request):
     if not master_key:
         return JsonResponse({'error': 'Мастер-ключ RouterAI не настроен на сервере.'}, status=500)
         
+    custom_name = f"NextRoom User: {request.user.username}"
+    if request.body:
+        try:
+            body = json.loads(request.body)
+            if body.get('name'):
+                custom_name = body.get('name').strip()[:50]  # Limit length to 50
+        except json.JSONDecodeError:
+            pass
+            
     url = "https://routerai.ru/api/v1/keys"
     payload = {
-        "name": f"NextRoom User: {request.user.username}",
+        "name": custom_name,
         "limit": 0  # 0 means unlimited by RouterAI side, we handle balance locally
     }
     data = json.dumps(payload).encode('utf-8')
