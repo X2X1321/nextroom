@@ -69,12 +69,12 @@
                         <a href="{% url 'models_pricing' %}" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
                             <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
                             <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
-                            <span class="relative z-10">Все модели и цены</span>
+                            <span class="relative z-10">Все модели</span>
                         </a>
 
-                        <a href="{% url 'routerai_keys' %}" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-brand-300 hover:text-brand-400 transition duration-300 group ml-auto">
-                            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-brand-900/30 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
-                            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-brand-700/30 group-hover:bg-brand-900/20 transition duration-300"></span>
+                        <a href="{% url 'routerai_keys' %}" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group ml-auto">
+                            <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                            <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
                             <span class="relative z-10 flex items-center gap-2">
                                 Мои ключи API
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
@@ -98,11 +98,14 @@
                             {% endif %}
                         </div>
                         <div class="flex items-center gap-2 mt-2 sm:mt-0 flex-wrap">
-                            <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-3 py-1 text-[11px] font-semibold text-emerald-300">Готово</span>
-                            <a href="{% url 'edit_ai_integration' integration.pk %}" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-slate-300 hover:text-white transition">Изменить</a>
+                            <a href="{% url 'edit_ai_integration' integration.pk %}" class="rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 hover:bg-slate-800 transition" title="Изменить">
+                                <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e3e3e3"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
+                            </a>
                             <form action="{% url 'delete_ai_integration' integration.pk %}" method="POST" class="inline" onsubmit="return confirm('Удалить интеграцию @{{ integration.provider }}?');">
                                 {% csrf_token %}
-                                <button type="submit" class="rounded-lg border border-red-900/50 bg-slate-900 px-3 py-1.5 text-[11px] font-semibold text-red-300 hover:text-red-200 transition">Удалить</button>
+                                <button type="submit" class="rounded-lg border border-red-900/50 bg-slate-900 px-2 py-1.5 hover:bg-red-900/30 transition" title="Удалить">
+                                    <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ef4444"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+                                </button>
                             </form>
                         </div>
                     </div>
