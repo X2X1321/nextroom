@@ -3,202 +3,188 @@
 {% block title %}Личный кабинет — NextRoom{% endblock %}
 
 {% block content %}
-<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
+<div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-5">
 
     <!-- ROW 1: Profile header card -->
-    <div class="bg-[#161B28] border border-slate-800 rounded-3xl p-8 flex items-center justify-between">
+    <div class="glass-panel rounded-2xl p-6 flex items-center justify-between gap-6">
         <!-- Left: avatar + info -->
         <div class="flex items-center gap-6">
             <div class="relative shrink-0">
-                <div class="w-[104px] h-[104px] rounded-full flex items-center justify-center text-4xl font-bold text-white select-none shadow-lg"
-                    style="background: linear-gradient(135deg, #4F46E5 0%, #A855F7 100%);">
+                <div class="w-28 h-28 rounded-full flex items-center justify-center text-5xl font-bold text-white select-none"
+                    style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
                     {{ user.username|slice:":1"|upper }}
                 </div>
             </div>
-            <div class="flex flex-col justify-center">
-                <h1 class="text-3xl font-semibold text-white tracking-wide mb-1">{{ user.username }}</h1>
-                <p class="text-[17px] text-slate-300 mb-3">
+            <div>
+                <p class="text-3xl font-bold text-white leading-tight">{{ user.username }}</p>
+                <p class="text-base text-slate-400 mt-1">
                     {% if profile.is_premium %}Premium аккаунт{% else %}Free аккаунт{% endif %}
                 </p>
-                <p class="text-sm text-slate-500">Участник с {{ user.date_joined|date:"d.m.Y" }}</p>
+                <p class="text-sm text-slate-500 mt-0.5">Участник с {{ user.date_joined|date:"d.m.Y" }}</p>
             </div>
         </div>
 
-        <!-- Right: nav buttons -->
-        <div class="flex items-center gap-4 shrink-0">
+        <!-- Right: nav buttons (large equal squares) -->
+        <div class="flex items-center gap-3 shrink-0">
             <a href="{% url 'dashboard' %}"
-                class="flex flex-col items-center justify-center gap-2.5 w-[92px] h-[92px] rounded-2xl border border-slate-700 bg-transparent transition hover:bg-slate-800/50 group">
-                <svg class="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                class="flex flex-col items-center justify-center gap-2 w-[110px] h-[90px] rounded-2xl border border-slate-700 bg-slate-900/80 transition hover:border-slate-600 hover:bg-slate-800/80 group">
+                <svg class="w-7 h-7 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
                 </svg>
-                <span class="text-xs text-slate-300 font-medium group-hover:text-white transition-colors">Комнаты</span>
+                <span class="text-xs text-slate-400 group-hover:text-white transition-colors">Rooms</span>
             </a>
             <a href="{% url 'achievements' %}"
-                class="flex flex-col items-center justify-center gap-2.5 w-[92px] h-[92px] rounded-2xl border border-slate-700 bg-transparent transition hover:bg-slate-800/50 group">
-                <svg class="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                class="flex flex-col items-center justify-center gap-2 w-[110px] h-[90px] rounded-2xl border border-slate-700 bg-slate-900/80 transition hover:border-slate-600 hover:bg-slate-800/80 group">
+                <svg class="w-7 h-7 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
                 </svg>
-                <span class="text-xs text-slate-300 font-medium group-hover:text-white transition-colors">Достижения</span>
+                <span class="text-xs text-slate-400 group-hover:text-white transition-colors">Achievements</span>
             </a>
             <a href="{% url 'ai_management' %}"
-                class="flex flex-col items-center justify-center gap-2.5 w-[92px] h-[92px] rounded-2xl border border-slate-700 bg-transparent transition hover:bg-slate-800/50 group">
-                <svg class="w-6 h-6 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                class="flex flex-col items-center justify-center gap-2 w-[110px] h-[90px] rounded-2xl border border-slate-700 bg-slate-900/80 transition hover:border-slate-600 hover:bg-slate-800/80 group">
+                <svg class="w-7 h-7 text-slate-400 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17H3a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2h-2"/>
                 </svg>
-                <span class="text-xs text-slate-300 font-medium group-hover:text-white transition-colors">AI модели</span>
+                <span class="text-xs text-slate-400 group-hover:text-white transition-colors">AI Models</span>
             </a>
         </div>
     </div>
 
-    <!-- ROW 2: Balance | Subscription | Activity -->
-    <div class="grid grid-cols-3 gap-6">
+    <!-- ROW 2: Balance | Subscription | Activity (3 equal columns) -->
+    <div class="grid grid-cols-3 gap-5">
 
         <!-- Balance -->
-        <div class="bg-[#161B28] border border-slate-800 rounded-3xl p-6 flex flex-col h-[280px]">
-            <h2 class="text-[17px] font-medium text-white mb-2">Баланс</h2>
-            
-            <div class="flex-grow flex items-center justify-center">
-                <p class="text-[52px] font-bold text-indigo-500 tracking-tight">{{ profile.balance }} <span class="text-indigo-500 font-medium">₽</span></p>
-            </div>
-
-            <form action="{% url 'topup_balance' %}" method="POST" class="mt-auto flex gap-3">
+        <div class="glass-panel rounded-2xl p-6 flex flex-col">
+            <p class="text-sm font-semibold text-slate-300 mb-4">Balance</p>
+            <p class="text-6xl font-black text-indigo-400 mb-6">{{ profile.balance }} <span class="text-3xl text-slate-500 font-bold">₽</span></p>
+            <form action="{% url 'topup_balance' %}" method="POST" class="mt-auto flex gap-2">
                 {% csrf_token %}
-                <input type="number" name="amount" min="10" step="0.01" placeholder="Сумма" required
-                    class="flex-1 w-full rounded-xl bg-transparent border border-slate-700 px-4 py-3 text-[15px] text-white focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-500 outline-none transition">
+                <input type="number" name="amount" min="10" step="0.01" placeholder="Top up" required
+                    class="flex-1 min-w-0 rounded-xl bg-slate-900 border border-slate-700 px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-500 outline-none transition">
                 <button type="submit"
-                    class="shrink-0 rounded-xl bg-indigo-500 hover:bg-indigo-600 px-8 py-3 text-[15px] font-medium text-white transition duration-200">
-                    Пополнить
+                    class="shrink-0 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-5 py-2.5 text-sm font-semibold text-white transition duration-200">
+                    Top up
                 </button>
             </form>
         </div>
 
         <!-- Subscription -->
-        <div class="bg-[#161B28] border border-slate-800 rounded-3xl p-6 flex flex-col h-[280px]">
-            <h2 class="text-[17px] font-medium text-white mb-2">Подписка</h2>
-            
-            <div class="flex-grow flex flex-col items-center justify-center text-center px-4">
-                <p class="text-5xl font-bold text-white mb-3">{% if profile.is_premium %}Premium{% else %}Free{% endif %}</p>
-                <p class="text-[13px] text-slate-400 leading-snug">
-                    {% if profile.is_premium and profile.premium_until %}
-                        Активна до {{ profile.premium_until|date:"d.m.Y" }}.
-                    {% else %}
-                        Больше комнат, свои ключи и нейросети с Premium подпиской.
-                    {% endif %}
-                </p>
-            </div>
-
+        <div class="glass-panel rounded-2xl p-6 flex flex-col">
+            <p class="text-sm font-semibold text-slate-300 mb-4">Subscription</p>
+            <p class="text-6xl font-black text-white mb-3">{% if profile.is_premium %}Premium{% else %}Free{% endif %}</p>
+            <p class="text-sm text-slate-500 leading-relaxed mb-6">
+                {% if profile.is_premium and profile.premium_until %}
+                    Активна до {{ profile.premium_until|date:"d.m.Y" }}.
+                {% else %}
+                    Больше комнат, свои ключи и нейросети с Premium подпиской.
+                {% endif %}
+            </p>
             {% if not profile.is_premium %}
             <form action="{% url 'create_yookassa_subscription' %}" method="POST" class="mt-auto">
                 {% csrf_token %}
                 <button type="submit"
-                    class="w-full rounded-xl px-4 py-3.5 text-[15px] font-medium text-white transition duration-200 hover:opacity-90 shadow-[0_0_15px_rgba(99,102,241,0.3)]"
-                    style="background: linear-gradient(90deg, #4F46E5, #A855F7);">
-                    Купить Premium
+                    class="w-full rounded-xl px-4 py-3 text-sm font-bold text-white transition duration-200"
+                    style="background: linear-gradient(90deg, #6366f1, #8b5cf6);">
+                    Buy Premium
                 </button>
             </form>
             {% endif %}
         </div>
 
         <!-- Activity Calendar -->
-        <div class="bg-[#161B28] border border-slate-800 rounded-3xl p-6 flex flex-col h-[280px]">
-            <h2 class="text-[17px] font-medium text-white mb-6">Активность</h2>
-            <div class="flex-grow flex flex-col justify-center">
-                <div class="grid grid-cols-7 gap-2 mb-2">
-                    <div class="text-center text-xs font-medium text-slate-400">Пн</div>
-                    <div class="text-center text-xs font-medium text-slate-400">Вт</div>
-                    <div class="text-center text-xs font-medium text-slate-400">Ср</div>
-                    <div class="text-center text-xs font-medium text-slate-400">Чт</div>
-                    <div class="text-center text-xs font-medium text-slate-400">Пт</div>
-                    <div class="text-center text-xs font-medium text-slate-400">Сб</div>
-                    <div class="text-center text-xs font-medium text-slate-400">Вс</div>
-                </div>
-                
-                <div class="flex flex-col gap-2">
-                {% for week in calendar_weeks %}
-                    <div class="grid grid-cols-7 gap-2">
-                        {% for day in week %}
-                            {% if day %}
-                                <div class="aspect-square rounded-sm
-                                    {% if day.is_today %}bg-indigo-400
-                                    {% elif day.count > 0 %}bg-indigo-500
-                                    {% else %}bg-slate-700/50{% endif %}">
-                                </div>
-                            {% else %}
-                                <div class="aspect-square"></div>
-                            {% endif %}
-                        {% endfor %}
-                    </div>
-                {% endfor %}
-                </div>
+        <div class="glass-panel rounded-2xl p-6 flex flex-col">
+            <p class="text-sm font-semibold text-slate-300 mb-4">Activity</p>
+            <div class="grid grid-cols-7 gap-1 mb-1">
+                <div class="text-center text-[10px] text-slate-500">Mon</div>
+                <div class="text-center text-[10px] text-slate-500">Tue</div>
+                <div class="text-center text-[10px] text-slate-500">Wed</div>
+                <div class="text-center text-[10px] text-slate-500">Thu</div>
+                <div class="text-center text-[10px] text-slate-500">Fri</div>
+                <div class="text-center text-[10px] text-slate-500">Sat</div>
+                <div class="text-center text-[10px] text-slate-500">Sun</div>
             </div>
+            {% for week in calendar_weeks %}
+            <div class="grid grid-cols-7 gap-1 mb-1">
+                {% for day in week %}
+                    {% if day %}
+                        <div class="aspect-square rounded-[3px]
+                            {% if day.is_today %}bg-indigo-400
+                            {% elif day.count > 0 %}bg-indigo-600/80
+                            {% else %}bg-slate-700/60{% endif %}">
+                        </div>
+                    {% else %}
+                        <div class="aspect-square"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endfor %}
         </div>
 
     </div>
 
-    <!-- ROW 3: My Rooms | Visited Rooms -->
-    <div class="grid grid-cols-2 gap-6">
+    <!-- ROW 3: My Rooms | Visited Rooms (2 columns) -->
+    <div class="grid grid-cols-2 gap-5">
 
         <!-- My Rooms -->
-        <section class="bg-[#161B28] border border-slate-800 rounded-3xl px-6 py-6 pb-2">
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="text-[17px] font-medium text-white">Мои комнаты</h2>
-                <span class="text-sm text-slate-500">{{ my_rooms.count }} / {{ profile.room_limit }}</span>
+        <section class="glass-panel rounded-2xl">
+            <div class="flex items-center justify-between px-6 pt-5 pb-4">
+                <h2 class="text-base font-semibold text-white">My Rooms</h2>
+                <span class="text-xs text-slate-500">{{ my_rooms.count }} / {{ profile.room_limit }}</span>
             </div>
-            <div class="flex flex-col">
+            <div class="divide-y divide-slate-800/60">
                 {% for room in my_rooms %}
-                <a href="{% url 'room_detail' room.slug %}" class="group flex items-center justify-between py-4 border-b border-slate-800/80 last:border-0 hover:bg-slate-800/30 -mx-3 px-3 rounded-xl transition">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-indigo-500/10 text-indigo-400">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-col">
-                            <p class="text-[15px] font-medium text-white group-hover:text-indigo-300 transition-colors">{{ room.name }}</p>
-                            <p class="text-[13px] text-slate-400 mt-0.5">{{ room.get_category_display }}</p>
-                        </div>
+                <a href="{% url 'room_detail' room.slug %}" class="group flex items-center gap-4 px-6 py-3.5 transition hover:bg-slate-800/30">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                        style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
                     </div>
-                    <div class="flex items-center gap-3 shrink-0">
-                        <span class="text-[13px] text-slate-400">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
-                        <svg class="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-white truncate group-hover:text-indigo-400 transition-colors">{{ room.name }}</p>
+                        <p class="text-xs text-slate-600">{{ room.get_category_display }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-xs text-slate-600">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
+                        <svg class="w-4 h-4 text-slate-600 group-hover:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </a>
                 {% empty %}
-                <div class="py-8 text-center">
-                    <p class="text-sm text-slate-500">Вы ещё не создали ни одной комнаты.</p>
+                <div class="px-6 py-8 text-center">
+                    <p class="text-sm text-slate-600">Вы ещё не создали ни одной комнаты.</p>
+                    <a href="{% url 'dashboard' %}" class="mt-2 inline-block text-xs text-indigo-400 hover:text-indigo-300 transition">Создать &rarr;</a>
                 </div>
                 {% endfor %}
             </div>
         </section>
 
         <!-- Visited Rooms -->
-        <section class="bg-[#161B28] border border-slate-800 rounded-3xl px-6 py-6 pb-2">
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="text-[17px] font-medium text-white">Посещённые комнаты</h2>
-                <span class="text-sm text-slate-500">{{ visited_rooms.count }}</span>
+        <section class="glass-panel rounded-2xl">
+            <div class="flex items-center justify-between px-6 pt-5 pb-4">
+                <h2 class="text-base font-semibold text-white">Visited Rooms</h2>
+                <span class="text-xs text-slate-500">{{ visited_rooms.count }}</span>
             </div>
-            <div class="flex flex-col">
+            <div class="divide-y divide-slate-800/60">
                 {% for room in visited_rooms %}
-                <a href="{% url 'room_detail' room.slug %}" class="group flex items-center justify-between py-4 border-b border-slate-800/80 last:border-0 hover:bg-slate-800/30 -mx-3 px-3 rounded-xl transition">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0 bg-indigo-500/10 text-indigo-400">
-                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
-                            </svg>
-                        </div>
-                        <div class="flex-col">
-                            <p class="text-[15px] font-medium text-white group-hover:text-indigo-300 transition-colors">{{ room.name }}</p>
-                            <p class="text-[13px] text-slate-400 mt-0.5">{{ room.get_category_display }} &middot; {{ room.creator.username }}</p>
-                        </div>
+                <a href="{% url 'room_detail' room.slug %}" class="group flex items-center gap-4 px-6 py-3.5 transition hover:bg-slate-800/30">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                        style="background: rgba(99,102,241,0.15); border: 1px solid rgba(99,102,241,0.3);">
+                        <svg class="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
                     </div>
-                    <div class="flex items-center gap-3 shrink-0">
-                        <span class="text-[13px] text-slate-400">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
-                        <svg class="w-4 h-4 text-slate-500 group-hover:text-white transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"/></svg>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-white truncate group-hover:text-indigo-400 transition-colors">{{ room.name }}</p>
+                        <p class="text-xs text-slate-600">{{ room.get_category_display }} &middot; {{ room.creator.username }}</p>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <span class="text-xs text-slate-600">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
+                        <svg class="w-4 h-4 text-slate-600 group-hover:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                     </div>
                 </a>
                 {% empty %}
-                <div class="py-8 text-center">
-                    <p class="text-sm text-slate-500">Вы ещё не посещали чужих комнат.</p>
+                <div class="px-6 py-8 text-center">
+                    <p class="text-sm text-slate-600">Вы ещё не посещали чужих комнат.</p>
                 </div>
                 {% endfor %}
             </div>
