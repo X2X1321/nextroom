@@ -118,7 +118,6 @@
 
     <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6">
         <h2 class="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2">Статистика генерации изображений</h2>
-        <p class="text-[11px] sm:text-xs text-slate-400 mb-3 sm:mb-4">Показатели эффективности генерации</p>
         <div class="relative w-full h-64 sm:h-80">
             <canvas id="ai-stats-radar-chart" role="img" aria-label="AI image generation statistics radar chart"></canvas>
         </div>
@@ -366,8 +365,13 @@
                             },
                             tooltip: {
                                 callbacks: {
-                                    label: (tooltipItem) =>
-                                        `${tooltipItem.dataset.label}: ${tooltipItem.formattedValue}`,
+                                    label: (tooltipItem) => {
+                                        let val = tooltipItem.formattedValue;
+                                        if (tooltipItem.chart.data.labels[tooltipItem.dataIndex] === 'Успешность') {
+                                            val += '%';
+                                        }
+                                        return val;
+                                    },
                                 },
                             },
                         },
