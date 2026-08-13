@@ -28,7 +28,7 @@
                     {% csrf_token %}
                     <div>
                         <label for="provider_group_select" class="block text-sm font-medium text-slate-300">Провайдер нейросети</label>
-                        <select id="provider_group_select" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <select id="provider_group_select" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 sm:py-3 text-base sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">Все провайдеры</option>
                             {% for p in providers_structured %}
                                 <option value="{{ p.id }}">{{ p.name }}</option>
@@ -37,7 +37,7 @@
                     </div>
                     <div>
                         <label for="provider" class="block text-sm font-medium text-slate-300">Модель нейросети</label>
-                        <select id="provider" name="provider" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                        <select id="provider" name="provider" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 sm:py-3 text-base sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
                             <option value="">Выберите модель</option>
                             {% for p in providers_structured %}
                                 <optgroup label="{{ p.name }}" data-provider="{{ p.id }}">
@@ -51,11 +51,11 @@
                     </div>
                     <div>
                         <label for="api_key" class="block text-sm font-medium text-slate-300">API ключ</label>
-                        <input id="api_key" name="api_key" type="password" placeholder="Секретный ключ провайдера" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required autocomplete="new-password" data-lpignore="true" data-1p-ignore="true">
+                        <input id="api_key" name="api_key" type="password" placeholder="Секретный ключ провайдера" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 sm:py-3 text-base sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required autocomplete="new-password" data-lpignore="true" data-1p-ignore="true">
                     </div>
                     
                     <div>
-                        <textarea id="integration_custom_prompt" name="custom_prompt" rows="2" placeholder="Инструкции и роль исключительно для этой модели" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-600 resize-none"></textarea>
+                        <textarea id="integration_custom_prompt" name="custom_prompt" rows="2" placeholder="Инструкции и роль исключительно для этой модели" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 sm:py-2.5 text-base sm:text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-600 resize-none"></textarea>
                     </div>
 
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-6">
