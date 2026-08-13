@@ -57,8 +57,6 @@
                                     <h3 class="font-semibold text-white">{{ key.name }}</h3>
                                     {% if key.is_disabled %}
                                         <span class="inline-flex items-center rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">Заблокирован (Баланс)</span>
-                                    {% else %}
-                                        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">Активен</span>
                                     {% endif %}
                                 </div>
                                 <p class="text-xs text-slate-500">Создан: {{ key.created_at|date:"d.m.Y H:i" }}</p>
