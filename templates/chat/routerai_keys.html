@@ -11,9 +11,14 @@
             </svg>
             Назад
         </a>
+        <style>
+            @media (max-width: 639px) {
+                .desktop-generate-btn { display: none !important; }
+            }
+        </style>
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Мои ключи</h1>
-            <button class="generate-key-btn max-sm:hidden inline-flex w-full sm:w-auto relative items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+            <button class="generate-key-btn desktop-generate-btn inline-flex w-full sm:w-auto relative items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
                 <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
                 <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
                 <span class="relative z-10 flex items-center gap-2">
