@@ -1,0 +1,26 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div id="content-main">
+  <form method="post">
+    {% csrf_token %}
+    <fieldset class="module aligned">
+      <h2>Пополнить баланс по ID пользователя</h2>
+      {% for field in form %}
+      <div class="form-row">
+        {{ field.errors }}
+        <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+        {{ field }}
+        {% if field.help_text %}
+          <div class="help">{{ field.help_text|safe }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </fieldset>
+    <div class="submit-row">
+      <input type="submit" value="Пополнить баланс" class="default" />
+      <a href="{% url 'admin:chat_userprofile_changelist' %}" class="button cancel-link">Отмена</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

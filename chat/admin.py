@@ -112,8 +112,8 @@ class UserProfileAdmin(admin.ModelAdmin):
             'opts': self.model._meta,
             'form': form,
         }
-        # We can reuse the premium template since it's just a simple form
-        return render(request, 'admin/chat/userprofile/grant_premium_by_id.html', context)
+        # We use the specific template for granting balance
+        return render(request, 'admin/chat/userprofile/grant_balance_by_id.html', context)
 
 admin.site.register(Room)
 admin.site.register(Message)
