@@ -1494,7 +1494,7 @@ def _generate_with_horde(prompt, timeout=90, target_model=None):
     steps = int(os.environ.get('AI_HORDE_STEPS', '20'))
 
     # Optimal timeout per model based on benchmark
-    MODEL_TIMEOUT = 25 
+    MODEL_TIMEOUT = timeout 
     
     for model in models_to_try:
         headers = {
@@ -1705,7 +1705,7 @@ def generate_image(request):
         if target_model == 'uncensored':
             target_model = None
         try:
-            img_data, model_used, width, height = _generate_with_horde(prompt, timeout=20, target_model=target_model)
+            img_data, model_used, width, height = _generate_with_horde(prompt, timeout=55, target_model=target_model)
             # Since AI Horde generation takes long, we rely on the async wait inside _generate_with_horde
             # Here it returns the actual image URL or base64.
             return JsonResponse({
@@ -1734,7 +1734,7 @@ def generate_image(request):
 
     # 1. Try AI Horde
     try:
-        img_data, model_used, width, height = _generate_with_horde(prompt, timeout=10)
+        img_data, model_used, width, height = _generate_with_horde(prompt, timeout=30)
         image_url = img_data
         logging.info(f'Image generated via AI Horde: {model_used}')
     except Exception as exc:
