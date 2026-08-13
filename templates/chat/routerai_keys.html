@@ -13,7 +13,7 @@
         </a>
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Мои ключи</h1>
-            <button id="generate-key-btn" class="w-full sm:w-auto relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+            <button class="generate-key-btn hidden sm:inline-flex w-full sm:w-auto relative items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
                 <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
                 <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
                 <span class="relative z-10 flex items-center gap-2">
@@ -29,6 +29,14 @@
             <div class="text-sm text-slate-300 space-y-3 leading-relaxed">
                 <p>Сгенерированный ключ нужно скопировать и вставить в поле <strong>"Секретный ключ провайдера"</strong> на странице настройки нейросетей.</p>
             </div>
+            
+            <button class="generate-key-btn sm:hidden w-full mt-6 relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
+                <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                <span class="relative z-10 flex items-center gap-2">
+                    Сгенерировать ключ
+                </span>
+            </button>
         </section>
 
         <section class="glass-panel rounded-3xl p-6">
@@ -81,17 +89,17 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const generateBtn = document.getElementById('generate-key-btn');
+    const generateBtns = document.querySelectorAll('.generate-key-btn');
     
-    if (generateBtn) {
-        generateBtn.addEventListener('click', async function() {
+    generateBtns.forEach(btn => {
+        btn.addEventListener('click', async function() {
             const keyName = prompt('Введите название для нового ключа:', 'Мой ключ RouterAI');
             if (keyName) {
                 
                 // Disable button to prevent double clicks
-                generateBtn.disabled = true;
-                const originalContent = generateBtn.innerHTML;
-                generateBtn.innerHTML = '<span class="relative z-10 flex items-center gap-2"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Генерация...</span>';
+                btn.disabled = true;
+                const originalContent = btn.innerHTML;
+                btn.innerHTML = '<span class="relative z-10 flex items-center gap-2"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Генерация...</span>';
                 
                 try {
                     const response = await fetch("{% url 'generate_routerai_key' %}", {
@@ -109,17 +117,17 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.location.reload();
                     } else {
                         alert(data.error || 'Произошла ошибка при генерации ключа.');
-                        generateBtn.disabled = false;
-                        generateBtn.innerHTML = originalContent;
+                        btn.disabled = false;
+                        btn.innerHTML = originalContent;
                     }
                 } catch (error) {
                     alert('Ошибка сети при запросе генерации.');
-                    generateBtn.disabled = false;
-                    generateBtn.innerHTML = originalContent;
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
                 }
             }
         });
-    }
+    });
 });
 </script>
 {% endblock %}
