@@ -143,9 +143,13 @@
                     {% for member in recent_members %}
                         <div class="flex items-center gap-2.5 py-1">
                             <div class="relative">
-                                <div class="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold text-xs uppercase">
-                                    {{ member.username|slice:":2" }}
-                                </div>
+                                {% if member.profile.avatar_url %}
+                                    <img src="{{ member.profile.avatar_url }}" alt="Аватар" class="w-8 h-8 rounded-full object-cover border border-slate-700/50">
+                                {% else %}
+                                    <div class="w-8 h-8 rounded-full bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center font-bold text-xs uppercase">
+                                        {{ member.username|slice:":2" }}
+                                    </div>
+                                {% endif %}
                             </div>
                             <span class="text-sm text-slate-350 font-medium truncate">{{ member.username }}</span>
                             {% if member == room.creator %}
@@ -175,9 +179,18 @@
                 {% for msg in chat_messages %}
                     <!-- Message Bubble wrapper -->
                     <div class="flex flex-col max-w-[85%] sm:max-w-[80%] {% if msg.user and msg.user == user %}self-end items-end{% else %}self-start items-start{% endif %}" data-message-id="{{ msg.id }}">
-                        <span class="text-[10px] text-slate-500 mb-1 px-1 font-medium">
-                            {% if msg.user and msg.user == user %}Вы{% elif msg.user %}{{ msg.user.username }}{% else %}{{ msg.guest_name|default:"Гость" }}{% endif %}
-                        </span>
+                        <div class="flex items-center gap-1.5 mb-1 px-1 {% if msg.user and msg.user == user %}flex-row-reverse{% endif %}">
+                            {% if msg.user and msg.user.profile.avatar_url %}
+                                <img src="{{ msg.user.profile.avatar_url }}" alt="" class="w-4 h-4 rounded-full object-cover border border-slate-700/50">
+                            {% else %}
+                                <div class="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-[8px] font-bold text-slate-400">
+                                    {% if msg.user %}{{ msg.user.username|slice:":1"|upper }}{% else %}Г{% endif %}
+                                </div>
+                            {% endif %}
+                            <span class="text-[10px] text-slate-500 font-medium">
+                                {% if msg.user and msg.user == user %}Вы{% elif msg.user %}{{ msg.user.username }}{% else %}{{ msg.guest_name|default:"Гость" }}{% endif %}
+                            </span>
+                        </div>
                         
                         <div class="relative group pb-1.5">
                             <div class="px-3 py-2.5 sm:px-4 sm:py-2.5 rounded-2xl text-sm leading-relaxed break-words {% if msg.user == user %}bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5{% else %}glass-panel text-slate-100 rounded-tl-none border-slate-800{% endif %}">
@@ -429,9 +442,17 @@
             }
 
             bubbleWrapper.innerHTML = `
-                <span class="text-[10px] text-slate-550 mb-1 px-1 font-medium">
-                    ${escapeHTML(msg.username)}
-                </span>
+                <div class="flex items-center gap-1.5 mb-1 px-1 ${isMe ? 'flex-row-reverse' : ''}">
+                    ${msg.avatar_url ? 
+                        `<img src="${msg.avatar_url}" alt="" class="w-4 h-4 rounded-full object-cover border border-slate-700/50">` : 
+                        `<div class="w-4 h-4 rounded-full bg-slate-800 flex items-center justify-center text-[8px] font-bold text-slate-400">
+                            ${msg.username ? escapeHTML(msg.username).charAt(0).toUpperCase() : 'Г'}
+                        </div>`
+                    }
+                    <span class="text-[10px] text-slate-550 font-medium">
+                        ${isMe ? 'Вы' : escapeHTML(msg.username)}
+                    </span>
+                </div>
                 <div class="relative group pb-1.5">
                     <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed break-words ${isMe ? 'bg-gradient-to-tr from-brand-600 to-indigo-500 text-white rounded-tr-none shadow-md shadow-brand-600/5' : 'glass-panel text-slate-100 rounded-tl-none border-slate-800'}">
                         ${safeContent}

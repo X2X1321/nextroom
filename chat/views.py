@@ -762,9 +762,21 @@ def profile(request):
     available_providers = AVAILABLE_PROVIDERS
 
     if request.method == 'POST':
-        profile.custom_prompt = request.POST.get('custom_prompt', '').strip()
-        profile.save()
-        messages.success(request, 'Промпт сохранен.')
+        avatar_file = request.FILES.get('avatar')
+        if avatar_file:
+            from django.core.files.storage import default_storage
+            import uuid
+            ext = avatar_file.name.split('.')[-1]
+            file_name = f"avatars/{request.user.username}_{uuid.uuid4().hex[:6]}.{ext}"
+            saved_path = default_storage.save(file_name, avatar_file)
+            profile.avatar_url = default_storage.url(saved_path)
+            profile.save()
+            messages.success(request, 'Аватарка успешно обновлена.')
+        elif 'custom_prompt' in request.POST:
+            profile.custom_prompt = request.POST.get('custom_prompt', '').strip()
+            profile.save()
+            messages.success(request, 'Промпт сохранен.')
+            
         return redirect('profile')
 
     from django.utils import timezone
@@ -1009,9 +1021,15 @@ def get_messages(request, slug):
     for msg in queryset:
         username = msg.user.username if msg.user else (msg.guest_name or "Гость")
         is_me = (msg.user == request.user) if request.user.is_authenticated else (msg.guest_session and request.session.session_key == msg.guest_session.session_key)
+        
+        avatar_url = None
+        if msg.user and hasattr(msg.user, 'profile'):
+            avatar_url = msg.user.profile.avatar_url
+
         msg_data = {
             'id': msg.id,
             'username': username,
+            'avatar_url': avatar_url,
             'is_me': is_me,
             'content': sanitize_ai_response(msg.content) if (msg.user and getattr(msg.user.profile, 'is_bot', False)) else escape(msg.content),
             'message_type': msg.message_type,
