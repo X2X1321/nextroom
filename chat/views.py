@@ -1841,8 +1841,9 @@ def image_gen_stats(request):
             }],
             'actual_values': ['0 сек', '0%', '0', 'Нет данных', '0x0', '0']
         })
-
-    avg_time = images.aggregate(avg=Avg('generation_time'))['avg'] or 0
+    # Filter out erroneous entries where time was logged in ms instead of seconds
+    valid_time_images = images.filter(generation_time__lt=300)
+    avg_time = valid_time_images.aggregate(avg=Avg('generation_time'))['avg'] or 0
     speed_score = max(0, min(100, int((1 - min(avg_time / 15, 1)) * 100)))
     actual_speed = f"{int(avg_time * 1000)} мс"
 
