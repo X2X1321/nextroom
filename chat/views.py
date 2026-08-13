@@ -2366,13 +2366,3 @@ def delete_routerai_key(request, pk):
     key.delete()
     messages.success(request, f"Ключ удален.")
     return redirect('routerai_keys')
-
-from django.http import HttpResponse
-from django.core.management import call_command
-
-def force_migrate(request):
-    try:
-        call_command('migrate', interactive=False)
-        return HttpResponse("Migration successful! You can now use the site.")
-    except Exception as e:
-        return HttpResponse(f"Migration failed: {e}")
