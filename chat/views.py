@@ -1604,6 +1604,8 @@ def generate_image(request):
 
 
 
+    model_param = data.get('model', '')
+
     # If explicitly requested RouterAI models (Krea, Riverflow, Grok, FLUX, Qwen)
     if model_param in ('krea-2-medium-turbo', 'riverflow-v2.5-fast', 'grok-imagine', 'flux-2-pro', 'qwen-image-3-pro'):
         if not request.user.is_authenticated:
@@ -1697,7 +1699,6 @@ def generate_image(request):
             return JsonResponse({'error': f'Generation failed: {str(e)}'}, status=500)
 
     # If explicitly requested Horde
-    model_param = data.get('model', '')
     if model_param.startswith('horde-'):
         target_model = model_param[6:]
         if target_model == 'uncensored':
