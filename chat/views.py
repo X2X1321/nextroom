@@ -2307,6 +2307,7 @@ def generate_routerai_key(request):
     key_info = res_data.get('data', {})
     key_value = res_data.get('key')
     
+    
     if not key_info or not key_value:
         return JsonResponse({'error': 'Некорректный ответ от RouterAI API'}, status=500)
         
@@ -2320,3 +2321,28 @@ def generate_routerai_key(request):
     )
     
     return JsonResponse({'success': True})
+
+@login_required
+@require_POST
+def delete_routerai_key(request, pk):
+    from chat.models import RouterAIKey
+    from django.shortcuts import get_object_or_404, redirect
+    from django.contrib import messages
+    import os
+    import urllib.request
+    
+    key = get_object_or_404(RouterAIKey, pk=pk, user=request.user)
+    
+    master_key = os.environ.get('ROUTERAI_MASTER_KEY')
+    if master_key and key.key_hash:
+        url = f"https://routerai.ru/api/v1/keys/{key.key_hash}"
+        req = urllib.request.Request(url, method='DELETE')
+        req.add_header('Authorization', f'Bearer {master_key}')
+        try:
+            urllib.request.urlopen(req, timeout=10)
+        except Exception as e:
+            print(f"Failed to delete RouterAI key remotely: {e}")
+            
+    key.delete()
+    messages.success(request, f"Ключ удален.")
+    return redirect('routerai_keys')

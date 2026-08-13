@@ -31,6 +31,7 @@ urlpatterns = [
     path('ai-management/integration/<int:pk>/edit/', views.edit_ai_integration, name='edit_ai_integration'),
     path('ai-management/integration/<int:pk>/delete/', views.delete_ai_integration, name='delete_ai_integration'),
     path('ai-management/my-keys/', views.routerai_keys_view, name='routerai_keys'),
+    path('ai-management/my-keys/<int:pk>/delete/', views.delete_routerai_key, name='delete_routerai_key'),
     path('ai-management/generate-key/', views.generate_routerai_key, name='generate_routerai_key'),
     path('ai-management/models/', views.models_pricing, name='models_pricing'),
     path('room/<slug:slug>/toggle-pin/', views.toggle_room_pin, name='toggle_room_pin'),
