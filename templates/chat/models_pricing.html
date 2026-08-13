@@ -21,20 +21,20 @@
 
     <div class="glass-panel rounded-2xl border border-slate-800/60 overflow-hidden flex-1 flex flex-col">
         <div class="overflow-x-auto flex-1">
-            <table class="w-full text-left border-collapse">
-                <thead class="sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 shadow-sm">
-                    <tr>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">Модель</th>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 w-1/3">Описание</th>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 text-right whitespace-nowrap">Контекст</th>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 text-right whitespace-nowrap">Вход (за 1M токенов)</th>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 text-right whitespace-nowrap">Выход (за 1M токенов)</th>
+            <table class="w-full text-left border-collapse block md:table">
+                <thead class="hidden md:table-header-group sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 shadow-sm">
+                    <tr class="block md:table-row">
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">Модель</th>
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 md:w-1/3">Описание</th>
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 md:text-right whitespace-nowrap">Контекст</th>
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 md:text-right whitespace-nowrap">Вход (за 1M токенов)</th>
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 md:text-right whitespace-nowrap">Выход (за 1M токенов)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60 overflow-y-auto">
+                <tbody class="block md:table-row-group divide-y divide-slate-800/60 overflow-y-auto">
                     {% for model in models %}
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
-                        <td class="py-4 px-6 align-top">
+                    <tr class="block md:table-row p-4 md:p-0 hover:bg-slate-800/30 transition-colors group border-b border-slate-800/60 md:border-none">
+                        <td class="block md:table-cell py-3 md:py-4 px-0 md:px-6 align-top">
                             <div class="flex items-center gap-3">
                                 {% if model.logo %}
                                 <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center overflow-hidden shrink-0">
@@ -51,41 +51,49 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="block md:table-cell py-3 md:py-4 px-0 md:px-6 align-top">
                             <div class="relative">
-                                <p id="desc-{{ forloop.counter }}" class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">
-                                    {{ model.description|default:"Нет описания" }}
-                                </p>
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase mb-1 block">Описание</span>
+                                <p id="desc-{{ forloop.counter }}" class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">{{ model.description|default:"Нет описания" }}</p>
                                 {% if model.description %}
                                 <button onclick="const p = document.getElementById('desc-{{ forloop.counter }}'); p.classList.toggle('line-clamp-2'); this.textContent = p.classList.contains('line-clamp-2') ? 'Развернуть' : 'Свернуть';" class="text-xs text-indigo-400 hover:text-indigo-300 mt-1 font-medium transition-colors focus:outline-none">Развернуть</button>
                                 {% endif %}
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap text-sm text-slate-300 font-mono">
-                            {{ model.context_length|default:"-" }}
-                        </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-white font-mono">
-                                {% if model.pricing.prompt_formatted == 'бесплатно' %}
-                                    бесплатно
-                                {% else %}
-                                    {{ model.pricing.prompt_formatted|default:"0.00" }} ₽
-                                {% endif %}
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Контекст</span>
+                                <div class="text-sm text-slate-300 font-mono">{{ model.context_length|default:"-" }}</div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-white font-mono">
-                                {% if model.pricing.completion_formatted == 'бесплатно' %}
-                                    бесплатно
-                                {% else %}
-                                    {{ model.pricing.completion_formatted|default:"0.00" }} ₽
-                                {% endif %}
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Вход (1M)</span>
+                                <div class="text-sm font-medium text-white font-mono">
+                                    {% if model.pricing.prompt_formatted == 'бесплатно' %}
+                                        бесплатно
+                                    {% else %}
+                                        {{ model.pricing.prompt_formatted|default:"0.00" }} ₽
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Выход (1M)</span>
+                                <div class="text-sm font-medium text-white font-mono">
+                                    {% if model.pricing.completion_formatted == 'бесплатно' %}
+                                        бесплатно
+                                    {% else %}
+                                        {{ model.pricing.completion_formatted|default:"0.00" }} ₽
+                                    {% endif %}
+                                </div>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="5" class="py-12 text-center text-slate-400">
+                    <tr class="block md:table-row">
+                        <td colspan="5" class="block md:table-cell py-12 text-center text-slate-400">
                             Нет доступных моделей.
                         </td>
                     </tr>
@@ -104,18 +112,18 @@
 
     <div class="glass-panel rounded-2xl border border-slate-800/60 overflow-hidden flex-none flex flex-col mb-8">
         <div class="overflow-x-auto flex-1">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-slate-900/95 backdrop-blur-md z-10 shadow-sm">
-                    <tr>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">Модель</th>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 w-1/3">Описание</th>
-                        <th class="py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 text-right whitespace-nowrap">Стоимость (за фото)</th>
+            <table class="w-full text-left border-collapse block md:table">
+                <thead class="hidden md:table-header-group bg-slate-900/95 backdrop-blur-md z-10 shadow-sm">
+                    <tr class="block md:table-row">
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60">Модель</th>
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 md:w-1/3">Описание</th>
+                        <th class="block md:table-cell py-4 px-6 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/60 md:text-right whitespace-nowrap">Стоимость (за фото)</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-800/60 overflow-y-auto">
+                <tbody class="block md:table-row-group divide-y divide-slate-800/60 overflow-y-auto">
                     <!-- Krea -->
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
-                        <td class="py-4 px-6 align-top">
+                    <tr class="block md:table-row p-4 md:p-0 hover:bg-slate-800/30 transition-colors group border-b border-slate-800/60 md:border-none">
+                        <td class="block md:table-cell py-3 md:py-4 px-0 md:px-6 align-top">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center shrink-0 overflow-hidden p-1">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-full h-full text-indigo-400"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -126,16 +134,20 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top">
+                            <span class="md:hidden text-xs font-semibold text-slate-500 uppercase mb-1 block">Описание</span>
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Krea 2 Medium Turbo. Высококачественная генерация и обработка изображений (image-to-image).</p>
                         </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-white font-mono">3.00 ₽</div>
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Цена</span>
+                                <div class="text-sm font-medium text-white font-mono">3.00 ₽</div>
+                            </div>
                         </td>
                     </tr>
                     <!-- Riverflow -->
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
-                        <td class="py-4 px-6 align-top">
+                    <tr class="block md:table-row p-4 md:p-0 hover:bg-slate-800/30 transition-colors group border-b border-slate-800/60 md:border-none">
+                        <td class="block md:table-cell py-3 md:py-4 px-0 md:px-6 align-top">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center shrink-0 overflow-hidden p-1">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-full h-full text-cyan-400"><path d="M2 12C2 12 5 4 12 4C19 4 22 12 22 12C22 12 19 20 12 20C5 20 2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -146,16 +158,20 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top">
+                            <span class="md:hidden text-xs font-semibold text-slate-500 uppercase mb-1 block">Описание</span>
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Riverflow V2.5 Fast. Быстрая генерация изображений в высоком разрешении 2K с поддержкой референсов.</p>
                         </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-white font-mono">4.25 ₽</div>
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Цена</span>
+                                <div class="text-sm font-medium text-white font-mono">4.25 ₽</div>
+                            </div>
                         </td>
                     </tr>
                     <!-- Grok -->
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
-                        <td class="py-4 px-6 align-top">
+                    <tr class="block md:table-row p-4 md:p-0 hover:bg-slate-800/30 transition-colors group border-b border-slate-800/60 md:border-none">
+                        <td class="block md:table-cell py-3 md:py-4 px-0 md:px-6 align-top">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center shrink-0 overflow-hidden p-1.5">
                                     <img src="https://cdn.simpleicons.org/x/cbd5e1" class="w-full h-full object-contain" alt="xAI">
@@ -166,16 +182,20 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top">
+                            <span class="md:hidden text-xs font-semibold text-slate-500 uppercase mb-1 block">Описание</span>
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Генерация изображений от x-ai (Grok Imagine Image Quality) в разрешении 1K.</p>
                         </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-white font-mono">8.00 ₽</div>
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Цена</span>
+                                <div class="text-sm font-medium text-white font-mono">8.00 ₽</div>
+                            </div>
                         </td>
                     </tr>
                     <!-- FLUX -->
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
-                        <td class="py-4 px-6 align-top">
+                    <tr class="block md:table-row p-4 md:p-0 hover:bg-slate-800/30 transition-colors group border-b border-slate-800/60 md:border-none">
+                        <td class="block md:table-cell py-3 md:py-4 px-0 md:px-6 align-top">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center shrink-0 overflow-hidden p-1.5">
                                     <img src="https://cdn.simpleicons.org/flux/fde047" class="w-full h-full object-contain" alt="Flux">
@@ -186,16 +206,20 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top">
+                            <span class="md:hidden text-xs font-semibold text-slate-500 uppercase mb-1 block">Описание</span>
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Мощная генеративная модель от Black Forest Labs для создания фотореалистичных изображений.</p>
                         </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-white font-mono">5.50 ₽</div>
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Цена</span>
+                                <div class="text-sm font-medium text-white font-mono">5.50 ₽</div>
+                            </div>
                         </td>
                     </tr>
                     <!-- Qwen Image -->
-                    <tr class="hover:bg-slate-800/30 transition-colors group">
-                        <td class="py-4 px-6 align-top">
+                    <tr class="block md:table-row p-4 md:p-0 hover:bg-slate-800/30 transition-colors group border-b border-slate-800/60 md:border-none">
+                        <td class="block md:table-cell py-3 md:py-4 px-0 md:px-6 align-top">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full bg-slate-800/50 border border-slate-700/50 flex items-center justify-center shrink-0 overflow-hidden">
                                     <img src="https://assets.routerai.ru/assets/icons/qwen-826a8925.png" alt="Qwen" class="w-5 h-5 object-contain">
@@ -206,11 +230,15 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top">
+                            <span class="md:hidden text-xs font-semibold text-slate-500 uppercase mb-1 block">Описание</span>
                             <p class="text-sm text-slate-400 line-clamp-2 whitespace-pre-wrap">Продвинутая модель генерации изображений от Qwen в разрешении 1K.</p>
                         </td>
-                        <td class="py-4 px-6 align-top text-right whitespace-nowrap">
-                            <div class="text-sm font-medium text-white font-mono">6.30 ₽</div>
+                        <td class="block md:table-cell py-2 md:py-4 px-0 md:px-6 align-top md:text-right whitespace-nowrap">
+                            <div class="flex justify-between md:block items-center">
+                                <span class="md:hidden text-xs font-semibold text-slate-500 uppercase">Цена</span>
+                                <div class="text-sm font-medium text-white font-mono">6.30 ₽</div>
+                            </div>
                         </td>
                     </tr>
                 </tbody>
