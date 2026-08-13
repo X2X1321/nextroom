@@ -12,6 +12,11 @@
                         <div class="inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-300">
                             Личный кабинет
                         </div>
+                        <div class="mt-5 flex flex-wrap justify-center gap-3">
+                            <a href="{% url 'dashboard' %}" class="rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white">Открыть комнаты</a>
+                            <a href="{% url 'achievements' %}" class="rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white">Достижения</a>
+                            <a href="{% url 'ai_management' %}" class="rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white">Управление нейросетями</a>
+                        </div>
                     </div>
                     
                     <div class="w-full flex flex-col gap-4 items-start sm:items-center">
@@ -22,38 +27,16 @@
                             <p class="mt-1 text-xs text-slate-400">Участник с {{ user.date_joined|date:"d.m.Y" }}</p>
                         </div>
 
-                        <!-- Quick Actions Grid -->
-                        <div class="w-full sm:max-w-md grid grid-cols-3 gap-3">
-                            <a href="{% url 'dashboard' %}" class="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-3 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50 hover:bg-indigo-500/10 hover:shadow-lg hover:shadow-indigo-500/20">
-                                <svg class="h-5 w-5 sm:h-6 sm:w-6 text-slate-400 group-hover:text-indigo-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                                </svg>
-                                <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-white transition-colors duration-300">Комнаты</span>
-                            </a>
-                            <a href="{% url 'achievements' %}" class="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-3 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:border-yellow-500/50 hover:bg-yellow-500/10 hover:shadow-lg hover:shadow-yellow-500/20">
-                                <svg class="h-5 w-5 sm:h-6 sm:w-6 text-slate-400 group-hover:text-yellow-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                                <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-white transition-colors duration-300">Награды</span>
-                            </a>
-                            <a href="{% url 'ai_management' %}" class="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-slate-800 bg-slate-950/70 p-3 sm:p-4 transition-all duration-300 hover:-translate-y-1 hover:border-purple-500/50 hover:bg-purple-500/10 hover:shadow-lg hover:shadow-purple-500/20">
-                                <svg class="h-5 w-5 sm:h-6 sm:w-6 text-slate-400 group-hover:text-purple-400 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                                </svg>
-                                <span class="text-[9px] sm:text-[10px] font-semibold uppercase tracking-wider text-slate-400 group-hover:text-white transition-colors duration-300">Модели</span>
-                            </a>
-                        </div>
-
                         <!-- Balance Card -->
                         <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 w-full sm:max-w-md flex flex-col justify-between text-left sm:text-center">
                             <div>
                                 <p class="text-[11px] uppercase tracking-[0.24em] text-slate-400">Баланс</p>
                                 <p class="mt-1 text-2xl font-black text-indigo-400">{{ profile.balance }} ₽</p>
                             </div>
-                            <form action="{% url 'topup_balance' %}" method="POST" class="mt-4 flex w-full relative">
+                            <form action="{% url 'topup_balance' %}" method="POST" class="mt-4 flex w-full gap-2">
                                 {% csrf_token %}
-                                <input type="number" name="amount" min="10" step="0.01" placeholder="Сумма" required class="w-full rounded-xl bg-slate-900 border border-slate-700 pl-4 pr-[110px] py-2.5 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-500 outline-none transition-all duration-300">
-                                <button type="submit" class="absolute right-1 top-1 bottom-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 px-4 text-sm font-semibold text-white transition-colors duration-200 shadow-md">
+                                <input type="number" name="amount" min="10" step="0.01" placeholder="Сумма" required class="w-full min-w-0 rounded-xl bg-slate-900 border border-slate-700 px-3 py-2 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-500 outline-none">
+                                <button type="submit" class="shrink-0 rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-semibold text-white transition duration-200">
                                     Пополнить
                                 </button>
                             </form>
@@ -76,9 +59,10 @@
                             {% if not profile.is_premium %}
                             <form action="{% url 'create_yookassa_subscription' %}" method="POST" class="mt-4">
                                 {% csrf_token %}
-                                <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold text-white transition-all duration-300 group w-full rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-400 hover:to-purple-400 shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40 hover:-translate-y-0.5">
-                                    <span>Купить Premium</span>
-                                    <svg class="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                                <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group w-full">
+                                    <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-indigo-900/50 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                                    <span class="absolute inset-0 w-full h-full rounded-xl bg-slate-800/80 border border-slate-700/50 group-hover:bg-indigo-900/40 transition duration-300"></span>
+                                    <span class="relative z-10">Купить Premium</span>
                                 </button>
                             </form>
                             {% endif %}
@@ -133,16 +117,13 @@
             </div>
             <div class="space-y-3">
                 {% for room in my_rooms %}
-                <a href="{% url 'room_detail' room.slug %}" class="group block rounded-3xl border border-slate-800 bg-slate-950/80 p-4 transition-all duration-300 hover:border-indigo-500/40 hover:bg-slate-900 hover:shadow-lg hover:shadow-indigo-500/10">
-                    <div class="flex items-center justify-between gap-3">
+                <a href="{% url 'room_detail' room.slug %}" class="block rounded-3xl border border-slate-800 bg-slate-950/80 p-4 transition hover:border-indigo-500/30 hover:bg-slate-900">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-white group-hover:text-indigo-400 transition-colors duration-300">{{ room.name }}</h3>
+                            <h3 class="text-base font-semibold text-white">{{ room.name }}</h3>
                             <p class="text-sm text-slate-400 mt-1">{{ room.get_category_display }} · {{ room.messages.count }} сообщений</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs uppercase tracking-[0.24em] text-slate-500">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
-                            <svg class="w-5 h-5 text-slate-600 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-indigo-400 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </div>
+                        <span class="text-xs uppercase tracking-[0.24em] text-slate-400">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
                     </div>
                 </a>
                 {% empty %}
@@ -158,16 +139,13 @@
             </div>
             <div class="space-y-3">
                 {% for room in visited_rooms %}
-                <a href="{% url 'room_detail' room.slug %}" class="group block rounded-3xl border border-slate-800 bg-slate-950/80 p-4 transition-all duration-300 hover:border-indigo-500/40 hover:bg-slate-900 hover:shadow-lg hover:shadow-indigo-500/10">
-                    <div class="flex items-center justify-between gap-3">
+                <a href="{% url 'room_detail' room.slug %}" class="block rounded-3xl border border-slate-800 bg-slate-950/80 p-4 transition hover:border-indigo-500/30 hover:bg-slate-900">
+                    <div class="flex items-start justify-between gap-3">
                         <div>
-                            <h3 class="text-base font-semibold text-white group-hover:text-indigo-400 transition-colors duration-300">{{ room.name }}</h3>
+                            <h3 class="text-base font-semibold text-white">{{ room.name }}</h3>
                             <p class="text-sm text-slate-400 mt-1">{{ room.get_category_display }} · Создатель: {{ room.creator.username }}</p>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs uppercase tracking-[0.24em] text-slate-500">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
-                            <svg class="w-5 h-5 text-slate-600 opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0 group-hover:text-indigo-400 hidden sm:block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                        </div>
+                        <span class="text-xs uppercase tracking-[0.24em] text-slate-400">{% if room.last_activity %}{{ room.last_activity|date:'d.m.Y' }}{% else %}{{ room.created_at|date:'d.m.Y' }}{% endif %}</span>
                     </div>
                 </a>
                 {% empty %}
