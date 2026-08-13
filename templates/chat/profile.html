@@ -12,10 +12,7 @@
                     <div class="inline-flex items-center rounded-full border border-indigo-500/20 bg-indigo-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.28em] text-indigo-300">
                         Личный кабинет
                     </div>
-                    <div class="mt-5 flex flex-wrap justify-center gap-3">
-                        <a href="{% url 'dashboard' %}" class="rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white">Открыть комнаты</a>
-                        <a href="{% url 'achievements' %}" class="rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white">Достижения</a>
-                        <a href="{% url 'ai_management' %}" class="rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-2.5 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white">Управление нейросетями</a>
+                    <div class="mt-5">
                     </div>
                 </div>
             </div>
@@ -68,6 +65,13 @@
                             </button>
                         </form>
                         {% endif %}
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex flex-col gap-3 w-full">
+                        <a href="{% url 'dashboard' %}" class="w-full text-center rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white hover:bg-slate-800">Открыть комнаты</a>
+                        <a href="{% url 'ai_management' %}" class="w-full text-center rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white hover:bg-slate-800">Управление нейросетями</a>
+                        <a href="{% url 'achievements' %}" class="w-full text-center rounded-2xl border border-slate-700/70 bg-slate-900/80 px-4 py-3 text-sm font-semibold text-slate-200 transition hover:border-indigo-500/40 hover:text-white hover:bg-slate-800">Достижения</a>
                     </div>
                 </div>
 
