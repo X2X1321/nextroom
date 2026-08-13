@@ -334,12 +334,14 @@
             if (radarChartInstance) {
                 radarChartInstance.data.labels = labels;
                 radarChartInstance.data.datasets[0].data = values;
+                radarChartInstance.data.actualValues = data.actual_values || values;
                 radarChartInstance.update();
             } else {
                 radarChartInstance = new Chart(radarCanvas, {
                     type: 'radar',
                     data: {
                         labels: labels,
+                        actualValues: data.actual_values || values,
                         datasets: [{
                             label: 'Генерация изображений',
                             data: values,
@@ -366,11 +368,11 @@
                             tooltip: {
                                 callbacks: {
                                     label: (tooltipItem) => {
-                                        let val = tooltipItem.formattedValue;
-                                        if (tooltipItem.chart.data.labels[tooltipItem.dataIndex] === 'Успешность') {
-                                            val += '%';
+                                        const chart = tooltipItem.chart;
+                                        if (chart.data.actualValues && chart.data.actualValues[tooltipItem.dataIndex] !== undefined) {
+                                            return String(chart.data.actualValues[tooltipItem.dataIndex]);
                                         }
-                                        return val;
+                                        return tooltipItem.formattedValue;
                                     },
                                 },
                             },
