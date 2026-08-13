@@ -115,6 +115,22 @@ class UserProfile(models.Model):
     def active_plan(self):
         return 'Premium' if self.is_premium else 'Free'
 
+class RouterAIKey(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='routerai_keys')
+    name = models.CharField(max_length=150, verbose_name="Название ключа")
+    key_hash = models.CharField(max_length=150, unique=True, verbose_name="Hash ключа")
+    key_value = models.CharField(max_length=255, verbose_name="Значение ключа")
+    is_disabled = models.BooleanField(default=False, verbose_name="Отключен")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = 'API Ключ RouterAI'
+        verbose_name_plural = 'API Ключи RouterAI'
+
+    def __str__(self):
+        return f"{self.name} ({self.user.username})"
+
 class AIIntegration(models.Model):
     profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='integrations')
     provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)

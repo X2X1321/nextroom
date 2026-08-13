@@ -1693,6 +1693,10 @@ def generate_image(request):
             profile.balance -= cost
             profile.save()
             
+            # Sync API keys if balance dropped <= 0
+            if profile.balance <= 0:
+                sync_routerai_keys_state(request.user)
+            
             # Determine mime type based on output format
             mime_type = 'image/jpeg' if model_param in ('riverflow-v2.5-fast', 'flux-2-pro') else 'image/png'
             
@@ -2088,6 +2092,8 @@ def save_image_stat(request):
                 width=1024,
                 height=1024
             )
+            # Sync keys after balance deduction
+            sync_routerai_keys_state(request.user)
         else:
             guest = get_or_create_guest_session(request)
             GeneratedImage.objects.create(
@@ -2192,6 +2198,10 @@ def payment_return(request):
                 profile.save()
                 profile.refresh_from_db()
                 
+                # Sync API keys if balance became positive
+                if profile.balance > 0:
+                    sync_routerai_keys_state(request.user)
+                
                 messages.success(request, f'Баланс успешно пополнен на {p.amount} RUB!')
                 checked = True
             elif payment_info.status == 'canceled':
@@ -2214,3 +2224,90 @@ def models_pricing(request):
         'models': pricing_models
     }
     return render(request, 'chat/models_pricing.html', context)
+
+
+def sync_routerai_keys_state(user):
+    from chat.models import UserProfile, RouterAIKey
+    import os
+    import urllib.request
+    import json
+    
+    profile = UserProfile.objects.filter(user=user).first()
+    if not profile:
+        return
+
+    keys = RouterAIKey.objects.filter(user=user)
+    if not keys.exists():
+        return
+
+    should_be_disabled = profile.balance <= 0
+    master_key = os.environ.get('ROUTERAI_MASTER_KEY')
+    if not master_key:
+        print("WARNING: ROUTERAI_MASTER_KEY is not set.")
+        return
+        
+    for key in keys:
+        if key.is_disabled != should_be_disabled:
+            url = f"https://routerai.ru/api/v1/keys/{key.key_hash}"
+            payload = {"disabled": should_be_disabled}
+            data = json.dumps(payload).encode('utf-8')
+            req = urllib.request.Request(url, data=data, method='PATCH')
+            req.add_header('Authorization', f'Bearer {master_key}')
+            req.add_header('Content-Type', 'application/json')
+            try:
+                urllib.request.urlopen(req, timeout=10)
+                key.is_disabled = should_be_disabled
+                key.save()
+            except Exception as e:
+                print(f"Failed to sync RouterAI key state for {user.username}: {e}")
+
+@login_required
+def routerai_keys_view(request):
+    from chat.models import RouterAIKey
+    keys = RouterAIKey.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'chat/routerai_keys.html', {'keys': keys})
+
+@login_required
+@require_POST
+def generate_routerai_key(request):
+    import os
+    import urllib.request
+    import json
+    from chat.models import RouterAIKey
+    
+    master_key = os.environ.get('ROUTERAI_MASTER_KEY')
+    if not master_key:
+        return JsonResponse({'error': 'Мастер-ключ RouterAI не настроен на сервере.'}, status=500)
+        
+    url = "https://routerai.ru/api/v1/keys"
+    payload = {
+        "name": f"NextRoom User: {request.user.username}",
+        "limit": 0  # 0 means unlimited by RouterAI side, we handle balance locally
+    }
+    data = json.dumps(payload).encode('utf-8')
+    req = urllib.request.Request(url, data=data, method='POST')
+    req.add_header('Authorization', f'Bearer {master_key}')
+    req.add_header('Content-Type', 'application/json')
+    
+    try:
+        response = urllib.request.urlopen(req, timeout=15)
+        res_data = json.loads(response.read().decode('utf-8'))
+    except Exception as e:
+        return JsonResponse({'error': f'Ошибка API RouterAI: {str(e)}'}, status=500)
+        
+    key_info = res_data.get('data', {})
+    key_value = res_data.get('key')
+    
+    if not key_info or not key_value:
+        return JsonResponse({'error': 'Некорректный ответ от RouterAI API'}, status=500)
+        
+    # Save to database
+    RouterAIKey.objects.create(
+        user=request.user,
+        name=key_info.get('name', payload['name']),
+        key_hash=key_info.get('hash', ''),
+        key_value=key_value,
+        is_disabled=False
+    )
+    
+    return JsonResponse({'success': True})

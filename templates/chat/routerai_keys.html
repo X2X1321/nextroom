@@ -1,0 +1,127 @@
+{% extends 'chat/base.html' %}
+
+{% block title %}Мои ключи API — NextRoom{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8 w-full flex-grow flex flex-col gap-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+            <a href="{% url 'ai_management' %}" class="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition duration-200 group mb-3">
+                <svg class="w-4 h-4 transform group-hover:-translate-x-1 transition duration-250" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
+                Назад
+            </a>
+            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Мои ключи API (RouterAI)</h1>
+            <p class="text-sm text-slate-400 mt-1">Генерируйте ключи для интеграции моделей в сторонние приложения</p>
+        </div>
+        <div>
+            <button id="generate-key-btn" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-white transition duration-300 group">
+                <span class="absolute inset-0 w-full h-full rounded-xl transition duration-300 ease-out transform translate-x-1 translate-y-1 bg-brand-500/30 group-hover:-translate-x-0 group-hover:-translate-y-0"></span>
+                <span class="absolute inset-0 w-full h-full rounded-xl bg-brand-600 border border-brand-500 group-hover:bg-brand-500 transition duration-300"></span>
+                <span class="relative z-10 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    Сгенерировать ключ
+                </span>
+            </button>
+        </div>
+    </div>
+
+    <div class="grid gap-6 mt-4">
+        <section class="glass-panel rounded-3xl p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-brand-500/20 flex items-center justify-center text-brand-400 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-lg font-bold text-white">Как использовать ключи?</h2>
+            </div>
+            <div class="text-sm text-slate-300 space-y-3 leading-relaxed">
+                <p>Здесь вы можете сгенерировать персональные API-ключи RouterAI, привязанные к вашему балансу на сайте NextRoom.</p>
+                <ul class="list-disc pl-5 space-y-1 text-slate-400">
+                    <li>Ключи имеют <strong>безлимитный лимит</strong> со стороны провайдера, но жестко зависят от вашего баланса здесь.</li>
+                    <li>Если ваш баланс на NextRoom опускается до нуля или ниже, <strong>все ключи автоматически блокируются</strong>. При пополнении они снова активируются.</li>
+                    <li>Эти ключи можно использовать в любых приложениях, поддерживающих OpenAI API формат, указав Base URL: <code class="bg-slate-800 px-1.5 py-0.5 rounded text-indigo-300">https://routerai.ru/api/v1</code></li>
+                </ul>
+            </div>
+        </section>
+
+        <section class="glass-panel rounded-3xl p-6">
+            <h2 class="text-lg font-bold text-white mb-6">Сгенерированные ключи</h2>
+            
+            {% if keys %}
+                <div class="space-y-4">
+                    {% for key in keys %}
+                    <div class="rounded-2xl border {% if key.is_disabled %}border-red-900/30 bg-red-950/20{% else %}border-slate-800 bg-slate-900/50{% endif %} p-4">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-semibold text-white">{{ key.name }}</h3>
+                                    {% if key.is_disabled %}
+                                        <span class="inline-flex items-center rounded-full bg-red-500/10 px-2 py-0.5 text-[10px] font-semibold text-red-400">Заблокирован (Баланс)</span>
+                                    {% else %}
+                                        <span class="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">Активен</span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-xs text-slate-500">Создан: {{ key.created_at|date:"d.m.Y H:i" }}</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <code class="text-xs bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-indigo-300 select-all font-mono">{{ key.key_value }}</code>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-10 bg-slate-900/30 rounded-2xl border border-dashed border-slate-800">
+                    <svg class="w-12 h-12 text-slate-600 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                    <p class="text-slate-400 text-sm">У вас пока нет сгенерированных ключей.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const generateBtn = document.getElementById('generate-key-btn');
+    
+    if (generateBtn) {
+        generateBtn.addEventListener('click', async function() {
+            if (confirm('Сгенерировать новый API-ключ RouterAI? Он будет привязан к вашему балансу.')) {
+                
+                // Disable button to prevent double clicks
+                generateBtn.disabled = true;
+                const originalContent = generateBtn.innerHTML;
+                generateBtn.innerHTML = '<span class="relative z-10 flex items-center gap-2"><svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Генерация...</span>';
+                
+                try {
+                    const response = await fetch("{% url 'generate_routerai_key' %}", {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'Произошла ошибка при генерации ключа.');
+                        generateBtn.disabled = false;
+                        generateBtn.innerHTML = originalContent;
+                    }
+                } catch (error) {
+                    alert('Ошибка сети при запросе генерации.');
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = originalContent;
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
