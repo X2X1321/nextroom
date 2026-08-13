@@ -67,6 +67,7 @@ AI_COMMAND_ALIASES = {
     'claude': 'Claude',
     'cerebras': 'Cerebras',
     'openrouter': 'OpenRouter Auto',
+    'routerai': 'RouterAI Auto',
 }
 
 YOO_KASSA_API_URL = 'https://api.yookassa.ru/v3'
