@@ -795,7 +795,7 @@
     (function() {
         const roomsData = JSON.parse(document.getElementById('rooms-data').textContent);
         const el = document.getElementById('room-graph');
-        if (!el || !roomsData.length) return;
+        if (!el) return;
 
         const PURPLE_HUB  = '#c4b5fd';
         const PURPLE_NODE = '#8b5cf6';
