@@ -257,8 +257,14 @@ def fetch_chat_completion(provider, prompt, api_key, model=None, custom_prompt='
     payload = {
         'model': model,
         'messages': messages,
-        'max_tokens': 180,
-        'temperature': 0.8,
+        'max_tokens': 250,
+        'temperature': 0.85,
+        'top_p': 0.9,
+        'frequency_penalty': 0.7,
+        'presence_penalty': 0.7,
+        'repetition_penalty': 1.1,
+        'top_k': 40,
+        'min_p': 0.05,
     }
     data = json.dumps(payload).encode('utf-8')
     req = urllib.request.Request(url, data=data, method='POST')
