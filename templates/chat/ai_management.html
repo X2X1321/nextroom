@@ -23,7 +23,6 @@
     <div class="grid gap-6">
 
         <section class="glass-panel rounded-3xl p-6">
-            <h2 class="text-lg font-bold text-white mb-4">API ключи</h2>
             {% if profile.is_premium %}
                 <form action="{% url 'add_ai_integration' %}" method="POST" class="space-y-4" id="ai-integration-form">
                     {% csrf_token %}
