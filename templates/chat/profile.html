@@ -20,36 +20,47 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
                 <div class="flex flex-col gap-4">
                     <!-- Profile Card -->
-                    <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 w-full flex flex-col sm:flex-row items-center gap-5 sm:text-left text-center">
-                        <form action="{% url 'profile' %}" method="POST" enctype="multipart/form-data" class="shrink-0 relative group cursor-pointer w-16 h-16 sm:w-20 sm:h-20">
-                            {% csrf_token %}
-                            <input type="file" name="avatar" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="this.form.submit()" title="Изменить аватарку">
-                            {% if profile.avatar_url %}
+                    <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-5 w-full flex flex-col sm:flex-row justify-between items-center gap-5">
+                        
+                        <!-- ЛЕВАЯ ЧАСТЬ: Аватарка + Имя -->
+                        <div class="flex flex-col sm:flex-row items-center gap-5">
+                            <!-- Аватарка -->
+                            <form action="{% url 'profile' %}" method="POST" enctype="multipart/form-data" class="shrink-0 relative group cursor-pointer w-16 h-16 sm:w-20 sm:h-20">
+                                {% csrf_token %}
+                                <input type="file" name="avatar" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="this.form.submit()" title="Изменить аватарку">
+                                {% if profile.avatar_url %}
                                 <img src="{{ profile.avatar_url }}" alt="Аватарка" class="w-full h-full rounded-full object-cover border border-slate-700/50 group-hover:opacity-70 transition">
-                            {% else %}
+                                {% else %}
                                 <div class="w-full h-full rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-white border border-slate-700/50 group-hover:opacity-70 transition" style="background: linear-gradient(135deg, #4F46E5 0%, #A855F7 100%);">
                                     {{ user.username|slice:":1"|upper }}
                                 </div>
-                            {% endif %}
-                            <div class="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition bg-black/40 pointer-events-none">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            </div>
-                        </form>
-                        <div class="flex flex-col">
-                            <p class="text-[11px] uppercase tracking-[0.26em] text-slate-500">Профиль</p>
-                            <p class="mt-1 text-2xl font-bold text-white leading-tight">{{ user.username }}</p>
-                            <div class="mt-1 flex flex-wrap items-center gap-2">
-                                <p class="text-xs text-slate-400">Участник с {{ user.date_joined|date:"d.m.Y" }}</p>
-                                <span class="text-xs text-slate-600 hidden sm:inline">|</span>
-                                <div class="text-xs text-slate-400 flex items-center gap-1.5">
-                                    Ваш id: <span class="text-white font-mono">{{ user.id }}</span>
-                                    <button type="button" onclick="navigator.clipboard.writeText('{{ user.id }}'); const icon = this.querySelector('svg'); const old = icon.innerHTML; icon.innerHTML = '<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M5 13l4 4L19 7\'/>'; this.classList.add('text-emerald-500'); setTimeout(() => { icon.innerHTML = old; this.classList.remove('text-emerald-500'); }, 2000);" class="text-slate-500 hover:text-white transition" title="Скопировать ID">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                                    </button>
+                                {% endif %}
+                                <div class="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition bg-black/40 pointer-events-none">
+                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                 </div>
+                            </form>
+
+                            <!-- Текст: Профиль, Имя, Дата -->
+                            <div class="flex flex-col justify-center text-center sm:text-left">
+                                <p class="text-[11px] uppercase tracking-[0.26em] text-slate-500">Профиль</p>
+                                <p class="mt-1 text-2xl font-bold text-white leading-tight">{{ user.username }}</p>
+                                <p class="mt-1 text-xs text-slate-400">Участник с {{ user.date_joined|date:"d.m.Y" }}</p>
                             </div>
+                        </div>
+
+                        <!-- ПРАВАЯ ЧАСТЬ: ID и Статус -->
+                        <div class="flex flex-col justify-center items-center sm:items-end gap-2 mt-2 sm:mt-0">
+                            <!-- ID -->
+                            <div class="text-xs text-slate-400 flex items-center justify-center sm:justify-end gap-1.5">
+                                Ваш id: <span class="text-white font-mono">{{ user.id }}</span>
+                                <button type="button" onclick="navigator.clipboard.writeText('{{ user.id }}'); const icon = this.querySelector('svg'); const old = icon.innerHTML; icon.innerHTML = '<path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M5 13l4 4L19 7\'/>'; this.classList.add('text-emerald-500'); setTimeout(() => { icon.innerHTML = old; this.classList.remove('text-emerald-500'); }, 2000);" class="text-slate-500 hover:text-white transition" title="Скопировать ID">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                </button>
+                            </div>
+                            
+                            <!-- Статус -->
                             {% if user.is_authenticated %}
-                            <div class="mt-2 flex items-center gap-2">
+                            <div class="flex items-center justify-center sm:justify-end gap-2">
                                 <span class="text-xs text-slate-400">Статус:</span>
                                 <div class="flex items-center gap-1.5">
                                     <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
