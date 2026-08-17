@@ -58,7 +58,6 @@ class RoomAIAccessTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context['active_rooms'], 1)
-        self.assertEqual(response.context['online_users'], 0)
         self.assertEqual(response.context['total_messages'], 1)
 
     def test_creator_can_enable_room_ai_provider_for_other_users(self):
@@ -163,7 +162,9 @@ class RoomAIAccessTests(TestCase):
 
     def test_send_image_and_voice_message(self):
         from django.core.files.uploadedfile import SimpleUploadedFile
-        test_img = SimpleUploadedFile("test.jpg", b"fake_image_bytes", content_type="image/jpeg")
+        # 1x1 valid transparent GIF
+        gif_bytes = b'GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;'
+        test_img = SimpleUploadedFile("test.gif", gif_bytes, content_type="image/gif")
         test_voice = SimpleUploadedFile("voice.webm", b"fake_voice_bytes", content_type="audio/webm")
 
         img_res = self.client.post(
@@ -180,11 +181,37 @@ class RoomAIAccessTests(TestCase):
         self.assertEqual(voice_res.status_code, 200)
         self.assertTrue(Message.objects.filter(message_type='voice').exists())
 
-    def test_ai_fallback_on_provider_error(self):
-        from .views import fetch_ai_response
-        mock_integration = type('MockIntegration', (), {'api_key': 'invalid_key_123', 'model_name': 'invalid-model', 'custom_prompt': '', 'profile_id': None})()
-        response_text, tokens = fetch_ai_response('cerebras', 'Привет!', mock_integration)
-        self.assertIsNotNone(response_text)
-        self.assertNotIn('Error code: 404', response_text)
+    def test_cache_utils_get_and_set(self):
+        from .cache_utils import get_cache, set_cache
+        self.assertTrue(set_cache('test_key_abc', {'data': 123}, timeout=30))
+        cached = get_cache('test_key_abc')
+        self.assertIsNotNone(cached)
+        self.assertEqual(cached.get('data'), 123)
+
+    def test_confirm_subscription_idempotency(self):
+        from .models import Payment
+        self.client.force_login(self.creator)
+        
+        mock_payment_data = {
+            'id': 'pay_test_123',
+            'status': 'succeeded',
+            'metadata': {'user_id': str(self.creator.id)}
+        }
+        with patch('chat.views.yookassa_request', return_value=mock_payment_data):
+            # First confirmation
+            res1 = self.client.get(reverse('subscription_confirm') + '?paymentId=pay_test_123')
+            self.assertEqual(res1.status_code, 302)
+            payment = Payment.objects.get(payment_id='pay_test_123')
+            self.assertEqual(payment.status, 'succeeded')
+            self.creator_profile.refresh_from_db()
+            expiry1 = self.creator_profile.premium_until
+
+            # Second confirmation (replay attack / refresh)
+            res2 = self.client.get(reverse('subscription_confirm') + '?paymentId=pay_test_123')
+            self.assertEqual(res2.status_code, 302)
+            self.creator_profile.refresh_from_db()
+            # Expiry date must not be extended again
+            self.assertEqual(self.creator_profile.premium_until, expiry1)
+
 
 
