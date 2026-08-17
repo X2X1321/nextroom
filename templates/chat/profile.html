@@ -232,20 +232,57 @@ document.addEventListener('DOMContentLoaded', () => {
     const avatarPlaceholder = document.getElementById('avatar-placeholder');
     const avatarLoading = document.getElementById('avatar-loading');
 
+    // Client-side image compression to guarantee payload < 50KB (avoids Vercel 413 Payload Too Large)
+    function compressAvatarImage(file, maxSize = 320, quality = 0.85) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    try {
+                        const width = img.naturalWidth || img.width;
+                        const height = img.naturalHeight || img.height;
+                        const minDim = Math.min(width, height);
+                        const startX = (width - minDim) / 2;
+                        const startY = (height - minDim) / 2;
+                        const targetDim = Math.min(minDim, maxSize);
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = targetDim;
+                        canvas.height = targetDim;
+                        const ctx = canvas.getContext('2d');
+
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = 'high';
+                        ctx.drawImage(img, startX, startY, minDim, minDim, 0, 0, targetDim, targetDim);
+
+                        canvas.toBlob((blob) => {
+                            if (blob) {
+                                resolve(blob);
+                            } else {
+                                resolve(file);
+                            }
+                        }, 'image/jpeg', quality);
+                    } catch (canvasErr) {
+                        console.warn('Canvas compression fallback:', canvasErr);
+                        resolve(file);
+                    }
+                };
+                img.onerror = () => resolve(file);
+                img.src = e.target.result;
+            };
+            reader.onerror = () => resolve(file);
+            reader.readAsDataURL(file);
+        });
+    }
+
     if (avatarInput && avatarForm) {
         avatarInput.addEventListener('change', async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-
-            // Validate file size (e.g. max 15MB)
-            if (file.size > 15 * 1024 * 1024) {
-                alert('Размер файла превышает 15 МБ. Пожалуйста, выберите изображение меньшего размера.');
-                avatarInput.value = '';
-                return;
-            }
+            const rawFile = e.target.files?.[0];
+            if (!rawFile) return;
 
             // Show instant client preview
-            const previewUrl = URL.createObjectURL(file);
+            const previewUrl = URL.createObjectURL(rawFile);
             if (avatarImg) {
                 avatarImg.src = previewUrl;
                 avatarImg.classList.remove('hidden');
@@ -259,9 +296,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 avatarLoading.classList.remove('hidden');
             }
 
-            const formData = new FormData(avatarForm);
-
             try {
+                // Compress client-side to < 50KB
+                const compressedBlob = await compressAvatarImage(rawFile, 320, 0.85);
+
+                const formData = new FormData();
+                formData.append('avatar', compressedBlob, 'avatar.jpg');
+
+                const csrfTokenEl = avatarForm.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfTokenEl) {
+                    formData.append('csrfmiddlewaretoken', csrfTokenEl.value);
+                }
+
                 const response = await fetch(avatarForm.action, {
                     method: 'POST',
                     body: formData,
@@ -276,18 +322,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         avatarImg.src = data.avatar_url;
                     }
                 } else {
-                    console.warn('AJAX upload returned error status, falling back to full form submit');
-                    avatarForm.submit();
-                    return;
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || `Ошибка сервера (${response.status})`);
                 }
             } catch (err) {
-                console.error('Avatar AJAX upload failed, falling back:', err);
-                avatarForm.submit();
-                return;
+                console.error('Avatar upload error:', err);
+                alert(err.message || 'Не удалось загрузить аватарку. Попробуйте еще раз.');
             } finally {
                 if (avatarLoading) {
                     avatarLoading.classList.add('hidden');
                 }
+                avatarInput.value = '';
             }
         });
     }
