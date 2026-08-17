@@ -909,7 +909,12 @@ def create_yookassa_subscription(request):
         return redirect('profile')
 
     if isinstance(payment, dict) and 'confirmation' in payment and 'confirmation_url' in payment['confirmation']:
-        request.session['pending_yookassa_payment'] = payment.get('id')
+        payment_id = payment.get('id')
+        request.session['pending_yookassa_payment'] = payment_id
+        Payment.objects.get_or_create(
+            payment_id=payment_id,
+            defaults={'user': request.user, 'amount': Decimal('199.00'), 'status': 'pending'}
+        )
         return redirect(payment['confirmation']['confirmation_url'])
 
     detail = ''
@@ -931,10 +936,30 @@ def confirm_subscription(request):
         messages.error(request, f'Ошибка проверки платежа: {str(exc)}')
         return redirect('profile')
 
+    # Security check: verify metadata user matches current user
+    meta_user_id = str(payment.get('metadata', {}).get('user_id', ''))
+    if meta_user_id and meta_user_id != str(request.user.id):
+        messages.error(request, 'Ошибка доступа к платежу.')
+        return redirect('profile')
+
+    payment_record, _ = Payment.objects.get_or_create(
+        payment_id=payment_id,
+        defaults={'user': request.user, 'amount': Decimal('199.00'), 'status': 'pending'}
+    )
+
+    if payment_record.user != request.user:
+        messages.error(request, 'Ошибка доступа к платежу.')
+        return redirect('profile')
+
     if payment.get('status') == 'succeeded':
-        profile = get_user_profile(request.user)
-        update_premium_status(profile)
-        messages.success(request, 'Подписка Premium успешно активирована на 30 дней!')
+        if payment_record.status != 'succeeded':
+            payment_record.status = 'succeeded'
+            payment_record.save(update_fields=['status', 'updated_at'])
+            profile = get_user_profile(request.user)
+            update_premium_status(profile)
+            messages.success(request, 'Подписка Premium успешно активирована на 30 дней!')
+        else:
+            messages.info(request, 'Подписка Premium уже активна.')
     else:
         messages.error(request, 'Платеж не подтвержден. Попробуйте снова.')
     return redirect('profile')

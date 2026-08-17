@@ -451,7 +451,6 @@ def message_created_check_achievements(sender, instance, created, **kwargs):
         if instance.content.strip().startswith('@'):
             _check_and_grant_achievements(user, 'ai_messages', 1)
 
-        activity.refresh_from_db(fields=['streak_checked_today'])
         if not activity.streak_checked_today:
             streak = _calculate_streak(user)
             if streak >= 30:
