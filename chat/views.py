@@ -743,8 +743,8 @@ def dashboard(request):
     elif room_type == 'private':
         rooms = rooms.filter(is_private=True)
         
-    # Pinned rooms first
-    rooms = rooms.order_by('-is_pinned', '-created_at')
+    # Sorting: Pinned first -> Open/Public rooms first -> Message count desc -> Newest
+    rooms = rooms.order_by('-is_pinned', 'is_private', '-msg_count', '-created_at')
     
     # Get stats (cached for 60s via Upstash Redis REST or fallback)
     total_rooms = get_cache('dashboard_total_rooms')
@@ -816,6 +816,8 @@ def create_room(request):
             access_code=access_code if is_private else None
         )
         
+        from .cache_utils import invalidate_dashboard_stats
+        invalidate_dashboard_stats()
         messages.success(request, f'Комната "{name}" успешно создана!')
         return redirect('room_detail', slug=room.slug)
         
@@ -831,6 +833,8 @@ def delete_room(request, slug):
         
     room_name = room.name
     room.delete()
+    from .cache_utils import invalidate_dashboard_stats
+    invalidate_dashboard_stats()
     messages.success(request, f'Комната "{room_name}" была успешно удалена.')
     return redirect('dashboard')
 
@@ -844,11 +848,12 @@ def profile(request):
     my_rooms = Room.objects.filter(creator=request.user).annotate(
         msg_count=Count('messages'),
         last_activity=Coalesce(Max('messages__created_at'), 'created_at')
-    ).order_by('-last_activity')
+    ).order_by('-is_pinned', 'is_private', '-msg_count', '-last_activity')
     
     visited_rooms = profile.visited_rooms.annotate(
+        msg_count=Count('messages'),
         last_activity=Coalesce(Max('messages__created_at'), 'created_at')
-    ).order_by('-last_activity')
+    ).order_by('-is_pinned', 'is_private', '-msg_count', '-last_activity')
     
     integrations = profile.integrations.all()
     available_providers = AVAILABLE_PROVIDERS
@@ -1523,6 +1528,9 @@ def send_message(request, slug):
     if message.voice:
         response_data['message']['voice_url'] = message.voice.url
     
+    from .cache_utils import invalidate_room_messages_cache
+    invalidate_room_messages_cache(room.slug)
+    
     return JsonResponse(response_data)
 
 
@@ -1574,6 +1582,9 @@ def toggle_message_reaction(request, message_id):
             'reactors': reactors
         }
 
+    from .cache_utils import invalidate_room_messages_cache
+    invalidate_room_messages_cache(room.slug)
+
     return JsonResponse({
         'status': 'success',
         'action': action,
@@ -1592,6 +1603,22 @@ def room_stats(request, slug):
     if not is_authorized:
         return HttpResponseForbidden("У вас нет доступа к этой комнате.")
 
+    from .cache_utils import get_room_stats_cache, set_room_stats_cache
+    cached_stats = get_room_stats_cache(slug)
+    if cached_stats:
+        participants = []
+        for p in cached_stats.get('participants', []):
+            item = dict(p)
+            item['is_me'] = (item['username'] == request.user.username)
+            participants.append(item)
+        top_user = participants[0] if participants else None
+        return render(request, 'chat/room_stats.html', {
+            'room': room,
+            'total_messages': cached_stats.get('total_messages', 0),
+            'participants': participants,
+            'top_user': top_user,
+        })
+
     # Calculate statistics
     # Count messages grouped by user
     user_counts = User.objects.filter(
@@ -1602,22 +1629,32 @@ def room_stats(request, slug):
 
     # Convert to list of dictionaries for easier display
     participants = []
-    top_user = None
+    cached_participants = []
     
     for user_stat in user_counts:
+        is_me = user_stat == request.user
+        is_creator = user_stat == room.creator
         stat_dict = {
             'username': user_stat.username,
             'count': user_stat.message_count,
-            'is_me': user_stat == request.user,
-            'is_creator': user_stat == room.creator
+            'is_me': is_me,
+            'is_creator': is_creator
         }
         participants.append(stat_dict)
+        cached_participants.append({
+            'username': user_stat.username,
+            'count': user_stat.message_count,
+            'is_creator': is_creator
+        })
 
-    if participants:
-        top_user = participants[0]
-
-    # Total message count in room
+    top_user = participants[0] if participants else None
     total_messages = room.messages.count()
+
+    set_room_stats_cache(slug, {
+        'total_messages': total_messages,
+        'participants': cached_participants,
+        'top_user': cached_participants[0] if cached_participants else None,
+    }, 60)
 
     context = {
         'room': room,
@@ -2368,9 +2405,16 @@ def save_image_stat(request):
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
-                file_name = f"generated/{uuid.uuid4()}.{ext}"
-                path = default_storage.save(file_name, ContentFile(base64.b64decode(imgstr)))
-                image_url = default_storage.url(path)
+                mime = format.replace('data:', '')
+                file_bytes = base64.b64decode(imgstr)
+                file_name = f"{uuid.uuid4().hex[:12]}.{ext}"
+                from .cache_utils import upload_file_to_yandex_s3
+                s3_url = upload_file_to_yandex_s3('generated', file_name, file_bytes, content_type=mime)
+                if s3_url:
+                    image_url = s3_url
+                else:
+                    path = default_storage.save(f"generated/{file_name}", ContentFile(file_bytes))
+                    image_url = default_storage.url(path)
             except Exception as e:
                 logging.warning(f"Storage save skipped/failed: {e}")
         
@@ -2386,7 +2430,7 @@ def save_image_stat(request):
                 height=1024
             )
             # Invalidate cached stats immediately
-            set_cache(f'image_gen_stats_{profile.id}', None, 0)
+            delete_cache(f'image_gen_stats_{profile.id}')
             sync_routerai_keys_state(request.user)
         else:
             guest = get_or_create_guest_session(request)

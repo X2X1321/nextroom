@@ -255,3 +255,57 @@ class RoomAIAccessTests(TestCase):
         self.assertEqual(data.get('status'), 'ok')
         self.creator_profile.refresh_from_db()
         self.assertTrue(self.creator_profile.avatar_url is not None and len(self.creator_profile.avatar_url) > 0)
+
+    def test_room_ordering_pinned_public_message_count(self):
+        # 1. Closed/Private room with 10 messages
+        closed_room = Room.objects.create(name='Closed Room', slug='closed-room', creator=self.creator, is_private=True, is_pinned=False)
+        for i in range(10):
+            Message.objects.create(room=closed_room, user=self.creator, content=f'msg {i}')
+
+        # 2. Open room with 2 messages
+        open_room_low = Room.objects.create(name='Open Room Low', slug='open-low', creator=self.creator, is_private=False, is_pinned=False)
+        for i in range(2):
+            Message.objects.create(room=open_room_low, user=self.creator, content=f'msg {i}')
+
+        # 3. Open room with 5 messages
+        open_room_high = Room.objects.create(name='Open Room High', slug='open-high', creator=self.creator, is_private=False, is_pinned=False)
+        for i in range(5):
+            Message.objects.create(room=open_room_high, user=self.creator, content=f'msg {i}')
+
+        # 4. Pinned room with 1 message
+        pinned_room = Room.objects.create(name='Pinned Room', slug='pinned-room', creator=self.creator, is_private=False, is_pinned=True)
+        Message.objects.create(room=pinned_room, user=self.creator, content='pinned msg')
+
+        self.client.force_login(self.creator)
+        response = self.client.get(reverse('dashboard'))
+        self.assertEqual(response.status_code, 200)
+
+        rooms_list = list(response.context['rooms'])
+        room_names = [r.name for r in rooms_list]
+
+        # Pinned room must be 1st
+        self.assertEqual(room_names[0], 'Pinned Room')
+
+        # Open room with 5 messages comes before open room with 2 messages
+        idx_open_high = room_names.index('Open Room High')
+        idx_open_low = room_names.index('Open Room Low')
+        self.assertTrue(idx_open_high < idx_open_low)
+
+        # Open rooms MUST come before closed room (even though closed has 10 messages)
+        idx_closed = room_names.index('Closed Room')
+        self.assertTrue(idx_open_low < idx_closed)
+        self.assertTrue(idx_open_high < idx_closed)
+
+    def test_s3_and_cache_utils(self):
+        from .cache_utils import upload_file_to_yandex_s3, set_room_stats_cache, get_room_stats_cache, invalidate_dashboard_stats
+        
+        # Test cache set and get
+        set_room_stats_cache('test-room', {'total_messages': 42}, timeout=60)
+        cached = get_room_stats_cache('test-room')
+        self.assertIsNotNone(cached)
+        self.assertEqual(cached.get('total_messages'), 42)
+
+        # Test upload fallback
+        url = upload_file_to_yandex_s3('test_folder', 'test.txt', b'hello world', content_type='text/plain')
+        self.assertIsNotNone(url)
+

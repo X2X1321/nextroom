@@ -114,29 +114,27 @@ def invalidate_user_avatar(user_id):
     return delete_cache(key)
 
 
-def upload_avatar_to_yandex_s3(username, image_bytes, ext='jpg', content_type='image/jpeg'):
+def upload_file_to_yandex_s3(folder, filename, file_bytes, content_type='application/octet-stream'):
     """
-    Directly upload processed avatar bytes to Yandex Cloud Object Storage.
-    Returns the public direct S3 URL or None if S3 is not configured / fails.
+    Directly upload any file bytes (images, voices, generated images, exports) to Yandex Cloud Object Storage.
+    Returns the public direct S3 URL or None if S3 is not configured / fallback needed.
     """
-    import uuid
     from django.conf import settings
     from django.core.files.base import ContentFile
     from django.core.files.storage import default_storage
 
-    # Try uploading via boto3 / django-storages S3 storage
     s3_key = getattr(settings, 'AWS_ACCESS_KEY_ID', None)
     s3_secret = getattr(settings, 'AWS_SECRET_ACCESS_KEY', None)
     s3_bucket = getattr(settings, 'AWS_STORAGE_BUCKET_NAME', None)
 
-    file_key = f"avatars/{username}_{uuid.uuid4().hex[:8]}.{ext}"
+    file_key = f"{folder.strip('/')}/{filename.lstrip('/')}"
 
     if s3_key and s3_secret and s3_bucket:
         try:
             import boto3
             endpoint = getattr(settings, 'AWS_S3_ENDPOINT_URL', 'https://storage.yandexcloud.net')
             region = getattr(settings, 'AWS_S3_REGION_NAME', 'ru-central1')
-            
+
             s3 = boto3.client(
                 's3',
                 aws_access_key_id=s3_key,
@@ -148,25 +146,65 @@ def upload_avatar_to_yandex_s3(username, image_bytes, ext='jpg', content_type='i
             s3.put_object(
                 Bucket=s3_bucket,
                 Key=file_key,
-                Body=image_bytes,
+                Body=file_bytes,
                 ContentType=content_type,
                 ACL='public-read',
                 CacheControl='max-age=31536000, public'
             )
 
-            # Build direct public URL
             custom_domain = getattr(settings, 'AWS_S3_CUSTOM_DOMAIN', None)
             if custom_domain:
                 return f"https://{custom_domain}/{file_key}"
             clean_endpoint = endpoint.rstrip('/')
             return f"{clean_endpoint}/{s3_bucket}/{file_key}"
         except Exception as exc:
-            logger.warning("Boto3 direct Yandex Cloud S3 upload failed: %s", exc)
+            logger.warning("Boto3 direct upload to Yandex S3 failed for %s: %s", file_key, exc)
 
-    # Fallback to default_storage.save
     try:
-        saved_path = default_storage.save(file_key, ContentFile(image_bytes))
+        saved_path = default_storage.save(file_key, ContentFile(file_bytes))
         return default_storage.url(saved_path)
     except Exception as exc:
-        logger.warning("default_storage save failed: %s", exc)
+        logger.warning("default_storage save failed for %s: %s", file_key, exc)
         return None
+
+
+def upload_avatar_to_yandex_s3(username, image_bytes, ext='jpg', content_type='image/jpeg'):
+    """Upload processed avatar to Yandex Cloud Object Storage."""
+    import uuid
+    filename = f"{username}_{uuid.uuid4().hex[:8]}.{ext}"
+    return upload_file_to_yandex_s3('avatars', filename, image_bytes, content_type=content_type)
+
+
+def get_room_messages_cache(slug):
+    """Retrieve cached recent messages for room."""
+    return get_cache(f"room_msgs_{slug}", None)
+
+
+def set_room_messages_cache(slug, messages_data, timeout=30):
+    """Cache recent messages for room in Redis."""
+    return set_cache(f"room_msgs_{slug}", messages_data, timeout=timeout)
+
+
+def invalidate_room_messages_cache(slug):
+    """Invalidate cached recent messages for room."""
+    delete_cache(f"room_msgs_{slug}")
+    delete_cache(f"room_stats_{slug}")
+    delete_cache('dashboard_total_messages')
+    delete_cache('landing_page_stats')
+
+
+def get_room_stats_cache(slug):
+    """Retrieve cached room statistics."""
+    return get_cache(f"room_stats_{slug}", None)
+
+
+def set_room_stats_cache(slug, stats_data, timeout=60):
+    """Cache room statistics."""
+    return set_cache(f"room_stats_{slug}", stats_data, timeout=timeout)
+
+
+def invalidate_dashboard_stats():
+    """Invalidate all dashboard and landing statistics caches."""
+    delete_cache('dashboard_total_rooms')
+    delete_cache('dashboard_total_messages')
+    delete_cache('landing_page_stats')
