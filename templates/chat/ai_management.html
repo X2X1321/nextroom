@@ -22,13 +22,13 @@
 
     <div class="grid gap-6">
 
-        <section class="glass-panel rounded-3xl p-6">
+        <section class="glass-panel rounded-3xl p-6 overflow-hidden sm:overflow-visible">
             {% if profile.is_premium %}
                 <form action="{% url 'add_ai_integration' %}" method="POST" class="space-y-4" id="ai-integration-form">
                     {% csrf_token %}
                     <div>
                         <label for="provider_group_select" class="block text-sm font-medium text-slate-300">Провайдер нейросети</label>
-                        <select id="provider_group_select" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]">
+                        <select id="provider_group_select" class="mt-2 block w-full max-w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]">
                             <option value="">Все провайдеры</option>
                             {% for p in providers_structured %}
                                 <option value="{{ p.id }}">{{ p.name }}</option>
@@ -37,7 +37,7 @@
                     </div>
                     <div>
                         <label for="provider" class="block text-sm font-medium text-slate-300">Модель нейросети</label>
-                        <select id="provider" name="provider" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]" required>
+                        <select id="provider" name="provider" class="mt-2 block w-full max-w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]" required>
                             <option value="">Выберите модель</option>
                             {% for p in providers_structured %}
                                 <optgroup label="{{ p.name }}" data-provider="{{ p.id }}">
@@ -51,16 +51,16 @@
                     </div>
                     <div>
                         <label for="api_key" class="block text-sm font-medium text-slate-300">API ключ</label>
-                        <input id="api_key" name="api_key" type="password" placeholder="Секретный ключ провайдера" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]" required autocomplete="new-password" data-lpignore="true" data-1p-ignore="true">
+                        <input id="api_key" name="api_key" type="password" placeholder="Секретный ключ провайдера" class="mt-2 block w-full max-w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]" required autocomplete="new-password" data-lpignore="true" data-1p-ignore="true">
                     </div>
                     
                     <div>
                         <label for="integration_custom_prompt" class="block text-sm font-medium text-slate-300">Промпт для этой модели <span class="text-slate-500 font-normal">(необязательно)</span></label>
-                        <textarea id="integration_custom_prompt" name="custom_prompt" rows="2" placeholder="Инструкции и роль исключительно для этой модели" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-600 resize-none"></textarea>
+                        <textarea id="integration_custom_prompt" name="custom_prompt" rows="2" placeholder="Инструкции и роль исключительно для этой модели" class="mt-2 block w-full max-w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-600 resize-none"></textarea>
                     </div>
                     <div>
                         <label for="nickname" class="block text-sm font-medium text-slate-300">Ник модели <span class="text-slate-500 font-normal">(необязательно)</span></label>
-                        <input id="nickname" name="nickname" type="text" placeholder="Например: алиса, помощник" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]" autocomplete="off">
+                        <input id="nickname" name="nickname" type="text" placeholder="Например: алиса, помощник" class="mt-2 block w-full max-w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-4 text-base text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:h-[58px]" autocomplete="off">
                     </div>
 
                     <div class="flex flex-col sm:flex-row sm:items-center gap-4 mt-6">
@@ -91,9 +91,9 @@
             {% endif %}
             <div class="mt-6 space-y-3">
                 {% for integration in integrations %}
-                <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-4 sm:p-5">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
-                        <div class="overflow-hidden">
+                <div class="rounded-3xl border border-slate-800 bg-slate-950/70 p-4 sm:p-5 overflow-hidden sm:overflow-visible">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 min-w-0">
+                        <div class="overflow-hidden min-w-0 flex-1">
                             <p class="text-sm font-semibold text-white truncate">
                                 @{{ integration.provider }} 
                                 {% if integration.nickname %}<span class="text-indigo-300">(@{{ integration.nickname }})</span>{% endif %} 
@@ -110,11 +110,11 @@
                                 {% endif %}
                             </div>
                         </div>
-                        <div class="flex items-center gap-2 mt-2 sm:mt-0 flex-wrap">
+                        <div class="flex items-center gap-2 mt-2 sm:mt-0 flex-wrap shrink-0">
                             <a href="{% url 'edit_ai_integration' integration.pk %}" class="rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 hover:bg-slate-800 transition" title="Изменить">
                                 <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#e3e3e3"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>
                             </a>
-                            <form action="{% url 'delete_ai_integration' integration.pk %}" method="POST" class="inline" onsubmit="return confirm('Удалить интеграцию @{{ integration.provider }}?');">
+                            <form action="{% url 'delete_ai_integration' integration.pk %}" method="POST" class="inline m-0" onsubmit="return confirm('Удалить интеграцию @{{ integration.provider }}?');">
                                 {% csrf_token %}
                                 <button type="submit" class="rounded-lg border border-red-900/50 bg-slate-900 px-2 py-1.5 hover:bg-red-900/30 transition" title="Удалить">
                                     <svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="#ef4444"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
@@ -130,11 +130,11 @@
         </section>
     </div>
 
-    <div class="glass-panel rounded-3xl p-6 flex-grow">
+    <div class="glass-panel rounded-3xl p-6 flex-grow overflow-hidden sm:overflow-visible">
         <h2 class="text-lg font-bold text-white mb-2">Использование токенов</h2>
         <p class="text-xs text-slate-400 mb-4">Количество токенов, использованных за последние 7 дней.</p>
-        <div class="relative w-full h-64">
-            <canvas id="weekly-tokens-chart" role="img" aria-label="Tokens used this week, bar chart"></canvas>
+        <div class="relative w-full h-64 overflow-hidden">
+            <canvas id="weekly-tokens-chart" class="max-w-full" role="img" aria-label="Tokens used this week, bar chart"></canvas>
         </div>
         <table class="sr-only">
             <caption>
@@ -158,7 +158,7 @@
         </table>
     </div>
 
-    <div class="glass-panel rounded-3xl p-6 relative">
+    <div class="glass-panel rounded-3xl p-6 relative overflow-hidden sm:overflow-visible">
         <h2 class="text-lg font-bold text-white mb-4">Советы по использованию</h2>
         <div class="space-y-3 text-sm text-slate-400">
             <p>Чтобы обратиться к нейросети, начните сообщение с указания провайдера: <span class="font-semibold text-white">@openrouter</span>, <span class="font-semibold text-white">@groq</span>, <span class="font-semibold text-white">@cerebras</span> или <span class="font-semibold text-white">@routerai</span>, либо по нику модели (который вы вписали <span class="font-semibold text-white">@ник</span>).</p>
@@ -167,7 +167,7 @@
         </div>
         <div class="mt-8 pt-6 border-t border-slate-700/50">
             <h3 class="text-lg font-bold text-white mb-4">Как получить API ключ Groq/Cerebras</h3>
-            <div class="bg-slate-800/30 rounded-2xl p-5 border border-slate-700/50">
+            <div class="bg-slate-800/30 rounded-2xl p-5 border border-slate-700/50 overflow-hidden sm:overflow-visible">
                 <p class="text-sm text-slate-300 mb-4 leading-relaxed">Для использования сверхбыстрых моделей провайдера Groq/Cerebras вам понадобится бесплатный API ключ. Процесс получения займет всего пару минут:</p>
                 <ol class="space-y-3 text-sm text-slate-400 mb-6">
                     <li class="flex gap-3">
