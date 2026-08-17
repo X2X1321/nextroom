@@ -684,15 +684,28 @@ def dashboard(request):
     rooms = rooms.order_by('-is_pinned', '-created_at')
     
     # Get stats (cached for 60s to avoid expensive COUNT(*) on large tables)
-    total_rooms = cache.get('dashboard_total_rooms')
+    total_rooms = None
+    total_messages = None
+    try:
+        total_rooms = cache.get('dashboard_total_rooms')
+        total_messages = cache.get('dashboard_total_messages')
+    except Exception:
+        total_rooms = None
+        total_messages = None
+
     if total_rooms is None:
         total_rooms = Room.objects.count()
-        cache.set('dashboard_total_rooms', total_rooms, 60)
+        try:
+            cache.set('dashboard_total_rooms', total_rooms, 60)
+        except Exception:
+            pass
 
-    total_messages = cache.get('dashboard_total_messages')
     if total_messages is None:
         total_messages = Message.objects.count()
-        cache.set('dashboard_total_messages', total_messages, 60)
+        try:
+            cache.set('dashboard_total_messages', total_messages, 60)
+        except Exception:
+            pass
 
     my_rooms_count = Room.objects.filter(creator=request.user).count() if request.user.is_authenticated else 0
     

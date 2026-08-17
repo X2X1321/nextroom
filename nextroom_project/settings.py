@@ -137,13 +137,19 @@ elif not (BASE_DIR / 'db.sqlite3').exists() and os.environ.get('VERCEL'):
     )
 
 
-# Cache Configuration (Supports Redis from Amvera/Cloud or LocMemCache fallback)
+# Cache Configuration (Supports Redis from Cloud with fail-safe fallback)
 REDIS_URL = os.environ.get('REDIS_URL')
 if REDIS_URL:
     CACHES = {
         'default': {
-            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'BACKEND': 'django_redis.cache.RedisCache',
             'LOCATION': REDIS_URL,
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+                'IGNORE_EXCEPTIONS': True,
+                'SOCKET_CONNECT_TIMEOUT': 2,
+                'SOCKET_TIMEOUT': 2,
+            }
         }
     }
 else:
