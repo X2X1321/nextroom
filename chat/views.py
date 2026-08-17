@@ -899,24 +899,22 @@ def profile(request):
                     img.save(buffer, format='JPEG', quality=88, optimize=True)
                 
                 processed_bytes = buffer.getvalue()
+                mime = 'image/png' if fmt == 'PNG' else 'image/jpeg'
                 
-                # Try saving to storage (S3 / media)
-                avatar_saved_url = None
-                try:
-                    file_name = f"avatars/{request.user.username}_{uuid.uuid4().hex[:6]}.{ext}"
-                    saved_path = default_storage.save(file_name, ContentFile(processed_bytes))
-                    avatar_saved_url = default_storage.url(saved_path)
-                except Exception as storage_err:
-                    logging.warning(f"Avatar storage save failed, falling back to base64: {storage_err}")
+                # 1. Upload to Yandex Cloud Object Storage S3 bucket (or storage backend)
+                from .cache_utils import upload_avatar_to_yandex_s3, set_user_avatar
+                avatar_saved_url = upload_avatar_to_yandex_s3(request.user.username, processed_bytes, ext=ext, content_type=mime)
                 
-                # Fallback to base64 data URI if storage failed or unreachable
+                # 2. Fallback to base64 Data URI if storage not configured / offline
                 if not avatar_saved_url:
-                    mime = 'image/png' if fmt == 'PNG' else 'image/jpeg'
                     b64_data = base64.b64encode(processed_bytes).decode('utf-8')
                     avatar_saved_url = f"data:{mime};base64,{b64_data}"
                 
                 profile.avatar_url = avatar_saved_url
                 profile.save()
+
+                # 3. Cache avatar URL in Redis for instant retrieval
+                set_user_avatar(request.user.id, avatar_saved_url)
                 
                 if is_ajax:
                     return JsonResponse({'status': 'ok', 'avatar_url': profile.avatar_url, 'message': 'Аватарка успешно обновлена.'})

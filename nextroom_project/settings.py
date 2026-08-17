@@ -206,16 +206,49 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = '/media/'
-if os.environ.get('AWS_ACCESS_KEY_ID') and os.environ.get('AWS_SECRET_ACCESS_KEY'):
+
+# Yandex Cloud Object Storage / S3 Configuration
+_s3_key = (
+    os.environ.get('AWS_ACCESS_KEY_ID')
+    or os.environ.get('YC_ACCESS_KEY_ID')
+    or os.environ.get('YANDEX_ACCESS_KEY_ID')
+    or os.environ.get('S3_KEY_ID')
+)
+_s3_secret = (
+    os.environ.get('AWS_SECRET_ACCESS_KEY')
+    or os.environ.get('YC_SECRET_ACCESS_KEY')
+    or os.environ.get('YANDEX_SECRET_ACCESS_KEY')
+    or os.environ.get('S3_SECRET_KEY')
+)
+_s3_bucket = (
+    os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    or os.environ.get('YC_BUCKET_NAME')
+    or os.environ.get('YANDEX_STORAGE_BUCKET_NAME')
+    or os.environ.get('S3_BUCKET_NAME')
+)
+
+if _s3_key and _s3_secret and _s3_bucket:
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_ENDPOINT_URL = os.environ.get('AWS_S3_ENDPOINT_URL', 'https://storage.yandexcloud.net')
-    AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME', 'ru-central1')
+    AWS_ACCESS_KEY_ID = _s3_key
+    AWS_SECRET_ACCESS_KEY = _s3_secret
+    AWS_STORAGE_BUCKET_NAME = _s3_bucket
+    AWS_S3_ENDPOINT_URL = (
+        os.environ.get('AWS_S3_ENDPOINT_URL')
+        or os.environ.get('YC_ENDPOINT_URL')
+        or 'https://storage.yandexcloud.net'
+    )
+    AWS_S3_REGION_NAME = (
+        os.environ.get('AWS_S3_REGION_NAME')
+        or os.environ.get('YC_REGION_NAME')
+        or 'ru-central1'
+    )
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = 'public-read'
     AWS_QUERYSTRING_AUTH = False
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=31536000, public',
+    }
     if os.environ.get('AWS_S3_CUSTOM_DOMAIN'):
         AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
 elif os.environ.get('VERCEL') or not os.access(BASE_DIR, os.W_OK):
