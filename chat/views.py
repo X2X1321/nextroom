@@ -369,6 +369,26 @@ def parse_ai_command(content):
     return None, None
 
 
+def find_room_integration_by_alias(user, room, alias):
+    """Find an AIIntegration for this room by provider name or nickname."""
+    # Check enabled providers for this room
+    enabled_providers = set(room.ai_integrations.values_list('provider', flat=True))
+    if not enabled_providers:
+        return None, None
+
+    # Search by exact provider name first, then by nickname
+    integrations = AIIntegration.objects.filter(
+        profile__user=room.creator,
+        provider__in=enabled_providers
+    )
+    for integ in integrations:
+        if integ.provider == alias:
+            return integ, integ.provider
+        if integ.nickname and integ.nickname == alias:
+            return integ, integ.provider
+    return None, None
+
+
 def fetch_ai_response(alias, prompt, integration):
     if not prompt:
         return f'Пожалуйста, укажите запрос после команды @{alias}. Например: @{alias} расскажи анекдот.', 0
@@ -831,6 +851,8 @@ def add_ai_integration(request):
     api_key = request.POST.get('api_key', '').strip()
     model_name = request.POST.get('model_name', '').strip()
     custom_prompt = request.POST.get('custom_prompt', '').strip()
+    nickname = request.POST.get('nickname', '').strip().lower()
+    auto_reply = request.POST.get('auto_reply') == 'on'
     profile = get_user_profile(request.user)
     if not profile.is_premium:
         messages.error(request, 'Добавление API ключей доступно только для Premium-подписки.')
@@ -842,7 +864,7 @@ def add_ai_integration(request):
     integration, created = AIIntegration.objects.update_or_create(
         profile=profile,
         provider=provider,
-        defaults={'api_key': api_key, 'model_name': model_name, 'custom_prompt': custom_prompt}
+        defaults={'api_key': api_key, 'model_name': model_name, 'custom_prompt': custom_prompt, 'nickname': nickname, 'auto_reply': auto_reply}
     )
     messages.success(request, f'Интеграция @{provider} сохранена.')
     return redirect('profile')
@@ -1013,7 +1035,7 @@ def get_messages(request, slug):
     after_id = request.GET.get('after_id')
     
     # Query messages
-    queryset = room.messages.all().select_related('user', 'guest_session').prefetch_related('reactions__user')
+    queryset = room.messages.all().select_related('user', 'guest_session', 'reply_to__user').prefetch_related('reactions__user')
     if after_id:
         queryset = queryset.filter(id__gt=int(after_id))
         
@@ -1026,11 +1048,22 @@ def get_messages(request, slug):
         if msg.user and hasattr(msg.user, 'profile'):
             avatar_url = msg.user.profile.avatar_url
 
+        reply_to_data = None
+        if msg.reply_to_id:
+            rt = msg.reply_to
+            if rt:
+                reply_to_data = {
+                    'id': rt.id,
+                    'username': rt.user.username if rt.user else (rt.guest_name or 'Гость'),
+                    'content': rt.content[:120] if rt.content else '',
+                }
+
         msg_data = {
             'id': msg.id,
             'username': username,
             'avatar_url': avatar_url,
             'is_me': is_me,
+            'reply_to': reply_to_data,
             'content': sanitize_ai_response(msg.content) if (msg.user and getattr(msg.user.profile, 'is_bot', False)) else escape(msg.content),
             'message_type': msg.message_type,
             'timestamp': msg.created_at.strftime('%H:%M'),
@@ -1047,6 +1080,7 @@ def get_messages(request, slug):
         if msg.voice:
             msg_data['voice_url'] = msg.voice.url
         messages_data.append(msg_data)
+
 
     return JsonResponse({'messages': messages_data})
 
@@ -1122,16 +1156,27 @@ def send_message(request, slug):
     guest_obj = None if user_obj else get_or_create_guest_session(request)
 
     alias, prompt = parse_ai_command(content)
-    if alias in AI_COMMAND_ALIASES and message_type == 'text':
-        integration = get_room_ai_integration_for_user(user_obj, room, alias)
-        if not integration:
-            if alias == 'groq' and getattr(settings, 'GROQ_API_KEY', None):
-                integration = type('GlobalGroqIntegration', (), {'api_key': settings.GROQ_API_KEY})()
-            if alias == 'cerebras' and getattr(settings, 'CEREBRAS_API_KEY', None):
-                integration = type('GlobalCerebrasIntegration', (), {'api_key': settings.CEREBRAS_API_KEY})()
-            if not integration:
-                return JsonResponse({'error': f'Для использования @{alias} добавьте ключ API в личном кабинете или включите модель для комнаты.'}, status=400)
+    # Check if alias matches a known provider OR a nickname of a room integration
+    resolved_integration = None
+    resolved_provider = None
+    if alias and message_type == 'text':
+        # First: check classic alias (existing behavior)
+        if alias in AI_COMMAND_ALIASES:
+            resolved_integration = get_room_ai_integration_for_user(user_obj, room, alias)
+            if not resolved_integration:
+                if alias == 'groq' and getattr(settings, 'GROQ_API_KEY', None):
+                    resolved_integration = type('GlobalGroqIntegration', (), {'api_key': settings.GROQ_API_KEY})()\
 
+
+                if alias == 'cerebras' and getattr(settings, 'CEREBRAS_API_KEY', None):
+                    resolved_integration = type('GlobalCerebrasIntegration', (), {'api_key': settings.CEREBRAS_API_KEY})()
+            resolved_provider = alias if resolved_integration else None
+
+        # Second: check nickname of a room integration
+        if not resolved_integration:
+            resolved_integration, resolved_provider = find_room_integration_by_alias(user_obj, room, alias)
+
+    if resolved_integration and resolved_provider and message_type == 'text':
         if user_obj:
             user_message = Message.objects.create(room=room, user=user_obj, content=content, message_type='text')
             _update_user_activity(user_obj)
@@ -1141,31 +1186,41 @@ def send_message(request, slug):
             guest_obj.save(update_fields=['messages_count', 'last_activity'])
 
         bot_user = get_ai_bot_user()
+        sender_name = user_obj.username if user_obj else (guest_obj.guest_name if guest_obj else 'Гость')
+        captured_msg_id = user_message.id
+        integ_ref = resolved_integration
+        prov_ref = resolved_provider
 
-        def create_bot_message():
+        def create_bot_reply():
             start_time = time.time()
+            augmented_prompt = f'Пользователь {sender_name} написал: {prompt}' if prompt else f'Пользователь {sender_name} обратился к тебе.'
             try:
-                bot_content, tokens_used = fetch_ai_response(alias, prompt, integration)
+                bot_content, tokens_used = fetch_ai_response(prov_ref, augmented_prompt, integ_ref)
             except Exception as exc:
-                bot_content = f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(alias, alias).title()}: {str(exc)}'
+                bot_content = f'Ошибка при обращении к {AI_COMMAND_ALIASES.get(prov_ref, prov_ref).title()}: {str(exc)}'
                 tokens_used = 0
             response_time = time.time() - start_time
-            Message.objects.create(room=room, user=bot_user, content=sanitize_ai_response(bot_content), message_type='text')
+            Message.objects.create(
+                room=room, user=bot_user,
+                content=sanitize_ai_response(bot_content),
+                message_type='text',
+                reply_to_id=captured_msg_id
+            )
             if tokens_used:
                 try:
-                    profile = getattr(integration, 'profile', None) or (get_user_profile(user_obj) if user_obj else None)
+                    profile = getattr(integ_ref, 'profile', None) or (get_user_profile(user_obj) if user_obj else None)
                     if profile:
-                        AIUsageLog.objects.create(profile=profile, provider=alias, tokens_used=tokens_used, response_time=response_time)
+                        AIUsageLog.objects.create(profile=profile, provider=prov_ref, tokens_used=tokens_used, response_time=response_time)
                 except Exception:
                     pass
 
         from django.db import connection
         use_async = connection.vendor != 'sqlite'
         if use_async:
-            thread = threading.Thread(target=create_bot_message)
+            thread = threading.Thread(target=create_bot_reply)
             thread.start()
         else:
-            create_bot_message()
+            create_bot_reply()
 
         return JsonResponse({
             'status': 'success',
@@ -1243,7 +1298,54 @@ def send_message(request, slug):
                     bot_msg = f"Игра окончена, никто не угадал.\nЭто был фильм: {active_game.movie_name}"
                     Message.objects.create(room=room, user=bot_user, content=bot_msg, message_type='text')
             active_game.save()
-    
+
+    # Auto-reply: trigger integrations with auto_reply=True (only for text messages, skip bot messages)
+    bot_user_ref = get_ai_bot_user()
+    is_bot_message = (user_obj and user_obj == bot_user_ref)
+    if not is_bot_message and message_type == 'text' and content:
+        enabled_providers = set(room.ai_integrations.values_list('provider', flat=True))
+        auto_reply_integrations = AIIntegration.objects.filter(
+            profile__user=room.creator,
+            provider__in=enabled_providers,
+            auto_reply=True
+        )
+        for auto_integ in auto_reply_integrations:
+            sender_name = user_obj.username if user_obj else (guest_obj.guest_name if guest_obj else 'Гость')
+            captured_msg_id = message.id
+            auto_prov = auto_integ.provider
+            auto_integ_copy = auto_integ
+
+            def create_auto_reply(integ=auto_integ_copy, prov=auto_prov, msg_id=captured_msg_id, name=sender_name):
+                start_time = time.time()
+                full_prompt = f'Пользователь {name} написал: {content}'
+                try:
+                    bot_content, tokens_used = fetch_ai_response(prov, full_prompt, integ)
+                except Exception as exc:
+                    bot_content = f'Ошибка автоответа: {str(exc)}'
+                    tokens_used = 0
+                response_time = time.time() - start_time
+                Message.objects.create(
+                    room=room, user=bot_user_ref,
+                    content=sanitize_ai_response(bot_content),
+                    message_type='text',
+                    reply_to_id=msg_id
+                )
+                if tokens_used:
+                    try:
+                        profile = getattr(integ, 'profile', None)
+                        if profile:
+                            AIUsageLog.objects.create(profile=profile, provider=prov, tokens_used=tokens_used, response_time=response_time)
+                    except Exception:
+                        pass
+
+            from django.db import connection
+            use_async = connection.vendor != 'sqlite'
+            if use_async:
+                thread = threading.Thread(target=create_auto_reply)
+                thread.start()
+            else:
+                create_auto_reply()
+
     response_data = {
         'status': 'success',
         'message': {
@@ -1262,6 +1364,7 @@ def send_message(request, slug):
         response_data['message']['voice_url'] = message.voice.url
     
     return JsonResponse(response_data)
+
 
 
 @login_required
@@ -1428,10 +1531,14 @@ def edit_ai_integration(request, pk):
         api_key = request.POST.get('api_key', '').strip()
         model_name = request.POST.get('model_name', '').strip()
         custom_prompt = request.POST.get('custom_prompt', '').strip()
+        nickname = request.POST.get('nickname', '').strip().lower()
+        auto_reply = request.POST.get('auto_reply') == 'on'
         if api_key and api_key != '****************':
             integration.api_key = api_key
         integration.model_name = model_name
         integration.custom_prompt = custom_prompt
+        integration.nickname = nickname
+        integration.auto_reply = auto_reply
         integration.save()
         messages.success(request, f'Интеграция @{integration.provider} обновлена.')
         return redirect('ai_management')

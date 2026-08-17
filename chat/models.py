@@ -137,7 +137,9 @@ class AIIntegration(models.Model):
     provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)
     api_key = encrypt(models.CharField(max_length=255))
     model_name = models.CharField(max_length=120, blank=True)
+    nickname = models.CharField(max_length=50, blank=True, verbose_name="Ник модели", help_text="Альтернативное имя для обращения в чате через @ник")
     custom_prompt = models.TextField(blank=True, verbose_name="Персональный промпт", help_text="Инструкции и роль для этой модели в чате")
+    auto_reply = models.BooleanField(default=False, verbose_name="Отвечать на все сообщения", help_text="Модель будет отвечать на каждое сообщение в комнате без обращения @")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -220,6 +222,7 @@ class Message(models.Model):
     message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text')
     image = models.ImageField(upload_to=get_image_upload_path, blank=True, null=True)
     voice = models.FileField(upload_to=get_voice_upload_path, blank=True, null=True)
+    reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='replies', verbose_name="Ответ на сообщение")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

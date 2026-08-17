@@ -426,6 +426,21 @@
             const safeContent = escapeHTML(msg.content).replace(/\n/g, '<br>');
             const reactionsHTML = buildReactionsHTML(msg.id, msg.reactions);
 
+            // Build reply-to quote block
+            let replyHTML = '';
+            if (msg.reply_to) {
+                const rt = msg.reply_to;
+                const rtContent = escapeHTML(rt.content || '').substring(0, 100);
+                const rtUser = escapeHTML(rt.username || '');
+                replyHTML = `
+                    <div class="mb-1 px-1">
+                        <div class="border-l-2 border-indigo-500/60 pl-2 py-0.5 rounded-r-lg bg-slate-800/40 max-w-full cursor-pointer hover:bg-slate-800/70 transition" onclick="document.querySelector('[data-message-id=\\"${rt.id}\\"]')?.scrollIntoView({behavior:'smooth', block:'center'})">
+                            <span class="text-[10px] font-semibold text-indigo-400">${rtUser}</span>
+                            <p class="text-[11px] text-slate-400 truncate">${rtContent}</p>
+                        </div>
+                    </div>`;
+            }
+
             const urlPattern = /(https?:\/\/\S+\.(?:jpg|jpeg|png|gif|webp)(?:\?\S*)?)/gi;
             const imageMatches = safeContent.match(urlPattern) || [];
             let imagesHTML = '';
@@ -442,6 +457,7 @@
             }
 
             bubbleWrapper.innerHTML = `
+                ${replyHTML}
                 <div class="flex items-center gap-1.5 mb-1 px-1 ${isMe ? 'flex-row-reverse' : ''}">
                     ${msg.avatar_url ? 
                         `<img src="${msg.avatar_url}" alt="" class="w-4 h-4 rounded-full object-cover border border-slate-700/50">` : 
