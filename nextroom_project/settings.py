@@ -213,6 +213,8 @@ if os.environ.get('AWS_ACCESS_KEY_ID') and os.environ.get('AWS_SECRET_ACCESS_KEY
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = 'public-read'
     AWS_QUERYSTRING_AUTH = False
+    if os.environ.get('AWS_S3_CUSTOM_DOMAIN'):
+        AWS_S3_CUSTOM_DOMAIN = os.environ.get('AWS_S3_CUSTOM_DOMAIN')
 elif os.environ.get('VERCEL') or not os.access(BASE_DIR, os.W_OK):
     MEDIA_ROOT = Path('/tmp') / 'media'
 else:

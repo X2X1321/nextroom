@@ -546,22 +546,25 @@ def update_premium_status(profile, months=1):
 
 
 def landing(request):
-    """Landing/Welcome page with beautiful visuals and stats."""
+    """Landing/Welcome page with beautiful visuals and cached stats."""
     if request.user.is_authenticated:
         return redirect('dashboard')
     
+    cached_stats = get_cache('landing_page_stats')
+    if cached_stats:
+        return render(request, 'chat/landing.html', cached_stats)
+
     active_rooms = 0
     registered_users = 0
     total_messages = 0
     total_rooms = 0
     featured_rooms = []
-    all_rooms = []
     try:
         active_rooms = Room.objects.filter(messages__isnull=False).distinct().count()
         registered_users = User.objects.count()
         total_messages = Message.objects.count()
         total_rooms = Room.objects.count()
-        featured_rooms = Room.objects.annotate(msg_count=Count('messages')).filter(is_private=False).order_by('-msg_count')[:6]
+        featured_rooms = list(Room.objects.annotate(msg_count=Count('messages')).filter(is_private=False).order_by('-msg_count')[:6])
     except Exception:
         pass
 
@@ -572,12 +575,18 @@ def landing(request):
         'total_rooms': total_rooms,
         'featured_rooms': featured_rooms,
     }
+    set_cache('landing_page_stats', context, 120)
     return render(request, 'chat/landing.html', context)
 
+@ratelimit(key='ip', rate='5/m', block=False)
 def register_view(request):
-    """User registration view."""
+    """User registration view with brute-force / spam protection."""
     if request.user.is_authenticated:
         return redirect('dashboard')
+    
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Слишком много попыток регистрации. Пожалуйста, подождите минуту.')
+        return render(request, 'chat/register.html')
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
@@ -603,11 +612,16 @@ def register_view(request):
             
     return render(request, 'chat/register.html')
 
+@ratelimit(key='ip', rate='10/m', block=False)
 def login_view(request):
-    """User login view."""
+    """User login view with rate limiting against brute force."""
     if request.user.is_authenticated:
         return redirect('dashboard')
         
+    if getattr(request, 'limited', False):
+        messages.error(request, 'Слишком много попыток входа. Пожалуйста, подождите минуту перед повторной попыткой.')
+        return render(request, 'chat/login.html')
+
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         password = request.POST.get('password', '')
@@ -1569,20 +1583,6 @@ def delete_ai_integration(request, pk):
 
 
 @login_required
-def ai_usage_chart(request):
-    profile = get_user_profile(request.user)
-    today = timezone.now().date()
-    labels = []
-    data = []
-    for i in range(6, -1, -1):
-        day = today - timezone.timedelta(days=i)
-        labels.append(day.strftime('%a'))
-        total = AIUsageLog.objects.filter(profile=profile, created_at__date=day).aggregate(total=Sum('tokens_used'))['total'] or 0
-        data.append(total)
-    return JsonResponse({'labels': labels, 'data': data})
-
-
-@login_required
 def toggle_room_pin(request, slug):
     room = get_object_or_404(Room, slug=slug)
     if not request.user.is_staff:
@@ -1725,7 +1725,11 @@ def _generate_with_huggingface(prompt, timeout=10):
     return f'data:image/png;base64,{b64}', model, 1024, 1024
 
 
+@ratelimit(key='ip', rate='15/m', block=False)
 def generate_image(request):
+    if getattr(request, 'limited', False):
+        return JsonResponse({'error': 'Слишком много запросов на генерацию. Пожалуйста, подождите минуту.'}, status=429)
+
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
 
@@ -1963,6 +1967,11 @@ def image_history(request):
 @login_required
 def image_gen_stats(request):
     profile = get_user_profile(request.user)
+    cache_key = f'image_gen_stats_{profile.id}'
+    cached = get_cache(cache_key)
+    if cached:
+        return JsonResponse(cached)
+
     images = GeneratedImage.objects.filter(profile=profile)
     total = images.count()
     now = timezone.now()
@@ -2006,9 +2015,7 @@ def image_gen_stats(request):
     week_score = min(100, week_count * 2)
     actual_week = str(week_count)
 
-    actual_values = [actual_speed, actual_success, actual_volume, actual_model, actual_resolution, actual_week]
-
-    return JsonResponse({
+    res_data = {
         'labels': ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'],
         'datasets': [{
             'label': 'Генерация изображений',
@@ -2016,12 +2023,19 @@ def image_gen_stats(request):
         }],
         'top_models': top_models,
         'actual_values': actual_values
-    })
+    }
+    set_cache(cache_key, res_data, 60)
+    return JsonResponse(res_data)
 
 
 @login_required
 def ai_usage_chart(request):
     profile = get_user_profile(request.user)
+    cache_key = f'ai_usage_chart_{profile.id}'
+    cached = get_cache(cache_key)
+    if cached:
+        return JsonResponse(cached)
+
     logs = AIUsageLog.objects.filter(profile=profile)
     
     from django.db.models.functions import TruncDate
@@ -2042,10 +2056,12 @@ def ai_usage_chart(request):
         labels.append(day_names_ru[d.weekday()])
         data.append(day_map.get(d, 0))
     
-    return JsonResponse({
+    res = {
         'labels': labels,
         'data': data,
-    })
+    }
+    set_cache(cache_key, res, 120)
+    return JsonResponse(res)
 
 
 import random
