@@ -32,21 +32,23 @@
                 <label for="api_key" class="block text-sm font-medium text-slate-300">API ключ</label>
                 <input id="api_key" name="api_key" type="password" value="{{ masked_key }}" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required autocomplete="new-password" data-lpignore="true" data-1p-ignore="true">
             </div>
-            <div>
-                <label for="model_name" class="block text-sm font-medium text-slate-300">Модель</label>
-                <input id="model_name" name="model_name" type="text" readonly value="{{ integration.model_name|default:'' }}" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <div class="flex flex-col sm:flex-row sm:items-start gap-4">
+                <div class="flex-1">
+                    <label for="model_name" class="block text-sm font-medium text-slate-300">Модель</label>
+                    <input id="model_name" name="model_name" type="text" readonly value="{{ integration.model_name|default:'' }}" class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <div class="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-4 sm:mt-7 sm:w-64 shrink-0">
+                    <input id="auto_reply" name="auto_reply" type="checkbox" {% if integration.auto_reply %}checked{% endif %} class="mt-0.5 h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500 cursor-pointer shrink-0">
+                    <div>
+                        <label for="auto_reply" class="text-sm font-medium text-white cursor-pointer leading-none">Отвечать на все сообщения</label>
+                        <p class="text-[10px] text-slate-400 mt-1 leading-tight">Модель будет отвечать на каждое сообщение в комнате автоматически.</p>
+                    </div>
+                </div>
             </div>
             <div>
                 <label for="custom_prompt" class="block text-sm font-medium text-slate-300">Персональный промпт для этой модели</label>
                 <textarea id="custom_prompt" name="custom_prompt" rows="3" placeholder="Например: Ты эксперт по программированию. Отвечай подробно и с примерами." class="mt-2 block w-full rounded-2xl bg-slate-900 border border-slate-800 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-slate-600 resize-none">{{ integration.custom_prompt|default:'' }}</textarea>
                 <p class="text-xs text-slate-500 mt-1">Персональные правила и поведение исключительно для модели @{{ integration.provider }}.</p>
-            </div>
-            <div class="flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/50 p-4">
-                <input id="auto_reply" name="auto_reply" type="checkbox" {% if integration.auto_reply %}checked{% endif %} class="mt-0.5 h-4 w-4 rounded border-slate-700 bg-slate-900 text-indigo-500 focus:ring-indigo-500 cursor-pointer">
-                <div>
-                    <label for="auto_reply" class="text-sm font-medium text-white cursor-pointer">Отвечать на все сообщения</label>
-                    <p class="text-xs text-slate-400 mt-0.5">Модель будет автоматически реагировать на каждое сообщение в комнате, не требуя обращения @. Обращайтесь к пользователю по имени.</p>
-                </div>
             </div>
             <div class="flex items-center gap-3 mt-6">
                 <button type="submit" class="relative inline-flex items-center justify-center gap-2 px-6 py-3 text-sm font-semibold text-slate-300 hover:text-white transition duration-300 group">
