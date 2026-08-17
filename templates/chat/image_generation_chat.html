@@ -140,89 +140,53 @@
             <canvas id="ai-stats-radar-chart" role="img" aria-label="AI image generation statistics radar chart"></canvas>
         </div>
 
-        <!-- 6 Premium Metric Cards -->
+        <!-- 6 Clean Metric Cards -->
         <div id="ai-stats-cards-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6">
             <!-- Скорость генерации -->
-            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-indigo-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-indigo-500/5">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Скорость</span>
-                    <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                </div>
-                <div class="mt-3">
+            <div class="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Скорость генерации</span>
+                <div class="mt-2">
                     <span id="stat-speed" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0 сек</span>
-                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">в среднем</p>
                 </div>
             </div>
 
             <!-- Успешность -->
-            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-emerald-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-emerald-500/5">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Успешность</span>
-                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    </div>
-                </div>
-                <div class="mt-3">
+            <div class="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Успешность</span>
+                <div class="mt-2">
                     <span id="stat-success" class="text-xl sm:text-2xl font-extrabold text-emerald-400 tracking-tight">0%</span>
-                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">без ошибок</p>
                 </div>
             </div>
 
             <!-- Создано изображений -->
-            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-sky-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-sky-500/5">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Создано</span>
-                    <div class="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                </div>
-                <div class="mt-3">
+            <div class="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Изображений создано</span>
+                <div class="mt-2">
                     <span id="stat-total" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0</span>
-                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">изображений</p>
                 </div>
             </div>
 
             <!-- Использовано моделей -->
-            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-violet-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-violet-500/5">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Моделей</span>
-                    <div class="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    </div>
-                </div>
-                <div class="mt-3">
+            <div class="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Использовано моделей</span>
+                <div class="mt-2">
                     <span id="stat-models" class="text-xl sm:text-2xl font-extrabold text-violet-400 tracking-tight">0</span>
-                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">нейросетей</p>
                 </div>
             </div>
 
             <!-- Среднее разрешение -->
-            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-amber-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-amber-500/5">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Разрешение</span>
-                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-                    </div>
-                </div>
-                <div class="mt-3">
+            <div class="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Среднее разрешение</span>
+                <div class="mt-2">
                     <span id="stat-res" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0x0</span>
-                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">пикселей</p>
                 </div>
             </div>
 
             <!-- Генераций за неделю -->
-            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-cyan-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-cyan-500/5">
-                <div class="flex items-center justify-between gap-2">
-                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">За 7 дней</span>
-                    <div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:scale-110 transition-transform">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                    </div>
-                </div>
-                <div class="mt-3">
+            <div class="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between">
+                <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Генераций за неделю</span>
+                <div class="mt-2">
                     <span id="stat-week" class="text-xl sm:text-2xl font-extrabold text-cyan-400 tracking-tight">0</span>
-                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">за эту неделю</p>
                 </div>
             </div>
         </div>
@@ -534,22 +498,112 @@
                 tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${actualValues[idx] || 0}</td></tr>`).join('');
             }
 
-            // Render Top Models
+            // Helper for model logos and titles
+            function getModelBadge(modelName) {
+                const raw = (modelName || '').toLowerCase();
+                if (raw.includes('pollinations-flux')) {
+                    return {
+                        name: 'Pollinations Flux',
+                        badgeBg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>`
+                    };
+                } else if (raw.includes('pollinations-turbo')) {
+                    return {
+                        name: 'Pollinations Turbo',
+                        badgeBg: 'bg-teal-500/10 border-teal-500/30 text-teal-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>`
+                    };
+                } else if (raw.includes('pollinations')) {
+                    return {
+                        name: 'Pollinations AI',
+                        badgeBg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>`
+                    };
+                } else if (raw.includes('flux-1-schnell') || raw.includes('flux-1')) {
+                    return {
+                        name: 'Flux 1 Schnell',
+                        badgeBg: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`
+                    };
+                } else if (raw.includes('flux-2') || raw.includes('flux')) {
+                    return {
+                        name: 'FLUX.2 Pro',
+                        badgeBg: 'bg-purple-500/10 border-purple-500/30 text-purple-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`
+                    };
+                } else if (raw.includes('lucid-origin')) {
+                    return {
+                        name: 'Leonardo Lucid Origin',
+                        badgeBg: 'bg-amber-500/10 border-amber-500/30 text-amber-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>`
+                    };
+                } else if (raw.includes('phoenix')) {
+                    return {
+                        name: 'Leonardo Phoenix',
+                        badgeBg: 'bg-orange-500/10 border-orange-500/30 text-orange-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/></svg>`
+                    };
+                } else if (raw.includes('krea')) {
+                    return {
+                        name: 'Krea 2 Turbo',
+                        badgeBg: 'bg-pink-500/10 border-pink-500/30 text-pink-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>`
+                    };
+                } else if (raw.includes('riverflow')) {
+                    return {
+                        name: 'Riverflow V2.5',
+                        badgeBg: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 10l-2 1m0 0l-2-1m2 1v2.5M20 7l-2 1m2-1l-2-1m2 1v2.5M14 4l-2-1-2 1M4 7l2-1M4 7l2 1M4 7v2.5M12 21l-2-1m2 1l2-1m-2 1v-2.5M6 18l-2-1v-2.5M18 18l2-1v-2.5"/></svg>`
+                    };
+                } else if (raw.includes('grok')) {
+                    return {
+                        name: 'SpaceX Grok',
+                        badgeBg: 'bg-slate-500/10 border-slate-500/30 text-slate-300',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/></svg>`
+                    };
+                } else if (raw.includes('qwen')) {
+                    return {
+                        name: 'Qwen Image 3',
+                        badgeBg: 'bg-violet-500/10 border-violet-500/30 text-violet-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`
+                    };
+                } else if (raw.includes('horde')) {
+                    return {
+                        name: 'AI Horde',
+                        badgeBg: 'bg-rose-500/10 border-rose-500/30 text-rose-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>`
+                    };
+                } else {
+                    const cleanName = (modelName || 'AI Model').replace('@cf/', '').replace('black-forest-labs/', '');
+                    return {
+                        name: cleanName,
+                        badgeBg: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-400',
+                        icon: `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>`
+                    };
+                }
+            }
+
+            // Render Top Models with Logo Badges
             const topModelsContainer = document.getElementById('top-models-container');
             if (topModelsContainer) {
                 const models = data.top_models || [];
                 if (models.length === 0) {
                     topModelsContainer.innerHTML = '<div class="text-xs text-slate-500 col-span-full">Пока нет данных о генерациях.</div>';
                 } else {
-                    topModelsContainer.innerHTML = models.map((m, idx) => `
-                        <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 flex items-center justify-between ${idx === 0 ? 'ring-1 ring-indigo-500/50 bg-indigo-950/20' : ''}">
-                            <div class="flex items-center gap-2 overflow-hidden">
-                                <span class="flex-shrink-0 w-5 h-5 rounded-full bg-slate-800 text-[10px] font-bold text-slate-400 flex items-center justify-center border border-slate-700">${idx + 1}</span>
-                                <span class="text-xs font-medium text-slate-300 truncate" title="${m.model_name}">${m.model_name.replace('@cf/', '').replace('pollinations', 'Pollinations').replace('horde', 'AI Horde')}</span>
+                    topModelsContainer.innerHTML = models.map((m) => {
+                        const badge = getModelBadge(m.model_name);
+                        return `
+                            <div class="bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-slate-700/80 rounded-2xl p-3 sm:p-3.5 flex items-center justify-between transition-all duration-200">
+                                <div class="flex items-center gap-3 overflow-hidden">
+                                    <div class="w-8 h-8 rounded-xl ${badge.badgeBg} border flex items-center justify-center flex-shrink-0 shadow-sm">
+                                        ${badge.icon}
+                                    </div>
+                                    <span class="text-xs sm:text-sm font-semibold text-slate-200 truncate" title="${badge.name}">${badge.name}</span>
+                                </div>
+                                <span class="text-xs font-bold text-indigo-400 ml-2 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-xl flex-shrink-0">${m.count} фото</span>
                             </div>
-                            <span class="text-xs font-bold text-indigo-400 ml-2 bg-indigo-500/10 px-2 py-0.5 rounded-lg flex-shrink-0">${m.count} фото</span>
-                        </div>
-                    `).join('');
+                        `;
+                    }).join('');
                 }
             }
         } catch (e) {
