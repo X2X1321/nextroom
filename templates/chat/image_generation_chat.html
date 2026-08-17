@@ -111,11 +111,14 @@
             </div>
         </div>
 
+        {% if user.is_authenticated %}
         <div class="mt-4 text-right">
             <a href="{% url 'image_history' %}" class="text-xs sm:text-sm font-medium text-indigo-400 hover:text-indigo-300 transition">Посмотреть историю генераций &rarr;</a>
         </div>
+        {% endif %}
     </div>
 
+    {% if user.is_authenticated %}
     <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6">
         <h2 class="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2">Статистика генерации изображений</h2>
         <div class="relative w-full h-64 sm:h-80">
@@ -181,6 +184,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <script>
@@ -252,6 +256,12 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
                     body: JSON.stringify(bodyData)
+                }).then(() => {
+                    {% if user.is_authenticated %}
+                    if (typeof loadRadarChart === 'function') {
+                        setTimeout(loadRadarChart, 500);
+                    }
+                    {% endif %}
                 }).catch(e => console.error('Failed to save stats:', e));
             };
 
@@ -349,6 +359,7 @@
         }
     });
 
+    {% if user.is_authenticated %}
     // Radar chart and metrics for image generation stats
     const radarCanvas = document.getElementById('ai-stats-radar-chart');
     let radarChartInstance = null;
@@ -472,5 +483,6 @@
 
     loadRadarChart();
     setInterval(loadRadarChart, 30000);
+    {% endif %}
 </script>
 {% endblock %}

@@ -2001,6 +2001,8 @@ def generate_image(request):
                 height=height,
                 model_name=model_used,
             )
+            # Invalidate cached stats
+            set_cache(f'image_gen_stats_{profile.id}', None, 0)
         else:
             guest = get_or_create_guest_session(request)
             GeneratedImage.objects.create(
@@ -2038,14 +2040,24 @@ def image_history(request):
 
 
 def image_gen_stats(request):
-    profile = get_user_profile(request.user) if request.user.is_authenticated else None
-    cache_key = f'image_gen_stats_{profile.id}' if profile else None
-    if cache_key:
-        cached = get_cache(cache_key)
-        if cached:
-            return JsonResponse(cached)
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'labels': ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'],
+            'datasets': [{
+                'label': 'Генерация изображений',
+                'data': [0, 0, 0, 0, 0, 0],
+            }],
+            'top_models': [],
+            'actual_values': ['0 сек', '0%', '0', '0', '0x0', '0']
+        })
 
-    images = GeneratedImage.objects.filter(profile=profile) if profile else GeneratedImage.objects.none()
+    profile = get_user_profile(request.user)
+    cache_key = f'image_gen_stats_{profile.id}'
+    cached = get_cache(cache_key)
+    if cached:
+        return JsonResponse(cached)
+
+    images = GeneratedImage.objects.filter(profile=profile)
     total = images.count()
     now = timezone.now()
     week_ago = now - datetime.timedelta(days=7)
@@ -2061,35 +2073,34 @@ def image_gen_stats(request):
             'top_models': [],
             'actual_values': ['0 сек', '0%', '0', '0', '0x0', '0']
         }
-        if cache_key:
-            set_cache(cache_key, empty_res, 60)
+        set_cache(cache_key, empty_res, 60)
         return JsonResponse(empty_res)
+
     # Filter out erroneous entries where time was logged in ms instead of seconds
     valid_time_images = images.filter(generation_time__lt=300)
     avg_time = valid_time_images.aggregate(avg=Avg('generation_time'))['avg'] or 0
     speed_score = max(0, min(100, int((1 - min(avg_time / 15, 1)) * 100)))
-    actual_speed = f"{int(avg_time * 1000)} мс"
+    actual_speed = f"{avg_time:.1f} сек" if avg_time >= 1 else f"{int(avg_time * 1000)} мс"
 
     success_count = images.exclude(image_url__isnull=True).exclude(image_url__exact='').count()
-    success_score = int((success_count / total) * 100) if total else 0
+    success_score = int((success_count / total) * 100) if total else 100
     actual_success = f"{success_score}%"
 
-    volume_score = min(100, total)
+    volume_score = min(100, total * 10)
     actual_volume = str(total)
 
     models_used = images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').distinct().count()
-    coverage_score = min(100, models_used * 20)
-
-    top_models = list(images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').annotate(count=Count('id')).order_by('-count')[:5])
+    coverage_score = min(100, models_used * 25)
     actual_model = str(models_used)
 
-    avg_width = int(images.aggregate(avg=Avg('width'))['avg'] or 0)
-    avg_height = int(images.aggregate(avg=Avg('height'))['avg'] or 0)
-    avg_pixels = (avg_width * avg_height) if avg_width and avg_height else 0
-    resolution_score = min(100, int(avg_pixels / 20000))
-    actual_resolution = f"{avg_width}x{avg_height} пикселей" if avg_width else "Неизвестно"
+    top_models = list(images.exclude(model_name__isnull=True).exclude(model_name__exact='').values('model_name').annotate(count=Count('id')).order_by('-count')[:5])
 
-    week_score = min(100, week_count * 2)
+    avg_width = int(images.aggregate(avg=Avg('width'))['avg'] or 1024)
+    avg_height = int(images.aggregate(avg=Avg('height'))['avg'] or 1024)
+    resolution_score = min(100, int((avg_width * avg_height) / 10000))
+    actual_resolution = f"{avg_width}x{avg_height}"
+
+    week_score = min(100, week_count * 10)
     actual_week = str(week_count)
 
     res_data = {
@@ -2289,7 +2300,7 @@ def save_image_stat(request):
         from django.core.files.base import ContentFile
         from django.core.files.storage import default_storage
 
-        if image_data:
+        if image_data and image_data.startswith('data:image/'):
             try:
                 format, imgstr = image_data.split(';base64,')
                 ext = format.split('/')[-1]
@@ -2297,19 +2308,7 @@ def save_image_stat(request):
                 path = default_storage.save(file_name, ContentFile(base64.b64decode(imgstr)))
                 image_url = default_storage.url(path)
             except Exception as e:
-                print("Failed to save base64 image", e)
-        elif image_url and image_url.startswith('http'):
-            import urllib.request
-            try:
-                req = urllib.request.Request(image_url, headers={'User-Agent': 'Mozilla/5.0'})
-                with urllib.request.urlopen(req, timeout=10) as resp:
-                    img_bytes = resp.read()
-                ext = 'jpg' if 'pollinations' in image_url else 'png'
-                file_name = f"generated/{uuid.uuid4()}.{ext}"
-                path = default_storage.save(file_name, ContentFile(img_bytes))
-                image_url = default_storage.url(path)
-            except Exception as e:
-                print("Failed to download and save external image", e)
+                image_url = '[base64_image]'
         
         if request.user.is_authenticated:
             profile = get_user_profile(request.user)
@@ -2322,7 +2321,8 @@ def save_image_stat(request):
                 width=1024,
                 height=1024
             )
-            # Sync keys after balance deduction
+            # Invalidate cached stats immediately
+            set_cache(f'image_gen_stats_{profile.id}', None, 0)
             sync_routerai_keys_state(request.user)
         else:
             guest = get_or_create_guest_session(request)
