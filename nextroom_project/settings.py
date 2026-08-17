@@ -137,13 +137,22 @@ elif not (BASE_DIR / 'db.sqlite3').exists() and os.environ.get('VERCEL'):
     )
 
 
-# Cache Configuration
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': 'nextroom-cache',
+# Cache Configuration (Supports Redis from Amvera/Cloud or LocMemCache fallback)
+REDIS_URL = os.environ.get('REDIS_URL')
+if REDIS_URL:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+            'LOCATION': REDIS_URL,
+        }
     }
-}
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'nextroom-cache',
+        }
+    }
 
 
 # Password validation
