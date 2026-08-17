@@ -121,6 +121,35 @@
         <div class="relative w-full h-64 sm:h-80">
             <canvas id="ai-stats-radar-chart" role="img" aria-label="AI image generation statistics radar chart"></canvas>
         </div>
+
+        <!-- Metric Badges Grid -->
+        <div id="ai-stats-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-4">
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
+                <span class="text-[11px] font-medium text-slate-400">Скорость генерации</span>
+                <span id="stat-speed" class="text-sm sm:text-base font-bold text-indigo-400 mt-1">0 сек</span>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
+                <span class="text-[11px] font-medium text-slate-400">Успешность</span>
+                <span id="stat-success" class="text-sm sm:text-base font-bold text-emerald-400 mt-1">0%</span>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
+                <span class="text-[11px] font-medium text-slate-400">Изображений создано</span>
+                <span id="stat-total" class="text-sm sm:text-base font-bold text-white mt-1">0</span>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
+                <span class="text-[11px] font-medium text-slate-400">Использовано моделей</span>
+                <span id="stat-models" class="text-sm sm:text-base font-bold text-violet-400 mt-1">0</span>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
+                <span class="text-[11px] font-medium text-slate-400">Среднее разрешение</span>
+                <span id="stat-res" class="text-sm sm:text-base font-bold text-amber-400 mt-1">0x0</span>
+            </div>
+            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
+                <span class="text-[11px] font-medium text-slate-400">Генераций за неделю</span>
+                <span id="stat-week" class="text-sm sm:text-base font-bold text-cyan-400 mt-1">0</span>
+            </div>
+        </div>
+
         <table class="sr-only">
             <caption>
                 Image generation metrics
@@ -320,90 +349,112 @@
         }
     });
 
-    // Radar chart for image generation stats
+    // Radar chart and metrics for image generation stats
     const radarCanvas = document.getElementById('ai-stats-radar-chart');
     let radarChartInstance = null;
 
     async function loadRadarChart() {
         try {
             const res = await fetch("{% url 'image_gen_stats' %}");
+            if (!res.ok) return;
             const data = await res.json();
             const labels = data.labels || ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'];
             const values = data.datasets?.[0]?.data || [0, 0, 0, 0, 0, 0];
+            const actualValues = data.actual_values || ['0 сек', '0%', '0', '0', '0x0', '0'];
 
-            if (radarChartInstance) {
-                radarChartInstance.data.labels = labels;
-                radarChartInstance.data.datasets[0].data = values;
-                radarChartInstance.data.actualValues = data.actual_values || values;
-                radarChartInstance.update();
-            } else {
-                radarChartInstance = new Chart(radarCanvas, {
-                    type: 'radar',
-                    data: {
-                        labels: labels,
-                        actualValues: data.actual_values || values,
-                        datasets: [{
-                            label: 'Генерация изображений',
-                            data: values,
-                            borderColor: '#818cf8',
-                            backgroundColor: 'rgba(129, 140, 248, 0.25)',
-                            pointBackgroundColor: '#818cf8',
-                            pointBorderColor: '#111827',
-                            pointHoverRadius: 5,
-                            borderWidth: 2,
-                        }],
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        animation: {
-                            duration: 1500,
-                            easing: 'easeOutQuart',
+            // Update visible metric badges
+            const elSpeed = document.getElementById('stat-speed');
+            const elSuccess = document.getElementById('stat-success');
+            const elTotal = document.getElementById('stat-total');
+            const elModels = document.getElementById('stat-models');
+            const elRes = document.getElementById('stat-res');
+            const elWeek = document.getElementById('stat-week');
+            if (elSpeed && actualValues[0] !== undefined) elSpeed.textContent = actualValues[0];
+            if (elSuccess && actualValues[1] !== undefined) elSuccess.textContent = actualValues[1];
+            if (elTotal && actualValues[2] !== undefined) elTotal.textContent = actualValues[2];
+            if (elModels && actualValues[3] !== undefined) elModels.textContent = actualValues[3];
+            if (elRes && actualValues[4] !== undefined) elRes.textContent = actualValues[4];
+            if (elWeek && actualValues[5] !== undefined) elWeek.textContent = actualValues[5];
+
+            // Render/Update Radar Chart if Chart.js is loaded
+            if (typeof Chart !== 'undefined' && radarCanvas) {
+                if (radarChartInstance) {
+                    radarChartInstance.data.labels = labels;
+                    radarChartInstance.data.datasets[0].data = values;
+                    radarChartInstance.data.actualValues = actualValues;
+                    radarChartInstance.update();
+                } else {
+                    radarChartInstance = new Chart(radarCanvas, {
+                        type: 'radar',
+                        data: {
+                            labels: labels,
+                            actualValues: actualValues,
+                            datasets: [{
+                                label: 'Генерация изображений',
+                                data: values,
+                                borderColor: '#818cf8',
+                                backgroundColor: 'rgba(129, 140, 248, 0.25)',
+                                pointBackgroundColor: '#818cf8',
+                                pointBorderColor: '#111827',
+                                pointHoverRadius: 5,
+                                borderWidth: 2,
+                            }],
                         },
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: { color: '#9ca3af' },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            animation: {
+                                duration: 1500,
+                                easing: 'easeOutQuart',
                             },
-                            tooltip: {
-                                callbacks: {
-                                    label: (tooltipItem) => {
-                                        const chart = tooltipItem.chart;
-                                        if (chart.data.actualValues && chart.data.actualValues[tooltipItem.dataIndex] !== undefined) {
-                                            return String(chart.data.actualValues[tooltipItem.dataIndex]);
-                                        }
-                                        return tooltipItem.formattedValue;
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                    labels: { color: '#9ca3af' },
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (tooltipItem) => {
+                                            const chart = tooltipItem.chart;
+                                            if (chart.data.actualValues && chart.data.actualValues[tooltipItem.dataIndex] !== undefined) {
+                                                return String(chart.data.actualValues[tooltipItem.dataIndex]);
+                                            }
+                                            return tooltipItem.formattedValue;
+                                        },
                                     },
                                 },
                             },
-                        },
-                        scales: {
-                            r: {
-                                beginAtZero: true,
-                                max: 100,
-                                angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                                grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                                pointLabels: { color: '#9ca3af', font: { size: 11 } },
-                                ticks: { display: false },
+                            scales: {
+                                r: {
+                                    beginAtZero: true,
+                                    min: 0,
+                                    max: 100,
+                                    suggestedMin: 0,
+                                    suggestedMax: 100,
+                                    angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                                    grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                                    pointLabels: { color: '#9ca3af', font: { size: 11 } },
+                                    ticks: { display: false },
+                                },
                             },
                         },
-                    },
-                });
+                    });
+                }
             }
 
             const tbody = document.getElementById('ai-stats-table-body');
-            const actualValues = data.actual_values || values;
             if (tbody && actualValues.length) {
                 tbody.innerHTML = labels.map((label, idx) => `<tr><th scope="row">${label}</th><td>${actualValues[idx] || 0}</td></tr>`).join('');
             }
 
-            // Рендерим Топ моделей
+            // Render Top Models
             const topModelsContainer = document.getElementById('top-models-container');
-            if (topModelsContainer && data.top_models) {
-                if (data.top_models.length === 0) {
+            if (topModelsContainer) {
+                const models = data.top_models || [];
+                if (models.length === 0) {
                     topModelsContainer.innerHTML = '<div class="text-xs text-slate-500 col-span-full">Пока нет данных о генерациях.</div>';
                 } else {
-                    topModelsContainer.innerHTML = data.top_models.map((m, idx) => `
+                    topModelsContainer.innerHTML = models.map((m, idx) => `
                         <div class="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 flex items-center justify-between ${idx === 0 ? 'ring-1 ring-indigo-500/50 bg-indigo-950/20' : ''}">
                             <div class="flex items-center gap-2 overflow-hidden">
                                 <span class="flex-shrink-0 w-5 h-5 rounded-full bg-slate-800 text-[10px] font-bold text-slate-400 flex items-center justify-center border border-slate-700">${idx + 1}</span>

@@ -49,6 +49,24 @@ class RoomAIAccessTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(User.objects.filter(email='used@example.com').count(), 1)
 
+    def test_register_view_rejects_similar_email_alias(self):
+        User.objects.create_user(username='gmail-user', email='myname@gmail.com', password='pass123')
+
+        # Try registering with dot or plus alias
+        response = self.client.post(
+            reverse('register'),
+            {
+                'username': 'another-user',
+                'email': 'm.y.n.a.m.e+spam@gmail.com',
+                'password': 'newpass123',
+                'password_confirm': 'newpass123',
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(User.objects.filter(username='another-user').count(), 0)
+
+
     def test_landing_page_shows_real_stats(self):
         Room.objects.create(name='Room A', slug='room-a', creator=self.creator)
         Room.objects.create(name='Room B', slug='room-b', creator=self.creator)

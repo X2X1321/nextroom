@@ -18,11 +18,36 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
-from django.urls import reverse
-
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
 from django.core.cache import cache
 from .cache_utils import get_cache, set_cache
 from .models_catalog import MODELS_CATALOG, AVAILABLE_PROVIDERS
+
+def normalize_email_canonical(email):
+    """Normalize email address, handling case, dots in Gmail, plus aliases, and domain aliases."""
+    if not email:
+        return ''
+    email = email.strip().lower()
+    if '@' not in email:
+        return email
+    
+    local_part, domain = email.split('@', 1)
+    
+    # Remove plus tags: user+alias -> user
+    local_part = re.sub(r'\+.*$', '', local_part)
+    
+    # Gmail / Googlemail alias & dots handling
+    if domain in ('gmail.com', 'googlemail.com'):
+        domain = 'gmail.com'
+        local_part = local_part.replace('.', '')
+    # Yandex alias & dots/dashes handling
+    elif domain in ('yandex.ru', 'ya.ru', 'yandex.com', 'yandex.by', 'yandex.kz', 'yandex.ua'):
+        domain = 'yandex.ru'
+        local_part = local_part.replace('.', '-').replace('_', '-')
+    
+    return f"{local_part}@{domain}"
+
 from django.db.models import F
 from django.utils.html import escape
 from ipware import get_client_ip
@@ -596,10 +621,33 @@ def register_view(request):
         
         if not username or not password:
             messages.error(request, 'Пожалуйста, заполните все обязательные поля.')
-        elif User.objects.filter(username=username).exists():
+        elif User.objects.filter(username__iexact=username).exists():
             messages.error(request, 'Пользователь с таким именем уже существует.')
-        elif email and User.objects.filter(email__iexact=email).exists():
-            messages.error(request, 'Пользователь с такой почтой уже существует.')
+        elif email:
+            try:
+                validate_email(email)
+            except ValidationError:
+                messages.error(request, 'Пожалуйста, введите корректный адрес электронной почты.')
+                return render(request, 'chat/register.html')
+            
+            canonical_new = normalize_email_canonical(email)
+            is_taken = False
+            for existing_email in User.objects.exclude(email='').values_list('email', flat=True):
+                if normalize_email_canonical(existing_email) == canonical_new:
+                    is_taken = True
+                    break
+            
+            if is_taken:
+                messages.error(request, 'Пользователь с такой почтой (или аналогичным псевдонимом) уже существует.')
+            elif password != password_confirm:
+                messages.error(request, 'Пароли не совпадают.')
+            elif len(password) < 6:
+                messages.error(request, 'Пароль должен быть не менее 6 символов.')
+            else:
+                user = User.objects.create_user(username=username, email=email, password=password)
+                login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                messages.success(request, f'Добро пожаловать в NextRoom, {username}!')
+                return redirect('dashboard')
         elif password != password_confirm:
             messages.error(request, 'Пароли не совпадают.')
         elif len(password) < 6:
@@ -1989,29 +2037,33 @@ def image_history(request):
     return render(request, 'chat/image_history.html', context)
 
 
-@login_required
 def image_gen_stats(request):
-    profile = get_user_profile(request.user)
-    cache_key = f'image_gen_stats_{profile.id}'
-    cached = get_cache(cache_key)
-    if cached:
-        return JsonResponse(cached)
+    profile = get_user_profile(request.user) if request.user.is_authenticated else None
+    cache_key = f'image_gen_stats_{profile.id}' if profile else None
+    if cache_key:
+        cached = get_cache(cache_key)
+        if cached:
+            return JsonResponse(cached)
 
-    images = GeneratedImage.objects.filter(profile=profile)
+    images = GeneratedImage.objects.filter(profile=profile) if profile else GeneratedImage.objects.none()
     total = images.count()
     now = timezone.now()
     week_ago = now - datetime.timedelta(days=7)
     week_count = images.filter(created_at__gte=week_ago).count()
 
     if total == 0:
-        return JsonResponse({
+        empty_res = {
             'labels': ['Скорость генерации', 'Успешность', 'Изображений создано', 'Использовано моделей', 'Среднее разрешение', 'Генераций за неделю'],
             'datasets': [{
                 'label': 'Генерация изображений',
                 'data': [0, 0, 0, 0, 0, 0],
             }],
-            'actual_values': ['0 сек', '0%', '0', 'Нет данных', '0x0', '0']
-        })
+            'top_models': [],
+            'actual_values': ['0 сек', '0%', '0', '0', '0x0', '0']
+        }
+        if cache_key:
+            set_cache(cache_key, empty_res, 60)
+        return JsonResponse(empty_res)
     # Filter out erroneous entries where time was logged in ms instead of seconds
     valid_time_images = images.filter(generation_time__lt=300)
     avg_time = valid_time_images.aggregate(avg=Avg('generation_time'))['avg'] or 0
