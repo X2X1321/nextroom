@@ -137,8 +137,8 @@ elif not (BASE_DIR / 'db.sqlite3').exists() and os.environ.get('VERCEL'):
     )
 
 
-# Cache Configuration (Supports Redis from Cloud with fail-safe fallback)
-REDIS_URL = os.environ.get('REDIS_URL')
+# Cache Configuration (Supports Redis from Upstash/Cloud with fail-safe fallback)
+REDIS_URL = os.environ.get('REDIS_URL') or os.environ.get('KV_URL') or os.environ.get('UPSTASH_REDIS_URL') or os.environ.get('STORAGE_REDIS_URL')
 if REDIS_URL:
     CACHES = {
         'default': {
