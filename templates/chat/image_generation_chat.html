@@ -119,37 +119,111 @@
     </div>
 
     {% if user.is_authenticated %}
-    <div class="glass-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6">
-        <h2 class="text-base sm:text-lg font-bold text-white mb-1 sm:mb-2">Статистика генерации изображений</h2>
-        <div class="relative w-full h-64 sm:h-80">
+    <div class="glass-panel rounded-2xl sm:rounded-3xl p-5 sm:p-7 border border-slate-800/80 shadow-2xl relative overflow-hidden">
+        <!-- Ambient decorative glows -->
+        <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-violet-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <div>
+                <h2 class="text-base sm:text-lg font-bold tracking-tight text-white flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"></span>
+                    Статистика генерации изображений
+                </h2>
+                <p class="text-xs text-slate-400 mt-0.5">Аналитика вашей творческой активности и параметров моделей</p>
+            </div>
+        </div>
+
+        <!-- Radar Chart Container -->
+        <div class="relative w-full h-64 sm:h-80 my-2">
             <canvas id="ai-stats-radar-chart" role="img" aria-label="AI image generation statistics radar chart"></canvas>
         </div>
 
-        <!-- Metric Badges Grid -->
-        <div id="ai-stats-cards-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3 mt-4">
-            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
-                <span class="text-[11px] font-medium text-slate-400">Скорость генерации</span>
-                <span id="stat-speed" class="text-sm sm:text-base font-bold text-indigo-400 mt-1">0 сек</span>
+        <!-- 6 Premium Metric Cards -->
+        <div id="ai-stats-cards-grid" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-6">
+            <!-- Скорость генерации -->
+            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-indigo-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-indigo-500/5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Скорость</span>
+                    <div class="w-7 h-7 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span id="stat-speed" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0 сек</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">в среднем</p>
+                </div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
-                <span class="text-[11px] font-medium text-slate-400">Успешность</span>
-                <span id="stat-success" class="text-sm sm:text-base font-bold text-emerald-400 mt-1">0%</span>
+
+            <!-- Успешность -->
+            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-emerald-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-emerald-500/5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Успешность</span>
+                    <div class="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span id="stat-success" class="text-xl sm:text-2xl font-extrabold text-emerald-400 tracking-tight">0%</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">без ошибок</p>
+                </div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
-                <span class="text-[11px] font-medium text-slate-400">Изображений создано</span>
-                <span id="stat-total" class="text-sm sm:text-base font-bold text-white mt-1">0</span>
+
+            <!-- Создано изображений -->
+            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-sky-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-sky-500/5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Создано</span>
+                    <div class="w-7 h-7 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span id="stat-total" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">изображений</p>
+                </div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
-                <span class="text-[11px] font-medium text-slate-400">Использовано моделей</span>
-                <span id="stat-models" class="text-sm sm:text-base font-bold text-violet-400 mt-1">0</span>
+
+            <!-- Использовано моделей -->
+            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-violet-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-violet-500/5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Моделей</span>
+                    <div class="w-7 h-7 rounded-lg bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span id="stat-models" class="text-xl sm:text-2xl font-extrabold text-violet-400 tracking-tight">0</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">нейросетей</p>
+                </div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
-                <span class="text-[11px] font-medium text-slate-400">Среднее разрешение</span>
-                <span id="stat-res" class="text-sm sm:text-base font-bold text-amber-400 mt-1">0x0</span>
+
+            <!-- Среднее разрешение -->
+            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-amber-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-amber-500/5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">Разрешение</span>
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span id="stat-res" class="text-xl sm:text-2xl font-extrabold text-white tracking-tight">0x0</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">пикселей</p>
+                </div>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800/80 rounded-xl p-2.5 sm:p-3 flex flex-col">
-                <span class="text-[11px] font-medium text-slate-400">Генераций за неделю</span>
-                <span id="stat-week" class="text-sm sm:text-base font-bold text-cyan-400 mt-1">0</span>
+
+            <!-- Генераций за неделю -->
+            <div class="relative group bg-slate-900/60 hover:bg-slate-900/90 border border-slate-800/80 hover:border-cyan-500/50 rounded-2xl p-4 transition-all duration-300 flex flex-col justify-between overflow-hidden shadow-sm hover:shadow-lg hover:shadow-cyan-500/5">
+                <div class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">За 7 дней</span>
+                    <div class="w-7 h-7 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <span id="stat-week" class="text-xl sm:text-2xl font-extrabold text-cyan-400 tracking-tight">0</span>
+                    <p class="text-[11px] text-slate-500 mt-0.5 font-medium">за эту неделю</p>
+                </div>
             </div>
         </div>
 
@@ -174,9 +248,11 @@
         </table>
 
         <!-- Топ моделей -->
-        <div class="mt-8 border-t border-slate-800/60 pt-6">
+        <div class="mt-8 border-t border-slate-800/70 pt-6">
             <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
-                <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                <div class="w-5 h-5 rounded-md bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                </div>
                 Топ используемых моделей
             </h3>
             <div id="top-models-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
