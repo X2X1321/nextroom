@@ -309,3 +309,52 @@ class RoomAIAccessTests(TestCase):
         url = upload_file_to_yandex_s3('test_folder', 'test.txt', b'hello world', content_type='text/plain')
         self.assertIsNotNone(url)
 
+    def test_admin_panel_features(self):
+        admin_user = User.objects.create_superuser(username='adminboss', email='admin@test.com', password='adminpassword')
+        self.client.force_login(admin_user)
+
+        # 1. Test Admin Dashboard Index
+        response = self.client.get(reverse('admin:index'))
+        self.assertEqual(response.status_code, 200)
+
+        # 2. Test UserProfile Change List and Custom Views
+        response = self.client.get(reverse('admin:chat_userprofile_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+        # 3. Test Room Change List
+        response = self.client.get(reverse('admin:chat_room_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+        # 4. Test Message Change List
+        response = self.client.get(reverse('admin:chat_message_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+        # 5. Test Payment Change List
+        response = self.client.get(reverse('admin:chat_payment_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+        # 6. Test GeneratedImage Change List
+        response = self.client.get(reverse('admin:chat_generatedimage_changelist'))
+        self.assertEqual(response.status_code, 200)
+
+        # 7. Test Grant Premium By ID view
+        test_user = User.objects.create_user(username='target_premium_user', password='password123')
+        response = self.client.post(
+            reverse('admin:chat_userprofile_grant_premium_by_id'),
+            {'user_id': test_user.id}
+        )
+        self.assertEqual(response.status_code, 302)
+        test_user.profile.refresh_from_db()
+        self.assertTrue(test_user.profile.is_premium)
+        self.assertEqual(test_user.profile.subscription_plan, 'premium')
+
+        # 8. Test Grant Balance By ID view
+        response = self.client.post(
+            reverse('admin:chat_userprofile_grant_balance_by_id'),
+            {'user_id': test_user.id, 'amount': 250}
+        )
+        self.assertEqual(response.status_code, 302)
+        test_user.profile.refresh_from_db()
+        self.assertEqual(test_user.profile.balance, 250)
+
+

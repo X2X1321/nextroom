@@ -532,12 +532,175 @@
         box-shadow: 0 0 14px rgba(99, 102, 241, 0.35) !important;
     }
 
+    /* 13. Mobile Responsiveness & Touch Optimization (< 768px) */
     @media (max-width: 768px) {
-        #changelist.filtered #changelist-form {
+        #header {
+            padding: 12px 16px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 8px !important;
+        }
+
+        #site-name a {
+            font-size: 16px !important;
+        }
+
+        #user-tools {
+            font-size: 11px !important;
+            gap: 6px !important;
+            width: 100% !important;
+            justify-content: flex-start !important;
+        }
+
+        .breadcrumbs {
+            padding: 8px 16px !important;
+            font-size: 11px !important;
+            overflow-x: auto !important;
+            white-space: nowrap !important;
+            -webkit-overflow-scrolling: touch !important;
+        }
+
+        #content {
+            padding: 12px 12px 90px 12px !important;
             max-width: 100% !important;
         }
+
+        /* Changelist Layout on Mobile */
+        #changelist {
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        #changelist.filtered #changelist-form {
+            max-width: 100% !important;
+            width: 100% !important;
+            overflow-x: auto !important;
+        }
+
         #changelist-filter {
             width: 100% !important;
+            border-left: none !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 12px !important;
+            margin-top: 16px !important;
+            padding: 16px !important;
+        }
+
+        /* Responsive Table */
+        .results {
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            border-radius: 12px !important;
+            margin-bottom: 16px !important;
+        }
+
+        .results table {
+            min-width: 600px !important;
+        }
+
+        /* Search & Actions Bar on Mobile */
+        #toolbar form, #changelist-search {
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 8px !important;
+        }
+
+        #changelist-search input[type="text"], #searchbar {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            height: 42px !important;
+            font-size: 14px !important;
+        }
+
+        #changelist-search input[type="submit"] {
+            width: 100% !important;
+            height: 42px !important;
+            font-size: 14px !important;
+            justify-content: center !important;
+        }
+
+        .actions {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
+            padding: 12px !important;
+        }
+
+        .actions select {
+            width: 100% !important;
+            height: 42px !important;
+            font-size: 13px !important;
+        }
+
+        .actions button, .actions .button {
+            width: 100% !important;
+            height: 42px !important;
+            font-size: 13px !important;
+            text-align: center !important;
+            justify-content: center !important;
+        }
+
+        /* Object Tools (Add button) */
+        .object-tools {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+            width: 100% !important;
+        }
+
+        .object-tools li, .object-tools a {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            text-align: center !important;
+            height: 42px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 13px !important;
+        }
+
+        /* Change Form Full Width */
+        .form-row {
+            padding: 12px 14px !important;
+        }
+
+        .form-row label {
+            font-size: 12px !important;
+            margin-bottom: 4px !important;
+        }
+
+        input[type="text"], input[type="password"], input[type="email"], input[type="number"], input[type="url"], textarea, select {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            font-size: 14px !important;
+        }
+
+        /* Sticky Save Bar on Mobile */
+        .submit-row {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 50 !important;
+            margin: 0 !important;
+            border-radius: 16px 16px 0 0 !important;
+            background: rgba(15, 23, 42, 0.95) !important;
+            backdrop-filter: blur(16px) !important;
+            border-top: 1px solid rgba(99, 102, 241, 0.3) !important;
+            padding: 12px 16px !important;
+            box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5) !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+        }
+
+        .submit-row input[type="submit"], .submit-row button, .submit-row a {
+            flex: 1 1 auto !important;
+            height: 42px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 13px !important;
         }
     }
 </style>
