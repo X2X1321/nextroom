@@ -90,7 +90,7 @@ class UserProfile(models.Model):
     is_bot = models.BooleanField(default=False, verbose_name="Бот", help_text="Является ли пользователь системным ботом")
     total_messages_count = models.PositiveIntegerField(default=0, verbose_name="Total Messages")
     balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, verbose_name="Баланс (RUB)")
-    avatar_url = models.URLField(max_length=500, blank=True, null=True, verbose_name="Ссылка на аватарку")
+    avatar_url = models.TextField(blank=True, null=True, verbose_name="Ссылка на аватарку")
 
     class Meta:
         verbose_name = 'Профиль пользователя'

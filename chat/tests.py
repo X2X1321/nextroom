@@ -231,5 +231,27 @@ class RoomAIAccessTests(TestCase):
             # Expiry date must not be extended again
             self.assertEqual(self.creator_profile.premium_until, expiry1)
 
+    def test_profile_avatar_upload(self):
+        import io
+        from PIL import Image
+        from django.core.files.uploadedfile import SimpleUploadedFile
 
+        self.client.force_login(self.creator)
+        
+        # Create a test image
+        img = Image.new('RGB', (600, 400), color=(73, 109, 137))
+        img_bytes = io.BytesIO()
+        img.save(img_bytes, format='JPEG')
+        uploaded_file = SimpleUploadedFile('test_avatar.jpg', img_bytes.getvalue(), content_type='image/jpeg')
 
+        response = self.client.post(
+            reverse('profile'),
+            {'avatar': uploaded_file},
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest'
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data.get('status'), 'ok')
+        self.creator_profile.refresh_from_db()
+        self.assertTrue(self.creator_profile.avatar_url is not None and len(self.creator_profile.avatar_url) > 0)

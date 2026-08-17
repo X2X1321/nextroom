@@ -854,16 +854,81 @@ def profile(request):
     available_providers = AVAILABLE_PROVIDERS
 
     if request.method == 'POST':
+        is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest' or 'application/json' in request.headers.get('accept', '')
         avatar_file = request.FILES.get('avatar')
         if avatar_file:
-            from django.core.files.storage import default_storage
-            import uuid
-            ext = avatar_file.name.split('.')[-1]
-            file_name = f"avatars/{request.user.username}_{uuid.uuid4().hex[:6]}.{ext}"
-            saved_path = default_storage.save(file_name, avatar_file)
-            profile.avatar_url = default_storage.url(saved_path)
-            profile.save()
-            messages.success(request, 'Аватарка успешно обновлена.')
+            try:
+                import io
+                import base64
+                import uuid
+                from PIL import Image, ImageOps
+                from django.core.files.base import ContentFile
+                from django.core.files.storage import default_storage
+
+                # Validate & optimize image with Pillow
+                img = Image.open(avatar_file)
+                # Auto-orient based on EXIF (prevents rotated mobile camera uploads)
+                img = ImageOps.exif_transpose(img)
+                
+                # Check format / transparency
+                if img.mode in ('RGBA', 'LA') or (img.mode == 'P' and 'transparency' in img.info):
+                    img = img.convert('RGBA')
+                    fmt = 'PNG'
+                    ext = 'png'
+                else:
+                    img = img.convert('RGB')
+                    fmt = 'JPEG'
+                    ext = 'jpg'
+                
+                # Center crop to 1:1 square
+                width, height = img.size
+                min_dim = min(width, height)
+                left = (width - min_dim) / 2
+                top = (height - min_dim) / 2
+                right = (width + min_dim) / 2
+                bottom = (height + min_dim) / 2
+                img = img.crop((left, top, right, bottom))
+                
+                # Resize to max 320x320 for ultra-fast loading in chat & profile
+                img.thumbnail((320, 320), Image.Resampling.LANCZOS)
+                
+                buffer = io.BytesIO()
+                if fmt == 'PNG':
+                    img.save(buffer, format='PNG', optimize=True)
+                else:
+                    img.save(buffer, format='JPEG', quality=88, optimize=True)
+                
+                processed_bytes = buffer.getvalue()
+                
+                # Try saving to storage (S3 / media)
+                avatar_saved_url = None
+                try:
+                    file_name = f"avatars/{request.user.username}_{uuid.uuid4().hex[:6]}.{ext}"
+                    saved_path = default_storage.save(file_name, ContentFile(processed_bytes))
+                    avatar_saved_url = default_storage.url(saved_path)
+                except Exception as storage_err:
+                    logging.warning(f"Avatar storage save failed, falling back to base64: {storage_err}")
+                
+                # Fallback to base64 data URI if storage failed or unreachable
+                if not avatar_saved_url:
+                    mime = 'image/png' if fmt == 'PNG' else 'image/jpeg'
+                    b64_data = base64.b64encode(processed_bytes).decode('utf-8')
+                    avatar_saved_url = f"data:{mime};base64,{b64_data}"
+                
+                profile.avatar_url = avatar_saved_url
+                profile.save()
+                
+                if is_ajax:
+                    return JsonResponse({'status': 'ok', 'avatar_url': profile.avatar_url, 'message': 'Аватарка успешно обновлена.'})
+                messages.success(request, 'Аватарка успешно обновлена.')
+            except Exception as e:
+                logging.error(f"Error processing avatar upload: {e}", exc_info=True)
+                if is_ajax:
+                    return JsonResponse({'status': 'error', 'message': 'Не удалось обработать изображение. Пожалуйста, выберите файл JPG или PNG.'}, status=400)
+                messages.error(request, 'Не удалось загрузить аватарку. Пожалуйста, выберите другое изображение.')
+            
+            return redirect('profile')
+
         elif 'custom_prompt' in request.POST:
             profile.custom_prompt = request.POST.get('custom_prompt', '').strip()
             profile.save()

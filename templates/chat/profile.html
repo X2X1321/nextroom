@@ -25,18 +25,32 @@
                         <!-- ЛЕВАЯ ЧАСТЬ: Аватарка + Имя -->
                         <div class="flex flex-col sm:flex-row items-center gap-5">
                             <!-- Аватарка -->
-                            <form action="{% url 'profile' %}" method="POST" enctype="multipart/form-data" class="shrink-0 relative group cursor-pointer w-16 h-16 sm:w-20 sm:h-20">
+                            <form id="avatar-upload-form" action="{% url 'profile' %}" method="POST" enctype="multipart/form-data" class="shrink-0 relative group cursor-pointer w-16 h-16 sm:w-20 sm:h-20">
                                 {% csrf_token %}
-                                <input type="file" name="avatar" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="this.form.submit()" title="Изменить аватарку">
-                                {% if profile.avatar_url %}
-                                <img src="{{ profile.avatar_url }}" alt="Аватарка" class="w-full h-full rounded-full object-cover border border-slate-700/50 group-hover:opacity-70 transition">
-                                {% else %}
-                                <div class="w-full h-full rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-white border border-slate-700/50 group-hover:opacity-70 transition" style="background: linear-gradient(135deg, #4F46E5 0%, #A855F7 100%);">
-                                    {{ user.username|slice:":1"|upper }}
-                                </div>
-                                {% endif %}
-                                <div class="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition bg-black/40 pointer-events-none">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <input type="file" id="avatar-input" name="avatar" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20" title="Изменить аватарку">
+                                
+                                <div id="avatar-container" class="w-full h-full rounded-full overflow-hidden relative">
+                                    {% if profile.avatar_url %}
+                                    <img id="avatar-img" src="{{ profile.avatar_url }}" alt="Аватарка" class="w-full h-full object-cover border border-slate-700/50 group-hover:opacity-70 transition">
+                                    {% else %}
+                                    <div id="avatar-placeholder" class="w-full h-full rounded-full flex items-center justify-center text-2xl sm:text-3xl font-bold text-white border border-slate-700/50 group-hover:opacity-70 transition" style="background: linear-gradient(135deg, #4F46E5 0%, #A855F7 100%);">
+                                        {{ user.username|slice:":1"|upper }}
+                                    </div>
+                                    <img id="avatar-img" src="" alt="Аватарка" class="w-full h-full object-cover border border-slate-700/50 hidden">
+                                    {% endif %}
+
+                                    <!-- Loading Spinner Overlay -->
+                                    <div id="avatar-loading" class="absolute inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center z-15 hidden">
+                                        <svg class="animate-spin w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                                        </svg>
+                                    </div>
+
+                                    <!-- Hover Camera Icon -->
+                                    <div id="avatar-hover-icon" class="absolute inset-0 flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition bg-black/40 pointer-events-none z-10">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                    </div>
                                 </div>
                             </form>
 
@@ -207,4 +221,76 @@
         </section>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const avatarInput = document.getElementById('avatar-input');
+    const avatarForm = document.getElementById('avatar-upload-form');
+    const avatarImg = document.getElementById('avatar-img');
+    const avatarPlaceholder = document.getElementById('avatar-placeholder');
+    const avatarLoading = document.getElementById('avatar-loading');
+
+    if (avatarInput && avatarForm) {
+        avatarInput.addEventListener('change', async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            // Validate file size (e.g. max 15MB)
+            if (file.size > 15 * 1024 * 1024) {
+                alert('Размер файла превышает 15 МБ. Пожалуйста, выберите изображение меньшего размера.');
+                avatarInput.value = '';
+                return;
+            }
+
+            // Show instant client preview
+            const previewUrl = URL.createObjectURL(file);
+            if (avatarImg) {
+                avatarImg.src = previewUrl;
+                avatarImg.classList.remove('hidden');
+            }
+            if (avatarPlaceholder) {
+                avatarPlaceholder.classList.add('hidden');
+            }
+
+            // Show loading spinner
+            if (avatarLoading) {
+                avatarLoading.classList.remove('hidden');
+            }
+
+            const formData = new FormData(avatarForm);
+
+            try {
+                const response = await fetch(avatarForm.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json().catch(() => null);
+                    if (data && data.avatar_url && avatarImg) {
+                        avatarImg.src = data.avatar_url;
+                    }
+                } else {
+                    console.warn('AJAX upload returned error status, falling back to full form submit');
+                    avatarForm.submit();
+                    return;
+                }
+            } catch (err) {
+                console.error('Avatar AJAX upload failed, falling back:', err);
+                avatarForm.submit();
+                return;
+            } finally {
+                if (avatarLoading) {
+                    avatarLoading.classList.add('hidden');
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
