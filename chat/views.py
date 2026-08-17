@@ -20,6 +20,7 @@ from django.contrib import messages
 from django.http import HttpResponse, JsonResponse, HttpResponseForbidden, HttpResponseBadRequest
 from django.urls import reverse
 
+from django.core.cache import cache
 from .models_catalog import MODELS_CATALOG, AVAILABLE_PROVIDERS
 from django.db.models import F
 from django.utils.html import escape
@@ -659,7 +660,7 @@ def dashboard(request):
     category_filter = request.GET.get('category', '').strip()
     room_type = request.GET.get('type', 'all').strip() # all, public, private
     
-    rooms = Room.objects.all().annotate(msg_count=Count('messages'))
+    rooms = Room.objects.all().select_related('creator__profile').annotate(msg_count=Count('messages'))
     
     # Apply search filter
     if query:
@@ -682,10 +683,18 @@ def dashboard(request):
     # Pinned rooms first
     rooms = rooms.order_by('-is_pinned', '-created_at')
     
-    # Get stats
-    total_rooms = Room.objects.count()
+    # Get stats (cached for 60s to avoid expensive COUNT(*) on large tables)
+    total_rooms = cache.get('dashboard_total_rooms')
+    if total_rooms is None:
+        total_rooms = Room.objects.count()
+        cache.set('dashboard_total_rooms', total_rooms, 60)
+
+    total_messages = cache.get('dashboard_total_messages')
+    if total_messages is None:
+        total_messages = Message.objects.count()
+        cache.set('dashboard_total_messages', total_messages, 60)
+
     my_rooms_count = Room.objects.filter(creator=request.user).count() if request.user.is_authenticated else 0
-    total_messages = Message.objects.count()
     
     categories = Room.CATEGORY_CHOICES
 
@@ -990,7 +999,7 @@ def room_detail(request, slug):
         get_or_create_guest_session(request)
 
     # Retrieve last 100 messages
-    chat_messages = room.messages.all().select_related('user', 'guest_session').prefetch_related('reactions__user')[:100]
+    chat_messages = room.messages.all().select_related('user__profile', 'guest_session', 'reply_to__user', 'reply_to__guest_session').prefetch_related('reactions__user')[:100]
     for msg in chat_messages:
         if msg.user and msg.user.username == 'nextroom_ai':
             msg.content = sanitize_ai_response(msg.content)
@@ -1035,7 +1044,7 @@ def get_messages(request, slug):
     after_id = request.GET.get('after_id')
     
     # Query messages
-    queryset = room.messages.all().select_related('user', 'guest_session', 'reply_to__user').prefetch_related('reactions__user')
+    queryset = room.messages.all().select_related('user__profile', 'guest_session', 'reply_to__user', 'reply_to__guest_session').prefetch_related('reactions__user')
     if after_id:
         queryset = queryset.filter(id__gt=int(after_id))
         

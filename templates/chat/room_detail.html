@@ -808,7 +808,7 @@
 
         // Fast polling & typing indicator helpers
         let isFastPolling = false;
-        let pollInterval = setInterval(pollMessages, 1000);
+        let pollInterval = setInterval(pollMessages, 2000);
 
         window.showAITypingIndicator = function() {
             const indicator = document.getElementById('ai-typing-indicator');
@@ -820,7 +820,7 @@
             if (!isFastPolling) {
                 isFastPolling = true;
                 clearInterval(pollInterval);
-                pollInterval = setInterval(pollMessages, 400);
+                pollInterval = setInterval(pollMessages, 1000);
             }
         };
 
@@ -832,7 +832,7 @@
             if (isFastPolling) {
                 isFastPolling = false;
                 clearInterval(pollInterval);
-                pollInterval = setInterval(pollMessages, 1000);
+                pollInterval = setInterval(pollMessages, 2000);
             }
         };
 
@@ -841,8 +841,8 @@
             if (document.hidden) {
                 clearInterval(pollInterval);
             } else {
-                pollMessages(); // Poll immediately
-                pollInterval = setInterval(pollMessages, isFastPolling ? 400 : 1000);
+                pollMessages(); // Poll immediately upon tab refocus
+                pollInterval = setInterval(pollMessages, isFastPolling ? 1000 : 2000);
             }
         });
     });

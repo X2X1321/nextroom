@@ -137,6 +137,15 @@ elif not (BASE_DIR / 'db.sqlite3').exists() and os.environ.get('VERCEL'):
     )
 
 
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'nextroom-cache',
+    }
+}
+
+
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 

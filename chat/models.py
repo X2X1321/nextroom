@@ -57,11 +57,11 @@ class Room(models.Model):
     slug = models.SlugField(max_length=120, unique=True, blank=True)
     description = models.TextField(max_length=300, blank=True, verbose_name="Description")
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_rooms')
-    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='general')
-    is_private = models.BooleanField(default=False, verbose_name="Private Room")
+    category = models.CharField(max_length=30, choices=CATEGORY_CHOICES, default='general', db_index=True)
+    is_private = models.BooleanField(default=False, db_index=True, verbose_name="Private Room")
     access_code = models.CharField(max_length=50, blank=True, null=True, verbose_name="Access Code")
-    is_pinned = models.BooleanField(default=False, verbose_name="Pinned Room")
-    created_at = models.DateTimeField(auto_now_add=True)
+    is_pinned = models.BooleanField(default=False, db_index=True, verbose_name="Pinned Room")
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -122,7 +122,7 @@ class RouterAIKey(models.Model):
     key_hash = models.CharField(max_length=150, unique=True, verbose_name="Hash ключа")
     key_value = models.CharField(max_length=255, verbose_name="Значение ключа")
     is_disabled = models.BooleanField(default=False, verbose_name="Отключен")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -189,7 +189,7 @@ class GuestSession(models.Model):
     messages_count = models.IntegerField(default=0, verbose_name="Отправлено сообщений")
     images_count = models.IntegerField(default=0, verbose_name="Сгенерировано фото")
     first_seen = models.DateTimeField(auto_now_add=True, verbose_name="Первый визит")
-    last_activity = models.DateTimeField(auto_now=True, verbose_name="Последняя активность")
+    last_activity = models.DateTimeField(auto_now=True, db_index=True, verbose_name="Последняя активность")
 
     class Meta:
         verbose_name = "Незарегистрированный пользователь"
@@ -219,11 +219,11 @@ class Message(models.Model):
     guest_session = models.ForeignKey(GuestSession, on_delete=models.SET_NULL, related_name='messages', null=True, blank=True)
     guest_name = models.CharField(max_length=100, blank=True)
     content = models.TextField(verbose_name="Message Content", blank=True)
-    message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text')
+    message_type = models.CharField(max_length=20, choices=MESSAGE_TYPES, default='text', db_index=True)
     image = models.ImageField(upload_to=get_image_upload_path, blank=True, null=True)
     voice = models.FileField(upload_to=get_voice_upload_path, blank=True, null=True)
     reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name='replies', verbose_name="Ответ на сообщение")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ['created_at']
@@ -232,19 +232,22 @@ class Message(models.Model):
 
     def get_reactions_summary(self):
         summary = []
-        reaction_counts = self.reactions.values('reaction').annotate(count=Count('id'))
-        count_map = {r['reaction']: r['count'] for r in reaction_counts}
+        all_reactions = list(self.reactions.all())
+        count_map = {}
+        reactors_map = {}
+        for r in all_reactions:
+            emoji = r.reaction
+            count_map[emoji] = count_map.get(emoji, 0) + 1
+            if emoji not in reactors_map:
+                reactors_map[emoji] = []
+            if len(reactors_map[emoji]) < 3 and r.user:
+                reactors_map[emoji].append(r.user.username)
         
         for emoji in ['❤️', '🔥', '😂', '🎉']:
-            count = count_map.get(emoji, 0)
-            reactors = []
-            if count > 0:
-                top_reactors = self.reactions.filter(reaction=emoji).select_related('user')[:3]
-                reactors = [r.user.username for r in top_reactors if r.user]
             summary.append({
                 'emoji': emoji,
-                'count': count,
-                'reactors': reactors,
+                'count': count_map.get(emoji, 0),
+                'reactors': reactors_map.get(emoji, []),
             })
         return summary
 
@@ -335,7 +338,7 @@ class AIUsageLog(models.Model):
     provider = models.CharField(max_length=30, choices=AI_PROVIDER_CHOICES)
     tokens_used = models.IntegerField(default=0)
     response_time = models.FloatField(default=0.0, help_text='Время ответа в секундах')
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ['-created_at']
@@ -355,7 +358,7 @@ class GeneratedImage(models.Model):
     width = models.IntegerField(null=True, blank=True)
     height = models.IntegerField(null=True, blank=True)
     model_name = models.CharField(max_length=100, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
         ordering = ['-created_at']
