@@ -21,6 +21,7 @@ from django.http import HttpResponse, JsonResponse, HttpResponseForbidden, HttpR
 from django.urls import reverse
 
 from django.core.cache import cache
+from .cache_utils import get_cache, set_cache
 from .models_catalog import MODELS_CATALOG, AVAILABLE_PROVIDERS
 from django.db.models import F
 from django.utils.html import escape
@@ -683,29 +684,16 @@ def dashboard(request):
     # Pinned rooms first
     rooms = rooms.order_by('-is_pinned', '-created_at')
     
-    # Get stats (cached for 60s to avoid expensive COUNT(*) on large tables)
-    total_rooms = None
-    total_messages = None
-    try:
-        total_rooms = cache.get('dashboard_total_rooms')
-        total_messages = cache.get('dashboard_total_messages')
-    except Exception:
-        total_rooms = None
-        total_messages = None
-
+    # Get stats (cached for 60s via Upstash Redis REST or fallback)
+    total_rooms = get_cache('dashboard_total_rooms')
     if total_rooms is None:
         total_rooms = Room.objects.count()
-        try:
-            cache.set('dashboard_total_rooms', total_rooms, 60)
-        except Exception:
-            pass
+        set_cache('dashboard_total_rooms', total_rooms, 60)
 
+    total_messages = get_cache('dashboard_total_messages')
     if total_messages is None:
         total_messages = Message.objects.count()
-        try:
-            cache.set('dashboard_total_messages', total_messages, 60)
-        except Exception:
-            pass
+        set_cache('dashboard_total_messages', total_messages, 60)
 
     my_rooms_count = Room.objects.filter(creator=request.user).count() if request.user.is_authenticated else 0
     
