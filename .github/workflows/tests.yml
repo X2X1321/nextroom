@@ -1,0 +1,44 @@
+name: Django Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: ["**"]
+
+jobs:
+  test:
+    name: Run Django Test Suite
+    runs-on: ubuntu-latest
+
+    env:
+      DJANGO_SECRET_KEY: "ci-test-secret-key-not-for-production"
+      DATABASE_URL: ""          # uses SQLite in CI
+      UPSTASH_REDIS_REST_URL: "" # cache falls back to dummy
+      UPSTASH_REDIS_REST_TOKEN: ""
+      SMARTCAPTCHA_SERVER_KEY: ""   # captcha skipped in CI (fail-open)
+      SMARTCAPTCHA_CLIENT_KEY: "ci-client-key"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run migrations (SQLite)
+        run: python manage.py migrate --run-syncdb
+
+      - name: Run tests
+        run: python manage.py test chat --verbosity=2 --failfast
+
+      - name: Check for missing migrations
+        run: python manage.py migrate --check
