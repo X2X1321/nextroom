@@ -603,21 +603,60 @@ def landing(request):
     set_cache('landing_page_stats', context, 120)
     return render(request, 'chat/landing.html', context)
 
+
+def _verify_smartcaptcha(token, client_ip):
+    """Validate Yandex SmartCaptcha token server-side. Returns True if passed."""
+    server_key = getattr(settings, 'SMARTCAPTCHA_SERVER_KEY', '')
+    if not server_key:
+        # Not configured — skip captcha check (dev/local mode)
+        return True
+    if not token:
+        return False
+    try:
+        import urllib.parse
+        resp = urllib.request.urlopen(
+            "https://smartcaptcha.yandexcloud.net/validate?" + urllib.parse.urlencode({
+                'secret': server_key,
+                'token': token,
+                'ip': client_ip or '127.0.0.1',
+            }),
+            timeout=3
+        )
+        body = resp.read().decode('utf-8')
+        return json.loads(body).get('status') == 'ok'
+    except Exception as exc:
+        logger.warning('SmartCaptcha validation error: %s', exc)
+        # On error — allow through (fail-open) to not block legit users
+        return True
+
+
 @ratelimit(key='ip', rate='5/m', block=False)
 def register_view(request):
+
     """User registration view with brute-force / spam protection."""
     if request.user.is_authenticated:
         return redirect('dashboard')
     
+    captcha_ctx = {'SMARTCAPTCHA_CLIENT_KEY': settings.SMARTCAPTCHA_CLIENT_KEY}
+
     if getattr(request, 'limited', False):
         messages.error(request, 'Слишком много попыток регистрации. Пожалуйста, подождите минуту.')
-        return render(request, 'chat/register.html')
+        return render(request, 'chat/register.html', captcha_ctx)
     
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
         password = request.POST.get('password', '')
         password_confirm = request.POST.get('password_confirm', '')
+
+        # --- Yandex SmartCaptcha verification ---
+        captcha_token = request.POST.get('smart-token', '').strip()
+        client_ip, _ = get_client_ip(request)
+        if not _verify_smartcaptcha(captcha_token, client_ip):
+            messages.error(request, 'Пожалуйста, пройдите проверку капчи.')
+            return render(request, 'chat/register.html', captcha_ctx)
+        # --- End captcha ---
+
         
         if not username or not password:
             messages.error(request, 'Пожалуйста, заполните все обязательные поля.')
@@ -628,7 +667,7 @@ def register_view(request):
                 validate_email(email)
             except ValidationError:
                 messages.error(request, 'Пожалуйста, введите корректный адрес электронной почты.')
-                return render(request, 'chat/register.html')
+                return render(request, 'chat/register.html', captcha_ctx)
             
             canonical_new = normalize_email_canonical(email)
             is_taken = False
@@ -658,7 +697,10 @@ def register_view(request):
             messages.success(request, f'Добро пожаловать в NextRoom, {username}!')
             return redirect('dashboard')
             
-    return render(request, 'chat/register.html')
+    return render(request, 'chat/register.html', {
+        'SMARTCAPTCHA_CLIENT_KEY': settings.SMARTCAPTCHA_CLIENT_KEY,
+    })
+
 
 @ratelimit(key='ip', rate='10/m', block=False)
 def login_view(request):
@@ -1198,11 +1240,34 @@ def get_messages(request, slug):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
         
     after_id = request.GET.get('after_id')
-    
-    # Query messages
-    queryset = room.messages.all().select_related('user__profile', 'guest_session', 'reply_to__user', 'reply_to__guest_session').prefetch_related('reactions__user')
+
+    # Cache initial load (no after_id) per room for 5 seconds to reduce DB load on polling bursts.
+    # We skip cache for authenticated users (is_me flag differs per user), but cache for guest polls.
+    if not after_id and not request.user.is_authenticated:
+        from .cache_utils import get_cache, set_cache
+        cache_key = f"room_msgs_api_{slug}"
+        cached = get_cache(cache_key)
+        if cached is not None:
+            return JsonResponse(cached)
+
+    # Query messages — always limit to avoid loading entire history on each poll.
+    # With after_id: fetch up to 50 new messages since last seen.
+    # Without after_id: return last 50 messages (initial load or first poll).
+    MESSAGE_LIMIT = 50
+    base_qs = room.messages.all().select_related(
+        'user__profile', 'guest_session', 'reply_to__user', 'reply_to__guest_session'
+    ).prefetch_related('reactions__user')
+
     if after_id:
-        queryset = queryset.filter(id__gt=int(after_id))
+        try:
+            after_id_int = int(after_id)
+        except (ValueError, TypeError):
+            after_id_int = 0
+        queryset = base_qs.filter(id__gt=after_id_int).order_by('id')[:MESSAGE_LIMIT]
+    else:
+        # Last 50 messages in chronological order
+        queryset = list(base_qs.order_by('-id')[:MESSAGE_LIMIT])
+        queryset = list(reversed(queryset))
         
     messages_data = []
     for msg in queryset:
@@ -1246,8 +1311,14 @@ def get_messages(request, slug):
             msg_data['voice_url'] = msg.voice.url
         messages_data.append(msg_data)
 
+    result = {'messages': messages_data}
 
-    return JsonResponse({'messages': messages_data})
+    # Cache anonymous initial-load response for 5 seconds
+    if not after_id and not request.user.is_authenticated:
+        from .cache_utils import set_cache
+        set_cache(f"room_msgs_api_{slug}", result, timeout=5)
+
+    return JsonResponse(result)
 
 
 def _update_user_activity(user):
@@ -1532,6 +1603,7 @@ def send_message(request, slug):
     invalidate_room_messages_cache(room.slug)
     
     return JsonResponse(response_data)
+
 
 
 

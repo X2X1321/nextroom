@@ -578,43 +578,8 @@
             });
         });
 
-        // Polling loop
-        window.pollMessages = function pollMessages() {
-            fetch(`{% url 'get_messages' room.slug %}?after_id=${lastMessageId}`)
-            .then(res => {
-                if (res.status === 403) {
-                    window.location.reload();
-                    return;
-                }
-                return res.json();
-            })
-            .then(data => {
-                if (data && data.messages && data.messages.length > 0) {
-                    let hasNew = false;
-                    let hasAIMessage = false;
-                    data.messages.forEach(msg => {
-                        if (msg.id > lastMessageId) {
-                            renderMessage(msg);
-                            lastMessageId = Math.max(lastMessageId, msg.id);
-                            hasNew = true;
-                            if (msg.username === 'nextroom_ai' || msg.username.includes('AI') || msg.username.includes('Bot')) {
-                                hasAIMessage = true;
-                            }
-                        }
-                    });
-                    if (hasNew) {
-                        if (hasAIMessage && typeof hideAITypingIndicator === 'function') {
-                            hideAITypingIndicator();
-                        }
-                        updateNoMessagesAlert();
-                        scrollToBottom();
-                    }
-                }
-            })
-            .catch(err => {
-                console.warn('Ошибка опроса сообщений: ', err);
-            });
-        }
+
+        // pollMessages is defined below with adaptive exponential backoff logic.
 
         // Client-side image compression helper
         function compressImageIfNeeded(file, maxSizeMB = 2.0) {
@@ -806,9 +771,83 @@
             });
         }
 
-        // Fast polling & typing indicator helpers
+        // Adaptive polling with exponential backoff
+        // When no new messages arrive: 2s → 4s → 8s → 15s (saves serverless calls)
+        // When a new message arrives: immediately reset to 2s
+        const POLL_MIN = 2000;
+        const POLL_MAX = 15000;
+        let currentPollDelay = POLL_MIN;
         let isFastPolling = false;
-        let pollInterval = setInterval(pollMessages, 2000);
+        let pollTimeout = null;
+
+        function schedulePoll(delay) {
+            clearTimeout(pollTimeout);
+            pollTimeout = setTimeout(() => {
+                if (!document.hidden) {
+                    pollMessages();
+                } else {
+                    // Tab hidden — reschedule without actually polling
+                    schedulePoll(delay);
+                }
+            }, delay);
+        }
+
+        // Adaptive polling with exponential backoff
+        window.pollMessages = function pollMessages() {
+
+            fetch(`{% url 'get_messages' room.slug %}?after_id=${lastMessageId}`)
+            .then(res => {
+                if (res.status === 403) {
+                    window.location.reload();
+                    return;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data && data.messages && data.messages.length > 0) {
+                    let hasNew = false;
+                    let hasAIMessage = false;
+                    data.messages.forEach(msg => {
+                        if (msg.id > lastMessageId) {
+                            renderMessage(msg);
+                            lastMessageId = Math.max(lastMessageId, msg.id);
+                            hasNew = true;
+                            if (msg.username === 'nextroom_ai' || msg.username.includes('AI') || msg.username.includes('Bot')) {
+                                hasAIMessage = true;
+                            }
+                        }
+                    });
+                    if (hasNew) {
+                        if (hasAIMessage && typeof hideAITypingIndicator === 'function') {
+                            hideAITypingIndicator();
+                        }
+                        updateNoMessagesAlert();
+                        scrollToBottom();
+                        // New messages received — reset backoff to minimum
+                        currentPollDelay = POLL_MIN;
+                    } else {
+                        // No new messages — increase backoff (up to max)
+                        if (!isFastPolling) {
+                            currentPollDelay = Math.min(currentPollDelay * 2, POLL_MAX);
+                        }
+                    }
+                } else {
+                    // Empty response — increase backoff
+                    if (!isFastPolling) {
+                        currentPollDelay = Math.min(currentPollDelay * 2, POLL_MAX);
+                    }
+                }
+                schedulePoll(isFastPolling ? 1000 : currentPollDelay);
+            })
+            .catch(err => {
+                console.warn('Ошибка опроса сообщений: ', err);
+                // On error, retry with a slightly longer delay
+                schedulePoll(Math.min(currentPollDelay * 2, POLL_MAX));
+            });
+        };
+
+        // Start polling
+        schedulePoll(POLL_MIN);
 
         window.showAITypingIndicator = function() {
             const indicator = document.getElementById('ai-typing-indicator');
@@ -819,8 +858,9 @@
             }
             if (!isFastPolling) {
                 isFastPolling = true;
-                clearInterval(pollInterval);
-                pollInterval = setInterval(pollMessages, 1000);
+                currentPollDelay = 1000;
+                clearTimeout(pollTimeout);
+                schedulePoll(1000);
             }
         };
 
@@ -831,18 +871,16 @@
             }
             if (isFastPolling) {
                 isFastPolling = false;
-                clearInterval(pollInterval);
-                pollInterval = setInterval(pollMessages, 2000);
+                currentPollDelay = POLL_MIN;
             }
         };
 
-        // Pause polling when tab is inactive to optimize server load & resource usage
+        // On tab refocus — poll immediately and reset backoff
         document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                clearInterval(pollInterval);
-            } else {
-                pollMessages(); // Poll immediately upon tab refocus
-                pollInterval = setInterval(pollMessages, isFastPolling ? 1000 : 2000);
+            if (!document.hidden) {
+                currentPollDelay = POLL_MIN;
+                clearTimeout(pollTimeout);
+                window.pollMessages();
             }
         });
     });

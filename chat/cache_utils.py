@@ -191,6 +191,8 @@ def invalidate_room_messages_cache(slug):
     delete_cache(f"room_stats_{slug}")
     delete_cache('dashboard_total_messages')
     delete_cache('landing_page_stats')
+    # Also invalidate the anonymous API polling cache
+    delete_cache(f"room_msgs_api_{slug}")
 
 
 def get_room_stats_cache(slug):

@@ -229,6 +229,10 @@ class Message(models.Model):
         ordering = ['created_at']
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
+        indexes = [
+            # Composite index for fast room message polling: WHERE room_id=X AND id>Y ORDER BY id
+            models.Index(fields=['room', 'id'], name='chat_message_room_id_idx'),
+        ]
 
     def get_reactions_summary(self):
         summary = []

@@ -2,6 +2,10 @@
 
 {% block title %}Регистрация — NextRoom{% endblock %}
 
+{% block extra_head %}
+<script src="https://smartcaptcha.yandexcloud.net/captcha.js" defer></script>
+{% endblock %}
+
 {% block content %}
 <div class="flex min-h-[calc(100dvh-4rem-3.5rem)] flex-col justify-center px-6 py-12 lg:px-8 items-center">
     <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
@@ -49,8 +53,19 @@
                     </div>
                 </div>
 
+                <input type="hidden" name="smart-token" id="smart-token" value="">
+
+                <!-- Yandex SmartCaptcha widget -->
+                <div id="captcha-container"
+                    class="smart-captcha"
+                    data-sitekey="{{ SMARTCAPTCHA_CLIENT_KEY }}"
+                    data-callback="onCaptchaSuccess"
+                    data-on-reset="onCaptchaReset">
+                </div>
+                <p id="captcha-error" class="hidden text-xs text-red-400 mt-2">Please complete the captcha to continue.</p>
+
                 <div>
-                    <button type="submit"
+                    <button type="submit" id="register-submit-btn"
                         class="flex w-full justify-center rounded-xl bg-gradient-to-r from-brand-600 to-indigo-500 hover:from-brand-500 hover:to-indigo-400 py-3 px-4 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600 transition">
                         Создать аккаунт
                     </button>
@@ -58,21 +73,45 @@
             </form>
             
             <script>
+                // Captcha state
+                let captchaPassed = false;
+
+                function onCaptchaSuccess(token) {
+                    document.getElementById('smart-token').value = token;
+                    captchaPassed = true;
+                    document.getElementById('captcha-error').classList.add('hidden');
+                }
+
+                function onCaptchaReset() {
+                    document.getElementById('smart-token').value = '';
+                    captchaPassed = false;
+                }
+
                 document.getElementById('register-form').addEventListener('submit', function(e) {
                     const pass = document.getElementById('password').value;
                     const confirmPass = document.getElementById('password_confirm').value;
                     const errorMsg = document.getElementById('password-error');
-                    
+                    const captchaError = document.getElementById('captcha-error');
+
+                    let hasError = false;
+
                     if (pass !== confirmPass) {
                         e.preventDefault();
                         errorMsg.classList.remove('hidden');
                         document.getElementById('password_confirm').classList.add('border-red-500', 'focus:ring-red-500');
+                        hasError = true;
                     } else {
                         errorMsg.classList.add('hidden');
                         document.getElementById('password_confirm').classList.remove('border-red-500', 'focus:ring-red-500');
                     }
+
+                    if (!captchaPassed) {
+                        e.preventDefault();
+                        captchaError.classList.remove('hidden');
+                        hasError = true;
+                    }
                 });
-                
+
                 document.getElementById('password_confirm').addEventListener('input', function() {
                     document.getElementById('password-error').classList.add('hidden');
                     this.classList.remove('border-red-500', 'focus:ring-red-500');
