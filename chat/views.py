@@ -1196,8 +1196,9 @@ def room_detail(request, slug):
     else:
         get_or_create_guest_session(request)
 
-    # Retrieve last 100 messages
-    chat_messages = room.messages.all().select_related('user__profile', 'guest_session', 'reply_to__user', 'reply_to__guest_session').prefetch_related('reactions__user')[:100]
+    # Retrieve last 50 messages and reverse to chronological order
+    chat_messages = list(room.messages.all().select_related('user__profile', 'guest_session', 'reply_to__user', 'reply_to__guest_session').prefetch_related('reactions__user').order_by('-id')[:50])
+    chat_messages.reverse()
     for msg in chat_messages:
         if msg.user and msg.user.username == 'nextroom_ai':
             msg.content = sanitize_ai_response(msg.content)
@@ -1240,10 +1241,11 @@ def get_messages(request, slug):
         return JsonResponse({'error': 'Unauthorized'}, status=403)
         
     after_id = request.GET.get('after_id')
+    before_id = request.GET.get('before_id')
 
-    # Cache initial load (no after_id) per room for 5 seconds to reduce DB load on polling bursts.
+    # Cache initial load (no after_id, no before_id) per room for 5 seconds to reduce DB load on polling bursts.
     # We skip cache for authenticated users (is_me flag differs per user), but cache for guest polls.
-    if not after_id and not request.user.is_authenticated:
+    if not after_id and not before_id and not request.user.is_authenticated:
         from .cache_utils import get_cache, set_cache
         cache_key = f"room_msgs_api_{slug}"
         cached = get_cache(cache_key)
@@ -1251,8 +1253,6 @@ def get_messages(request, slug):
             return JsonResponse(cached)
 
     # Query messages — always limit to avoid loading entire history on each poll.
-    # With after_id: fetch up to 50 new messages since last seen.
-    # Without after_id: return last 50 messages (initial load or first poll).
     MESSAGE_LIMIT = 50
     base_qs = room.messages.all().select_related(
         'user__profile', 'guest_session', 'reply_to__user', 'reply_to__guest_session'
@@ -1264,6 +1264,14 @@ def get_messages(request, slug):
         except (ValueError, TypeError):
             after_id_int = 0
         queryset = base_qs.filter(id__gt=after_id_int).order_by('id')[:MESSAGE_LIMIT]
+    elif before_id:
+        try:
+            before_id_int = int(before_id)
+        except (ValueError, TypeError):
+            before_id_int = 0
+        # Fetch up to 50 older messages, order by -id (newest to oldest), then reverse to chronological
+        queryset = list(base_qs.filter(id__lt=before_id_int).order_by('-id')[:MESSAGE_LIMIT])
+        queryset = list(reversed(queryset))
     else:
         # Last 50 messages in chronological order
         queryset = list(base_qs.order_by('-id')[:MESSAGE_LIMIT])

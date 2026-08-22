@@ -314,11 +314,57 @@
         const currentUser = "{{ user.username }}";
         const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
         
-        // Track the last message ID rendered to avoid double rendering
+        // Track the first and last message ID rendered to avoid double rendering
         let lastMessageId = 0;
+        let firstMessageId = null;
         const msgDivs = messagesContainer.querySelectorAll('[data-message-id]');
         if (msgDivs.length > 0) {
             lastMessageId = parseInt(msgDivs[msgDivs.length - 1].getAttribute('data-message-id'));
+            firstMessageId = parseInt(msgDivs[0].getAttribute('data-message-id'));
+        }
+        
+        let isLoadingOlder = false;
+        let hasMoreOlder = true;
+
+        messagesContainer.addEventListener('scroll', () => {
+            if (messagesContainer.scrollTop <= 50 && !isLoadingOlder && hasMoreOlder && firstMessageId) {
+                loadOlderMessages();
+            }
+        });
+
+        function loadOlderMessages() {
+            if (!firstMessageId || !hasMoreOlder) return;
+            isLoadingOlder = true;
+            const originalScrollHeight = messagesContainer.scrollHeight;
+            
+            fetch(`{% url 'get_messages' room.slug %}?before_id=${firstMessageId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.messages && data.messages.length > 0) {
+                        // Reverse because the API returns chronological (oldest to newest),
+                        // and prepending them one by one chronologically would render them backwards at the top.
+                        // Actually, if we prepend chronologically, [A, B, C] prepended one by one:
+                        // prepend A -> A
+                        // prepend B -> B, A
+                        // prepend C -> C, B, A (wrong!)
+                        // We need to prepend C, then B, then A. So we reverse the array.
+                        const reversedMessages = [...data.messages].reverse();
+                        reversedMessages.forEach(msg => {
+                            renderMessage(msg, true); // prepend = true
+                            firstMessageId = Math.min(firstMessageId, msg.id);
+                        });
+                        
+                        // Maintain scroll position
+                        const newScrollHeight = messagesContainer.scrollHeight;
+                        messagesContainer.scrollTop = messagesContainer.scrollTop + (newScrollHeight - originalScrollHeight);
+                    } else {
+                        hasMoreOlder = false;
+                    }
+                })
+                .catch(err => console.error("Error loading older messages", err))
+                .finally(() => {
+                    isLoadingOlder = false;
+                });
         }
 
         // Helper to check if any messages exist
@@ -399,8 +445,8 @@
             return html;
         }
 
-        // Append message to UI helper
-        function renderMessage(msg) {
+        // Append or prepend message to UI helper
+        function renderMessage(msg, prepend = false) {
             // Check if already in container
             const existing = messagesContainer.querySelector(`[data-message-id="${msg.id}"]`);
             if (existing) {
@@ -488,7 +534,11 @@
                 </span>
             `;
 
-            messagesContainer.appendChild(bubbleWrapper);
+            if (prepend) {
+                messagesContainer.insertBefore(bubbleWrapper, messagesContainer.firstChild);
+            } else {
+                messagesContainer.appendChild(bubbleWrapper);
+            }
             
             // Add user to active members sidebar list if not present
             updateSidebarMembers(msg.username);
