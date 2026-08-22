@@ -24,6 +24,8 @@ from django.core.cache import cache
 from .cache_utils import get_cache, set_cache
 from .models_catalog import MODELS_CATALOG, AVAILABLE_PROVIDERS
 
+logger = logging.getLogger(__name__)
+
 def normalize_email_canonical(email):
     """Normalize email address, handling case, dots in Gmail, plus aliases, and domain aliases."""
     if not email:
