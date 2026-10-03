@@ -1099,16 +1099,211 @@
     </div>
 </div>
 
+<style>
+  #vpn-promo-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .vpn-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(3, 7, 18, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    cursor: pointer;
+  }
+  .vpn-modal-card {
+    position: relative;
+    max-width: 420px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    background: linear-gradient(160deg, rgba(17, 24, 39, 0.98) 0%, rgba(10, 15, 30, 0.99) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.3);
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 45px rgba(56, 189, 248, 0.16);
+    border-radius: 24px;
+    padding: 28px 22px;
+    text-align: center;
+    color: #fff;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+  }
+  .vpn-modal-card::-webkit-scrollbar {
+    width: 4px;
+  }
+  .vpn-modal-card::-webkit-scrollbar-thumb {
+    background: rgba(56, 189, 248, 0.25);
+    border-radius: 4px;
+  }
+  .vpn-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
+    background: none;
+    border: none;
+    padding: 0;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, transform 0.2s;
+    z-index: 10;
+  }
+  .vpn-close-btn:hover {
+    color: #f8fafc;
+    transform: scale(1.15);
+  }
+  .vpn-title {
+    font-size: 22px;
+    margin: 4px 0 18px 0;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    line-height: 1.3;
+    color: #f8fafc;
+    padding: 0 12px;
+  }
+  .vpn-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    transition: border-color 0.2s;
+    text-align: left;
+  }
+  .vpn-item:hover {
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+  .vpn-icon-wrap {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    border-radius: 50%;
+  }
+  .vpn-item-text {
+    font-size: 13.5px;
+    color: #cbd5e1;
+    line-height: 1.4;
+  }
+  .vpn-cta-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 20px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #030712;
+    background: linear-gradient(135deg, #38bdf8 0%, #6366f1 100%);
+    border-radius: 14px;
+    text-decoration: none;
+    box-shadow: 0 10px 25px -5px rgba(56, 189, 248, 0.45);
+    transition: all 0.2s;
+    cursor: pointer;
+    text-align: center;
+  }
+  .vpn-cta-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 30px -5px rgba(56, 189, 248, 0.6);
+  }
+  .vpn-promo-text {
+    margin-top: 13px;
+    font-size: 12.5px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    line-height: 1.4;
+  }
+  .vpn-promo-badge {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-weight: 700;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1px solid rgba(56, 189, 248, 0.35);
+    padding: 2px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    user-select: all;
+  }
+
+  /* Smartphone adaptation */
+  @media (max-width: 480px) {
+    #vpn-promo-modal {
+      padding: 12px;
+    }
+    .vpn-modal-card {
+      padding: 22px 14px 18px 14px;
+      border-radius: 20px;
+      max-height: 94vh;
+    }
+    .vpn-title {
+      font-size: 19px;
+      margin: 2px 0 14px 0;
+      padding: 0 20px 0 0;
+      line-height: 1.3;
+    }
+    .vpn-item {
+      padding: 9px 11px;
+      gap: 10px;
+      border-radius: 12px;
+    }
+    .vpn-item-text {
+      font-size: 12.5px;
+    }
+    .vpn-icon-wrap {
+      width: 24px;
+      height: 24px;
+    }
+    .vpn-cta-btn {
+      padding: 13px 16px;
+      font-size: 14.5px;
+      border-radius: 12px;
+    }
+    .vpn-promo-text {
+      margin-top: 11px;
+      font-size: 11.5px;
+    }
+    .vpn-close-btn {
+      top: 12px;
+      right: 12px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+</style>
+
 <!-- VPN Promo Modal -->
-<div id="vpn-promo-modal" style="display:none; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:16px; font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; opacity:0; transition:opacity 0.3s ease;">
+<div id="vpn-promo-modal">
   <!-- Backdrop -->
-  <div onclick="closeVpnModal()" style="position:absolute; inset:0; background:rgba(3,7,18,0.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); cursor:pointer;"></div>
+  <div class="vpn-modal-backdrop" onclick="closeVpnModal()"></div>
   
   <!-- Modal Card -->
-  <div style="position:relative; max-width:430px; width:100%; background:linear-gradient(160deg, rgba(17,24,39,0.97) 0%, rgba(10,15,30,0.98) 100%); border:1px solid rgba(56,189,248,0.28); box-shadow:0 25px 60px -15px rgba(0,0,0,0.85), 0 0 45px rgba(56,189,248,0.16); border-radius:24px; padding:32px 24px; text-align:center; color:#fff; transform:scale(0.95); transition:transform 0.3s cubic-bezier(0.16,1,0.3,1); box-sizing:border-box;">
+  <div class="vpn-modal-card">
     
     <!-- Top-Right Close Button -->
-    <button onclick="closeVpnModal()" aria-label="Закрыть" style="position:absolute; top:16px; right:16px; background:none; border:none; padding:4px; color:#64748b; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:color 0.2s, transform 0.2s;" onmouseover="this.style.color='#f8fafc'; this.style.transform='scale(1.15)'" onmouseout="this.style.color='#64748b'; this.style.transform='scale(1)'">
+    <button class="vpn-close-btn" onclick="closeVpnModal()" aria-label="Закрыть">
       <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <line x1="18" y1="6" x2="6" y2="18"></line>
         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1116,45 +1311,45 @@
     </button>
 
     <!-- Title -->
-    <h2 style="font-size:23px; margin:4px 0 20px 0; font-weight:800; letter-spacing:-0.4px; line-height:1.3; color:#f8fafc;">
+    <h2 class="vpn-title">
       Свободный и быстрый интернет<br>со скидкой <span style="background:linear-gradient(90deg,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">-20%</span>
     </h2>
     
     <!-- Feature List Cards -->
-    <div style="display:flex; flex-direction:column; gap:9px; margin-bottom:24px; text-align:left;">
+    <div style="display:flex; flex-direction:column; gap:9px; margin-bottom:20px; text-align:left;">
       
-      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
-        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+      <div class="vpn-item">
+        <div class="vpn-icon-wrap">
           <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
         </div>
-        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+        <div class="vpn-item-text">
           <strong style="color:#fff; font-weight:600;">Максимальная скорость</strong> и полная анонимность
         </div>
       </div>
 
-      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
-        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+      <div class="vpn-item">
+        <div class="vpn-icon-wrap">
           <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
         </div>
-        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+        <div class="vpn-item-text">
           <strong style="color:#fff; font-weight:600;">Пробный период 3 дня</strong> бесплатно
         </div>
       </div>
 
-      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
-        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+      <div class="vpn-item">
+        <div class="vpn-icon-wrap">
           <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
         </div>
-        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+        <div class="vpn-item-text">
           <strong style="color:#fff; font-weight:600;">Обход блокировок</strong> и «белых списков»
         </div>
       </div>
 
-      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
-        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+      <div class="vpn-item">
+        <div class="vpn-icon-wrap">
           <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
         </div>
-        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+        <div class="vpn-item-text">
           <strong style="color:#fff; font-weight:600;">Выгодная подписка</strong> от 119 ₽/мес
         </div>
       </div>
@@ -1162,44 +1357,53 @@
     </div>
     
     <!-- CTA Button -->
-    <a href="https://t.me/VPNcv2_bot?start=invite_5486734706" target="_blank" onclick="closeVpnModal()" style="display:block; width:100%; box-sizing:border-box; padding:14px 20px; font-size:15px; font-weight:700; color:#030712; background:linear-gradient(135deg,#38bdf8 0%,#6366f1 100%); border-radius:14px; text-decoration:none; box-shadow:0 10px 25px -5px rgba(56,189,248,0.45); transition:all 0.2s; cursor:pointer;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 14px 30px -5px rgba(56,189,248,0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(56,189,248,0.45)'">
+    <a class="vpn-cta-btn" href="https://t.me/VPNcv2_bot?start=invite_5486734706" target="_blank" onclick="closeVpnModal()">
       Активировать скидку
     </a>
 
     <!-- Promo Code Info -->
-    <div style="margin-top:14px; font-size:12.5px; color:#94a3b8; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px;">
+    <div class="vpn-promo-text">
       <span>Активируйте скидку по промокоду:</span>
-      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); padding:2px 8px; border-radius:6px; letter-spacing:0.5px; user-select:all;">FASTVPN</span>
+      <span class="vpn-promo-badge">FASTVPN</span>
     </div>
   </div>
 </div>
 
 <script>
-  (function() {
-    if (!sessionStorage.getItem('vpn_banner_dismissed')) {
-      setTimeout(function() {
-        var m = document.getElementById('vpn-promo-modal');
-        if (m) {
-          m.style.display = 'flex';
-          requestAnimationFrame(function() {
-            m.style.opacity = '1';
-            m.children[1].style.transform = 'scale(1)';
-          });
+  function showVpnModal() {
+    var m = document.getElementById('vpn-promo-modal');
+    if (m) {
+      m.style.display = 'flex';
+      requestAnimationFrame(function() {
+        m.style.opacity = '1';
+        var card = m.querySelector('.vpn-modal-card');
+        if (card) {
+          card.style.transform = 'scale(1)';
         }
-      }, 700);
+      });
     }
-  })();
+  }
 
   function closeVpnModal() {
     var m = document.getElementById('vpn-promo-modal');
     if (m) {
       m.style.opacity = '0';
-      m.children[1].style.transform = 'scale(0.95)';
+      var card = m.querySelector('.vpn-modal-card');
+      if (card) {
+        card.style.transform = 'scale(0.95)';
+      }
       setTimeout(function() {
         m.style.display = 'none';
       }, 300);
     }
-    sessionStorage.setItem('vpn_banner_dismissed', 'true');
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(showVpnModal, 500);
+    });
+  } else {
+    setTimeout(showVpnModal, 500);
   }
 </script>
 {% endblock %}
