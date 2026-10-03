@@ -5,3 +5,9 @@ __pycache__/
 *.db
 .env
 local_dev/
+.DS_Store
+.coverage
+*.docx
+nextroom_presentation.txt
+media/chat_images/
+media/chat_voices/

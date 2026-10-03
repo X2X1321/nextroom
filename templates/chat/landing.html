@@ -4,353 +4,485 @@
 
 {% block extra_head %}
 <style>
-  /* Scroll-in reveal */
-  .sr { opacity: 0; transform: translateY(24px); transition: opacity .6s ease, transform .6s ease; }
-  .sr.visible { opacity: 1; transform: translateY(0); }
-  .sr-delay-1 { transition-delay: .08s; }
-  .sr-delay-2 { transition-delay: .16s; }
-  .sr-delay-3 { transition-delay: .24s; }
+    /* Scroll-in reveal */
+    .sr {
+        opacity: 0;
+        transform: translateY(24px);
+        transition: opacity .6s ease, transform .6s ease;
+    }
 
-  /* Card hover lift */
-  .card-lift { transition: transform .25s ease, box-shadow .25s ease; }
-  .card-lift:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(99,102,241,.18); }
+    .sr.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
-  /* ===== WOPE-STYLE BACKGROUND ===== */
-  @keyframes orb-drift {
-    0%, 100% { transform: translate(0, 0) scale(1); }
-    33%       { transform: translate(30px, -20px) scale(1.05); }
-    66%       { transform: translate(-20px, 10px) scale(.97); }
-  }
-  .anim-orb   { animation: orb-drift 9s ease-in-out infinite; }
-  .anim-orb-2 { animation: orb-drift 12s ease-in-out infinite reverse; animation-delay: 3s; }
+    .sr-delay-1 {
+        transition-delay: .08s;
+    }
 
-  /* Wope synthwave background */
-  .wope-bg {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    background: #080718;
-    overflow: hidden;
-    pointer-events: none;
-  }
+    .sr-delay-2 {
+        transition-delay: .16s;
+    }
 
-  /* Multi-layer intense Star twinkling */
-  @keyframes star-pulse-1 {
-    0%, 100% { opacity: 0.2; transform: scale(0.7); }
-    50%       { opacity: 1.0; transform: scale(1.4); filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 14px #c084fc); }
-  }
-  @keyframes star-pulse-2 {
-    0%, 100% { opacity: 1.0; transform: scale(1.3); filter: drop-shadow(0 0 10px #e879f9) drop-shadow(0 0 16px #a855f7); }
-    50%       { opacity: 0.15; transform: scale(0.6); }
-  }
-  @keyframes star-pulse-3 {
-    0%, 100% { opacity: 0.3; transform: scale(0.8); }
-    40%       { opacity: 1.0; transform: scale(1.5); filter: drop-shadow(0 0 12px #60a5fa) drop-shadow(0 0 20px #818cf8); }
-  }
+    .sr-delay-3 {
+        transition-delay: .24s;
+    }
 
-  .wope-stars-1 {
-    position: absolute;
-    inset: 0;
-    animation: star-pulse-1 2.2s ease-in-out infinite;
-    background-image:
-      radial-gradient(3px 3px at 8% 12%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(4px 4px at 28% 22%, #f472b6 0%, rgba(244,114,182,0) 100%),
-      radial-gradient(3.5px 3.5px at 52% 8%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(4px 4px at 74% 18%, #c084fc 0%, rgba(192,132,252,0) 100%),
-      radial-gradient(3px 3px at 92% 14%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(3.5px 3.5px at 18% 45%, #e879f9 0%, rgba(232,121,249,0) 100%),
-      radial-gradient(4px 4px at 64% 38%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(3px 3px at 84% 52%, #a855f7 0%, rgba(168,85,247,0) 100%);
-  }
+    /* Card hover lift */
+    .card-lift {
+        transition: transform .25s ease, box-shadow .25s ease;
+    }
 
-  .wope-stars-2 {
-    position: absolute;
-    inset: 0;
-    animation: star-pulse-2 3.1s ease-in-out infinite;
-    animation-delay: 0.8s;
-    background-image:
-      radial-gradient(3.5px 3.5px at 15% 6%, #e0e7ff 0%, rgba(224,231,255,0) 100%),
-      radial-gradient(4.5px 4.5px at 35% 32%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(3px 3px at 62% 12%, #c084fc 0%, rgba(192,132,252,0) 100%),
-      radial-gradient(4px 4px at 82% 28%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(3px 3px at 42% 56%, #f472b6 0%, rgba(244,114,182,0) 100%),
-      radial-gradient(3.5px 3.5px at 95% 42%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(3px 3px at 5% 58%, #818cf8 0%, rgba(129,140,248,0) 100%);
-  }
+    .card-lift:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 16px 48px rgba(99, 102, 241, .18);
+    }
 
-  .wope-stars-3 {
-    position: absolute;
-    inset: 0;
-    animation: star-pulse-3 2.7s ease-in-out infinite;
-    animation-delay: 1.5s;
-    background-image:
-      radial-gradient(4px 4px at 22% 16%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(3px 3px at 45% 24%, #e879f9 0%, rgba(232,121,249,0) 100%),
-      radial-gradient(4px 4px at 79% 36%, #38bdf8 0%, rgba(56,189,248,0) 100%),
-      radial-gradient(3.5px 3.5px at 89% 8%, #ffffff 0%, rgba(255,255,255,0) 100%),
-      radial-gradient(3px 3px at 12% 52%, #a855f7 0%, rgba(168,85,247,0) 100%),
-      radial-gradient(4px 4px at 70% 50%, #ffffff 0%, rgba(255,255,255,0) 100%);
-  }
+    /* ===== WOPE-STYLE BACKGROUND ===== */
+    @keyframes orb-drift {
+
+        0%,
+        100% {
+            transform: translate(0, 0) scale(1);
+        }
+
+        33% {
+            transform: translate(30px, -20px) scale(1.05);
+        }
+
+        66% {
+            transform: translate(-20px, 10px) scale(.97);
+        }
+    }
+
+    .anim-orb {
+        animation: orb-drift 9s ease-in-out infinite;
+    }
+
+    .anim-orb-2 {
+        animation: orb-drift 12s ease-in-out infinite reverse;
+        animation-delay: 3s;
+    }
+
+    /* Wope synthwave background */
+    .wope-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background: #080718;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    /* Multi-layer intense Star twinkling */
+    @keyframes star-pulse-1 {
+
+        0%,
+        100% {
+            opacity: 0.2;
+            transform: scale(0.7);
+        }
+
+        50% {
+            opacity: 1.0;
+            transform: scale(1.4);
+            filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 14px #c084fc);
+        }
+    }
+
+    @keyframes star-pulse-2 {
+
+        0%,
+        100% {
+            opacity: 1.0;
+            transform: scale(1.3);
+            filter: drop-shadow(0 0 10px #e879f9) drop-shadow(0 0 16px #a855f7);
+        }
+
+        50% {
+            opacity: 0.15;
+            transform: scale(0.6);
+        }
+    }
+
+    @keyframes star-pulse-3 {
+
+        0%,
+        100% {
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+
+        40% {
+            opacity: 1.0;
+            transform: scale(1.5);
+            filter: drop-shadow(0 0 12px #60a5fa) drop-shadow(0 0 20px #818cf8);
+        }
+    }
+
+    .wope-stars-1 {
+        position: absolute;
+        inset: 0;
+        animation: star-pulse-1 2.2s ease-in-out infinite;
+        background-image:
+            radial-gradient(3px 3px at 8% 12%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(4px 4px at 28% 22%, #f472b6 0%, rgba(244, 114, 182, 0) 100%),
+            radial-gradient(3.5px 3.5px at 52% 8%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(4px 4px at 74% 18%, #c084fc 0%, rgba(192, 132, 252, 0) 100%),
+            radial-gradient(3px 3px at 92% 14%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(3.5px 3.5px at 18% 45%, #e879f9 0%, rgba(232, 121, 249, 0) 100%),
+            radial-gradient(4px 4px at 64% 38%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(3px 3px at 84% 52%, #a855f7 0%, rgba(168, 85, 247, 0) 100%);
+    }
+
+    .wope-stars-2 {
+        position: absolute;
+        inset: 0;
+        animation: star-pulse-2 3.1s ease-in-out infinite;
+        animation-delay: 0.8s;
+        background-image:
+            radial-gradient(3.5px 3.5px at 15% 6%, #e0e7ff 0%, rgba(224, 231, 255, 0) 100%),
+            radial-gradient(4.5px 4.5px at 35% 32%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(3px 3px at 62% 12%, #c084fc 0%, rgba(192, 132, 252, 0) 100%),
+            radial-gradient(4px 4px at 82% 28%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(3px 3px at 42% 56%, #f472b6 0%, rgba(244, 114, 182, 0) 100%),
+            radial-gradient(3.5px 3.5px at 95% 42%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(3px 3px at 5% 58%, #818cf8 0%, rgba(129, 140, 248, 0) 100%);
+    }
+
+    .wope-stars-3 {
+        position: absolute;
+        inset: 0;
+        animation: star-pulse-3 2.7s ease-in-out infinite;
+        animation-delay: 1.5s;
+        background-image:
+            radial-gradient(4px 4px at 22% 16%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(3px 3px at 45% 24%, #e879f9 0%, rgba(232, 121, 249, 0) 100%),
+            radial-gradient(4px 4px at 79% 36%, #38bdf8 0%, rgba(56, 189, 248, 0) 100%),
+            radial-gradient(3.5px 3.5px at 89% 8%, #ffffff 0%, rgba(255, 255, 255, 0) 100%),
+            radial-gradient(3px 3px at 12% 52%, #a855f7 0%, rgba(168, 85, 247, 0) 100%),
+            radial-gradient(4px 4px at 70% 50%, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+    }
 
 
 
-  /* Purple horizon glow */
-  .wope-glow {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    height: 65%;
-    background: radial-gradient(ellipse 90% 65% at 50% 100%,
-      rgba(168, 85, 247, .65) 0%,
-      rgba(147, 51, 234, .45) 30%,
-      rgba(107, 33, 168, .22) 60%,
-      transparent 85%
-    );
-    animation: orb-drift 12s ease-in-out infinite;
-  }
+    /* Purple horizon glow */
+    .wope-glow {
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100%;
+        height: 65%;
+        background: radial-gradient(ellipse 90% 65% at 50% 100%,
+                rgba(168, 85, 247, .65) 0%,
+                rgba(147, 51, 234, .45) 30%,
+                rgba(107, 33, 168, .22) 60%,
+                transparent 85%);
+        animation: orb-drift 12s ease-in-out infinite;
+    }
 
-  /* Perspective grid */
-  .wope-grid {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 65%;
-    overflow: hidden;
-  }
-  .wope-grid svg {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 100%;
-  }
+    /* Perspective grid */
+    .wope-grid {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 65%;
+        overflow: hidden;
+    }
 
-  /* Top vignette */
-  .wope-vignette {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 120% 65% at 50% 0%, rgba(8,7,24,.0) 0%, rgba(8,7,24,.85) 85%);
-  }
+    .wope-grid svg {
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        height: 100%;
+    }
 
-  /* Thin top gradient line */
-  .wope-scanline {
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(168,85,247,.6) 30%, rgba(216,180,254,.9) 50%, rgba(168,85,247,.6) 70%, transparent 100%);
-  }
+    /* Top vignette */
+    .wope-vignette {
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(ellipse 120% 65% at 50% 0%, rgba(8, 7, 24, .0) 0%, rgba(8, 7, 24, .85) 85%);
+    }
 
-  /* Stat counter glow */
-  .stat-value { transition: text-shadow .4s ease; }
-  .stat-value.visible { text-shadow: 0 0 28px rgba(168,85,247,.6); }
+    /* Thin top gradient line */
+    .wope-scanline {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(168, 85, 247, .6) 30%, rgba(216, 180, 254, .9) 50%, rgba(168, 85, 247, .6) 70%, transparent 100%);
+    }
+
+    /* Stat counter glow */
+    .stat-value {
+        transition: text-shadow .4s ease;
+    }
+
+    .stat-value.visible {
+        text-shadow: 0 0 28px rgba(168, 85, 247, .6);
+    }
 
 
-  /* ===== FAQ ACCORDION ===== */
-  .faq-item { border-bottom: 1px solid rgba(51,65,85,.5); }
-  .faq-trigger {
-    width: 100%; display: flex; align-items: center; justify-content: space-between;
-    padding: 1.1rem 0; cursor: pointer; background: none; border: none; text-align: left;
-    color: #f1f5f9; font-size: .9rem; font-weight: 600;
-    transition: color .2s ease;
-  }
-  .faq-trigger:hover { color: #a5b4fc; }
-  .faq-icon {
-    flex-shrink: 0; width: 20px; height: 20px;
-    border: 1.5px solid rgba(99,102,241,.5); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    transition: transform .3s ease, border-color .2s ease, background .2s ease;
-  }
-  .faq-trigger[aria-expanded="true"] .faq-icon {
-    transform: rotate(45deg);
-    background: rgba(99,102,241,.15);
-    border-color: rgba(99,102,241,.8);
-  }
-  .faq-body {
-    overflow: hidden;
-    max-height: 0;
-    transition: all .45s ease-in-out;
-  }
-  .faq-body.open { max-height: 600px; }
-  .faq-body-inner { padding-bottom: 1rem; color: #94a3b8; font-size: .85rem; line-height: 1.7; }
-  .faq-body-inner ol { list-style: decimal; padding-left: 1.25rem; margin-top: .5rem; }
-  .faq-body-inner ol li { margin-bottom: .35rem; }
-  .faq-body-inner code {
-    background: rgba(99,102,241,.12); border: 1px solid rgba(99,102,241,.25);
-    border-radius: 4px; padding: 1px 6px; font-family: monospace; color: #a5b4fc; font-size: .82rem;
-  }
+    /* ===== FAQ ACCORDION ===== */
+    .faq-item {
+        border-bottom: 1px solid rgba(51, 65, 85, .5);
+    }
+
+    .faq-trigger {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.1rem 0;
+        cursor: pointer;
+        background: none;
+        border: none;
+        text-align: left;
+        color: #f1f5f9;
+        font-size: .9rem;
+        font-weight: 600;
+        transition: color .2s ease;
+    }
+
+    .faq-trigger:hover {
+        color: #a5b4fc;
+    }
+
+    .faq-icon {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        border: 1.5px solid rgba(99, 102, 241, .5);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform .3s ease, border-color .2s ease, background .2s ease;
+    }
+
+    .faq-trigger[aria-expanded="true"] .faq-icon {
+        transform: rotate(45deg);
+        background: rgba(99, 102, 241, .15);
+        border-color: rgba(99, 102, 241, .8);
+    }
+
+    .faq-body {
+        overflow: hidden;
+        max-height: 0;
+        transition: all .45s ease-in-out;
+    }
+
+    .faq-body.open {
+        max-height: 600px;
+    }
+
+    .faq-body-inner {
+        padding-bottom: 1rem;
+        color: #94a3b8;
+        font-size: .85rem;
+        line-height: 1.7;
+    }
+
+    .faq-body-inner ol {
+        list-style: decimal;
+        padding-left: 1.25rem;
+        margin-top: .5rem;
+    }
+
+    .faq-body-inner ol li {
+        margin-bottom: .35rem;
+    }
+
+    .faq-body-inner code {
+        background: rgba(99, 102, 241, .12);
+        border: 1px solid rgba(99, 102, 241, .25);
+        border-radius: 4px;
+        padding: 1px 6px;
+        font-family: monospace;
+        color: #a5b4fc;
+        font-size: .82rem;
+    }
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
 
-    /* --- Scroll reveal --- */
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible');
-          observer.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
-    document.querySelectorAll('.sr').forEach(el => observer.observe(el));
-
-    /* --- Counter animation (triggered on scroll into view) --- */
-    const counterObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (!e.isIntersecting || e.target.dataset.done) return;
-        e.target.dataset.done = '1';
-        const target = Number(e.target.dataset.target || 0);
-        const duration = 1200, startTime = performance.now();
-        const step = (now) => {
-          const progress = Math.min((now - startTime) / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          e.target.textContent = Math.floor(eased * target).toLocaleString('ru-RU');
-          if (progress < 1) requestAnimationFrame(step);
-          else e.target.textContent = target.toLocaleString('ru-RU');
-        };
-        requestAnimationFrame(step);
-      });
-    }, { threshold: 0.5 });
-    document.querySelectorAll('.stat-value').forEach(el => counterObs.observe(el));
-
-    /* --- FAQ Accordion --- */
-    document.querySelectorAll('.faq-trigger').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const expanded = btn.getAttribute('aria-expanded') === 'true';
-        document.querySelectorAll('.faq-trigger').forEach(b => {
-          b.setAttribute('aria-expanded', 'false');
-          b.nextElementSibling.classList.remove('open');
-        });
-        if (!expanded) {
-          btn.setAttribute('aria-expanded', 'true');
-          btn.nextElementSibling.classList.add('open');
-        }
-      });
-    });
-    const first = document.querySelector('.faq-trigger');
-    if (first) { first.setAttribute('aria-expanded','true'); first.nextElementSibling.classList.add('open'); }
-
-    /* --- Typewriter Effect --- */
-    const phrases = ["Создай свою комнату", "Общайся с друзьями", "Присоединяйся"];
-    const funFonts = ['"Rubik Maze", system-ui', '"Rubik Scribble", system-ui'];
-    let phraseIdx = 0;
-    let charIdx = 0;
-    let isDeleting = false;
-    const typedEl = document.getElementById('typed-text');
-
-    if (typedEl) {
-      typedEl.innerHTML = '';
-      function typeLoop() {
-        const currentPhrase = phrases[phraseIdx];
-        
-        if (isDeleting) {
-          charIdx--;
-        } else {
-          charIdx++;
-        }
-
-        if (!typedEl.phraseStyles || typedEl.phraseIdx !== phraseIdx) {
-            typedEl.phraseIdx = phraseIdx;
-            typedEl.phraseStyles = [];
-            for (let i = 0; i < currentPhrase.length; i++) {
-                if (currentPhrase[i] !== ' ' && Math.random() < 0.40) {
-                    typedEl.phraseStyles.push(funFonts[Math.floor(Math.random() * funFonts.length)]);
-                } else {
-                    typedEl.phraseStyles.push('');
+        /* --- Scroll reveal --- */
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    e.target.classList.add('visible');
+                    observer.unobserve(e.target);
                 }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -30px 0px' });
+        document.querySelectorAll('.sr').forEach(el => observer.observe(el));
+
+        /* --- Counter animation (triggered on scroll into view) --- */
+        const counterObs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (!e.isIntersecting || e.target.dataset.done) return;
+                e.target.dataset.done = '1';
+                const target = Number(e.target.dataset.target || 0);
+                const duration = 1200, startTime = performance.now();
+                const step = (now) => {
+                    const progress = Math.min((now - startTime) / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    e.target.textContent = Math.floor(eased * target).toLocaleString('ru-RU');
+                    if (progress < 1) requestAnimationFrame(step);
+                    else e.target.textContent = target.toLocaleString('ru-RU');
+                };
+                requestAnimationFrame(step);
+            });
+        }, { threshold: 0.5 });
+        document.querySelectorAll('.stat-value').forEach(el => counterObs.observe(el));
+
+        /* --- FAQ Accordion --- */
+        document.querySelectorAll('.faq-trigger').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                document.querySelectorAll('.faq-trigger').forEach(b => {
+                    b.setAttribute('aria-expanded', 'false');
+                    b.nextElementSibling.classList.remove('open');
+                });
+                if (!expanded) {
+                    btn.setAttribute('aria-expanded', 'true');
+                    btn.nextElementSibling.classList.add('open');
+                }
+            });
+        });
+        const first = document.querySelector('.faq-trigger');
+        if (first) { first.setAttribute('aria-expanded', 'true'); first.nextElementSibling.classList.add('open'); }
+
+        /* --- Typewriter Effect --- */
+        const phrases = ["Создай свою комнату", "Общайся с друзьями", "Присоединяйся"];
+        const funFonts = ['"Rubik Maze", system-ui', '"Rubik Scribble", system-ui'];
+        let phraseIdx = 0;
+        let charIdx = 0;
+        let isDeleting = false;
+        const typedEl = document.getElementById('typed-text');
+
+        if (typedEl) {
+            typedEl.innerHTML = '';
+            function typeLoop() {
+                const currentPhrase = phrases[phraseIdx];
+
+                if (isDeleting) {
+                    charIdx--;
+                } else {
+                    charIdx++;
+                }
+
+                if (!typedEl.phraseStyles || typedEl.phraseIdx !== phraseIdx) {
+                    typedEl.phraseIdx = phraseIdx;
+                    typedEl.phraseStyles = [];
+                    for (let i = 0; i < currentPhrase.length; i++) {
+                        if (currentPhrase[i] !== ' ' && Math.random() < 0.40) {
+                            typedEl.phraseStyles.push(funFonts[Math.floor(Math.random() * funFonts.length)]);
+                        } else {
+                            typedEl.phraseStyles.push('');
+                        }
+                    }
+                }
+
+                let htmlStr = '';
+                for (let i = 0; i < charIdx; i++) {
+                    let char = currentPhrase.charAt(i);
+                    let sFont = typedEl.phraseStyles[i];
+                    if (sFont) {
+                        htmlStr += `<span style="font-family: ${sFont};">${char}</span>`;
+                    } else {
+                        htmlStr += char;
+                    }
+                }
+                typedEl.innerHTML = htmlStr;
+
+                let delay = isDeleting ? 45 : 85;
+
+                if (!isDeleting && charIdx === currentPhrase.length) {
+                    isDeleting = true;
+                    delay = 2000; // Pause 2 seconds after completing phrase
+                } else if (isDeleting && charIdx === 0) {
+                    isDeleting = false;
+                    phraseIdx = (phraseIdx + 1) % phrases.length;
+                    delay = 450; // Pause before starting next phrase
+                }
+
+                setTimeout(typeLoop, delay);
             }
+            typeLoop();
         }
 
-        let htmlStr = '';
-        for (let i = 0; i < charIdx; i++) {
-           let char = currentPhrase.charAt(i);
-           let sFont = typedEl.phraseStyles[i];
-           if (sFont) {
-               htmlStr += `<span style="font-family: ${sFont};">${char}</span>`;
-           } else {
-               htmlStr += char;
-           }
-        }
-        typedEl.innerHTML = htmlStr;
-
-        let delay = isDeleting ? 45 : 85;
-
-        if (!isDeleting && charIdx === currentPhrase.length) {
-          isDeleting = true;
-          delay = 2000; // Pause 2 seconds after completing phrase
-        } else if (isDeleting && charIdx === 0) {
-          isDeleting = false;
-          phraseIdx = (phraseIdx + 1) % phrases.length;
-          delay = 450; // Pause before starting next phrase
-        }
-
-        setTimeout(typeLoop, delay);
-      }
-      typeLoop();
-    }
-
-  });
+    });
 </script>
 {% endblock %}
 
 {% block content %}
 <!-- ===== WOPE-STYLE SYNTHWAVE BACKGROUND ===== -->
-<div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="background-color: #060512;" aria-hidden="true">
-  <!-- Glowing horizon orb 1 -->
-  <div class="anim-orb absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]"></div>
-  
-  <!-- Purple synthwave horizon glow 2 -->
-  <div class="anim-orb-2 absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,_rgba(168,85,247,0.45)_0%,_rgba(126,34,206,0.25)_35%,_rgba(76,29,149,0.1)_70%,_transparent_100%)]"></div>
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-0" style="background-color: #060512;"
+    aria-hidden="true">
+    <!-- Glowing horizon orb 1 -->
+    <div
+        class="anim-orb absolute -top-40 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] rounded-full bg-indigo-600/15 blur-[120px]">
+    </div>
 
-  <!-- Twinkling Stars (Multi-layered 3D) -->
-  <div class="wope-stars-1"></div>
-  <div class="wope-stars-2"></div>
-  <div class="wope-stars-3"></div>
+    <!-- Purple synthwave horizon glow 2 -->
+    <div
+        class="anim-orb-2 absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[60%] bg-[radial-gradient(ellipse_80%_60%_at_50%_100%,_rgba(168,85,247,0.45)_0%,_rgba(126,34,206,0.25)_35%,_rgba(76,29,149,0.1)_70%,_transparent_100%)]">
+    </div>
 
-  <!-- Perspective SVG grid horizon -->
-  <div class="wope-grid">
-    <svg viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full h-full">
-      <!-- Horizontal perspective lines -->
-      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(192,132,252,0.4)" stroke-width="1.5"/>
-      <line x1="108" y1="340" x2="1332" y2="340" stroke="rgba(168,85,247,0.3)" stroke-width="1.2"/>
-      <line x1="216" y1="270" x2="1224" y2="270" stroke="rgba(168,85,247,0.24)" stroke-width="1"/>
-      <line x1="310" y1="210" x2="1130" y2="210" stroke="rgba(168,85,247,0.18)" stroke-width="0.8"/>
-      <line x1="390" y1="158" x2="1050" y2="158" stroke="rgba(168,85,247,0.14)" stroke-width="0.7"/>
-      <line x1="456" y1="112" x2="984" y2="112" stroke="rgba(168,85,247,0.1)" stroke-width="0.6"/>
-      <line x1="510" y1="72" x2="930" y2="72" stroke="rgba(168,85,247,0.08)" stroke-width="0.5"/>
-      <line x1="552" y1="38" x2="888" y2="38" stroke="rgba(168,85,247,0.05)" stroke-width="0.4"/>
-      
-      <!-- Vertical converging grid lines -->
-      <line x1="720" y1="0" x2="0" y2="420" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
-      <line x1="720" y1="0" x2="180" y2="420" stroke="rgba(168,85,247,0.25)" stroke-width="0.9"/>
-      <line x1="720" y1="0" x2="360" y2="420" stroke="rgba(168,85,247,0.22)" stroke-width="0.8"/>
-      <line x1="720" y1="0" x2="540" y2="420" stroke="rgba(168,85,247,0.2)" stroke-width="0.7"/>
-      <line x1="720" y1="0" x2="720" y2="420" stroke="rgba(216,180,254,0.4)" stroke-width="1.2"/>
-      <line x1="720" y1="0" x2="900" y2="420" stroke="rgba(168,85,247,0.2)" stroke-width="0.7"/>
-      <line x1="720" y1="0" x2="1080" y2="420" stroke="rgba(168,85,247,0.22)" stroke-width="0.8"/>
-      <line x1="720" y1="0" x2="1260" y2="420" stroke="rgba(168,85,247,0.25)" stroke-width="0.9"/>
-      <line x1="720" y1="0" x2="1440" y2="420" stroke="rgba(168,85,247,0.3)" stroke-width="1"/>
+    <!-- Twinkling Stars (Multi-layered 3D) -->
+    <div class="wope-stars-1"></div>
+    <div class="wope-stars-2"></div>
+    <div class="wope-stars-3"></div>
 
-      <!-- Glowing horizon beam -->
-      <defs>
-        <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
-          <feGaussianBlur stdDeviation="4" result="blur"/>
-          <feMerge>
-            <feMergeNode in="blur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
-        </filter>
-      </defs>
-      <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(232,121,249,0.95)" stroke-width="3" filter="url(#neon-glow)"/>
-    </svg>
-  </div>
-  
-  <div class="wope-scanline"></div>
-  <div class="wope-vignette"></div>
+    <!-- Perspective SVG grid horizon -->
+    <div class="wope-grid">
+        <svg viewBox="0 0 1440 420" preserveAspectRatio="xMidYMax meet" fill="none" xmlns="http://www.w3.org/2000/svg"
+            class="w-full h-full">
+            <!-- Horizontal perspective lines -->
+            <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(192,132,252,0.4)" stroke-width="1.5" />
+            <line x1="108" y1="340" x2="1332" y2="340" stroke="rgba(168,85,247,0.3)" stroke-width="1.2" />
+            <line x1="216" y1="270" x2="1224" y2="270" stroke="rgba(168,85,247,0.24)" stroke-width="1" />
+            <line x1="310" y1="210" x2="1130" y2="210" stroke="rgba(168,85,247,0.18)" stroke-width="0.8" />
+            <line x1="390" y1="158" x2="1050" y2="158" stroke="rgba(168,85,247,0.14)" stroke-width="0.7" />
+            <line x1="456" y1="112" x2="984" y2="112" stroke="rgba(168,85,247,0.1)" stroke-width="0.6" />
+            <line x1="510" y1="72" x2="930" y2="72" stroke="rgba(168,85,247,0.08)" stroke-width="0.5" />
+            <line x1="552" y1="38" x2="888" y2="38" stroke="rgba(168,85,247,0.05)" stroke-width="0.4" />
+
+            <!-- Vertical converging grid lines -->
+            <line x1="720" y1="0" x2="0" y2="420" stroke="rgba(168,85,247,0.3)" stroke-width="1" />
+            <line x1="720" y1="0" x2="180" y2="420" stroke="rgba(168,85,247,0.25)" stroke-width="0.9" />
+            <line x1="720" y1="0" x2="360" y2="420" stroke="rgba(168,85,247,0.22)" stroke-width="0.8" />
+            <line x1="720" y1="0" x2="540" y2="420" stroke="rgba(168,85,247,0.2)" stroke-width="0.7" />
+            <line x1="720" y1="0" x2="720" y2="420" stroke="rgba(216,180,254,0.4)" stroke-width="1.2" />
+            <line x1="720" y1="0" x2="900" y2="420" stroke="rgba(168,85,247,0.2)" stroke-width="0.7" />
+            <line x1="720" y1="0" x2="1080" y2="420" stroke="rgba(168,85,247,0.22)" stroke-width="0.8" />
+            <line x1="720" y1="0" x2="1260" y2="420" stroke="rgba(168,85,247,0.25)" stroke-width="0.9" />
+            <line x1="720" y1="0" x2="1440" y2="420" stroke="rgba(168,85,247,0.3)" stroke-width="1" />
+
+            <!-- Glowing horizon beam -->
+            <defs>
+                <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="4" result="blur" />
+                    <feMerge>
+                        <feMergeNode in="blur" />
+                        <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                </filter>
+            </defs>
+            <line x1="0" y1="420" x2="1440" y2="420" stroke="rgba(232,121,249,0.95)" stroke-width="3"
+                filter="url(#neon-glow)" />
+        </svg>
+    </div>
+
+    <div class="wope-scanline"></div>
+    <div class="wope-vignette"></div>
 </div>
 
 <!-- Main Page Wrapper -->
@@ -358,12 +490,15 @@
 
     <div class="mx-auto max-w-3xl text-center flex flex-col items-center sr sr-delay-1 w-full">
 
-        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center" style="font-family: 'Tektur', sans-serif; font-optical-sizing: auto; font-variation-settings: 'wdth' 100;">
-            <span id="typed-text">Создай свою комнату</span><span class="animate-pulse text-indigo-400 font-light ml-0.5">|</span>
+        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl max-w-2xl leading-[1.1] min-h-[2.4em] flex items-center justify-center"
+            style="font-family: 'Tektur', sans-serif; font-optical-sizing: auto; font-variation-settings: 'wdth' 100;">
+            <span id="typed-text">Создай свою комнату</span><span
+                class="animate-pulse text-indigo-400 font-light ml-0.5">|</span>
         </h1>
 
 
-        <div class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full">
+        <div
+            class="mt-8 flex flex-col items-center sm:flex-row sm:items-center sm:justify-center gap-3 sm:gap-x-6 w-full">
             <!-- Основная кнопка -->
             <a href="{% url 'dashboard' %}" class="button w-full max-w-xs sm:w-auto px-8 py-4 bg-indigo-500 rounded-xl cursor-pointer select-none
               active:translate-y-1.5 active:[box-shadow:0_0px_0_0_#4f46e5]
@@ -395,8 +530,8 @@
         <dl class="grid grid-cols-1 gap-4 sm:gap-6 text-center sm:grid-cols-3">
             <div class="card-lift flex flex-col gap-y-2 p-5 sm:p-6 rounded-2xl glass-panel">
                 <dd class="stat-value text-3xl font-normal tracking-tight text-white sm:text-4xl"
-                    style="font-family: 'Bitcount Prop Single', sans-serif;"
-                    data-target="{{ active_rooms|default:0 }}">0</dd>
+                    style="font-family: 'Bitcount Prop Single', sans-serif;" data-target="{{ active_rooms|default:0 }}">
+                    0</dd>
                 <dt class="text-sm font-medium leading-6 text-slate-400">Активных комнат</dt>
             </div>
             <div class="card-lift flex flex-col gap-y-2 p-5 sm:p-6 rounded-2xl glass-panel">
@@ -416,380 +551,655 @@
 </div>
 
 
-    <!-- Featured Rooms Section -->
-    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 w-full mt-4 sm:mt-6 mb-16 sr sr-delay-1">
-        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white text-center mb-6 sm:mb-8">
-            Популярные открытые комнаты
-        </h2>
-        <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {% for room in featured_rooms %}
-            <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel hover:border-indigo-500/30 transition group">
-                <div>
-                    <div class="flex justify-between items-start mb-4">
-                        <span class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20 capitalize">{{ room.get_category_display }}</span>
-                        <span class="text-xs text-slate-500 flex items-center gap-1">
-                            <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z"/></svg>
-                            {{ room.msg_count }}
-                        </span>
-                    </div>
-                    <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 transition">{{ room.name }}</h3>
-                    <p class="mt-2 text-sm text-slate-400 line-clamp-2">{% if room.description %}{{ room.description }}{% else %}Без описания.{% endif %}</p>
+<!-- Featured Rooms Section -->
+<div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 w-full mt-4 sm:mt-6 mb-16 sr sr-delay-1">
+    <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white text-center mb-6 sm:mb-8">
+        Популярные открытые комнаты
+    </h2>
+    <div class="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {% for room in featured_rooms %}
+        <div
+            class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel hover:border-indigo-500/30 transition group">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <span class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20 capitalize">{{ room.get_category_display }}</span>
+                    <span class="text-xs text-slate-500 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2 5a2 2 0 012-2h7a2 2 0 012 2v4a2 2 0 01-2 2H9l-3 3v-3H4a2 2 0 01-2-2V5z" />
+                        </svg>
+                        {{ room.msg_count }}
+                    </span>
                 </div>
-                <div class="mt-6">
-                    <a href="{% url 'login' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-indigo-500/20 py-2 text-xs font-semibold text-slate-300 group-hover:text-white transition">Войти и присоединиться</a>
-                </div>
+                <h3 class="text-lg font-bold text-white group-hover:text-indigo-400 transition">{{ room.name }}</h3>
+                <p class="mt-2 text-sm text-slate-400 line-clamp-2">{% if room.description %}{{ room.description }}{% else %}Без описания.{% endif %}</p>
             </div>
-            {% empty %}
-            <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel border-rose-500/20 border"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-rose-400/10 px-2 py-1 text-xs font-semibold text-rose-400 ring-1 ring-inset ring-rose-400/20">Игры</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>Рекомендованное</span></div><h3 class="text-lg font-bold text-white">Мир Minecraft &amp; CS2</h3><p class="mt-2 text-sm text-slate-400">Совместные игры, поиск напарников и обсуждение любимых серверов.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
-            <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20">Общение</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>Популярное</span></div><h3 class="text-lg font-bold text-white">Знакомства и общение</h3><p class="mt-2 text-sm text-slate-400">Найди новых друзей, общайся на любые темы и делись хорошим настроением.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
-            <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">Фильмы</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>Активное</span></div><h3 class="text-lg font-bold text-white">Клуб киноманов</h3><p class="mt-2 text-sm text-slate-400">Обсуждаем новинки кино, делимся рецензиями и советуем лучшие сериалы.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
-            <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-amber-400/10 px-2 py-1 text-xs font-semibold text-amber-400 ring-1 ring-inset ring-amber-400/20">Музыка</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Новое</span></div><h3 class="text-lg font-bold text-white">Меломаны</h3><p class="mt-2 text-sm text-slate-400">Делимся плейлистами, обсуждаем новые альбомы и открываем для себя новых артистов.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
-            <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-sky-400/10 px-2 py-1 text-xs font-semibold text-sky-400 ring-1 ring-inset ring-sky-400/20">Технологии</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>Активное</span></div><h3 class="text-lg font-bold text-white">AI &amp; Разработка</h3><p class="mt-2 text-sm text-slate-400">Обсуждаем нейросети, программирование и последние тренды в мире технологий.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
-            <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel"><div><div class="flex justify-between items-start mb-4"><span class="inline-flex items-center rounded-md bg-pink-400/10 px-2 py-1 text-xs font-semibold text-pink-400 ring-1 ring-inset ring-pink-400/20">Спорт</span><span class="text-xs text-slate-500 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse"></span>Популярное</span></div><h3 class="text-lg font-bold text-white">Спортивный уголок</h3><p class="mt-2 text-sm text-slate-400">Обсуждаем футбол, UFC, NBA и другие соревнования с болельщиками со всего мира.</p></div><div class="mt-6"><a href="{% url 'register' %}" class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать аккаунт</a></div></div>
-            {% endfor %}
+            <div class="mt-6">
+                <a href="{% url 'login' %}"
+                    class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 hover:border-indigo-500/20 py-2 text-xs font-semibold text-slate-300 group-hover:text-white transition">Войти
+                    и присоединиться</a>
+            </div>
         </div>
-    </div>
-
-
-    <!-- Available Models List (Compact width) -->
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 w-full mb-16 sr sr-delay-2">
-        <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-6 sm:mb-8">
-            Доступные провайдеры на данный момент
-        </h3>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-
-            <!-- ChatGPT -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="w-4 h-4 text-[#c7d2fe]" viewBox="0 0 16 16"><path d="M14.949 6.547a3.94 3.94 0 0 0-.348-3.273 4.11 4.11 0 0 0-4.4-1.934A4.1 4.1 0 0 0 8.423.2 4.15 4.15 0 0 0 6.305.086a4.1 4.1 0 0 0-1.891.948 4.04 4.04 0 0 0-1.158 1.753 4.1 4.1 0 0 0-1.563.679A4 4 0 0 0 .554 4.72a3.99 3.99 0 0 0 .502 4.731 3.94 3.94 0 0 0 .346 3.274 4.11 4.11 0 0 0 4.402 1.933c.382.425.852.764 1.377.995.526.231 1.095.35 1.67.346 1.78.002 3.358-1.132 3.901-2.804a4.1 4.1 0 0 0 1.563-.68 4 4 0 0 0 1.14-1.253 3.99 3.99 0 0 0-.506-4.716m-6.097 8.406a3.05 3.05 0 0 1-1.945-.694l.096-.054 3.23-1.838a.53.53 0 0 0 .265-.455v-4.49l1.366.778q.02.011.025.035v3.722c-.003 1.653-1.361 2.992-3.037 2.996m-6.53-2.75a2.95 2.95 0 0 1-.36-2.01l.095.057L5.29 12.09a.53.53 0 0 0 .527 0l3.949-2.246v1.555a.05.05 0 0 1-.022.041L6.473 13.3c-1.454.826-3.311.335-4.15-1.098m-.85-6.94A3.02 3.02 0 0 1 3.07 3.949v3.785a.51.51 0 0 0 .262.451l3.93 2.237-1.366.779a.05.05 0 0 1-.048 0L2.585 9.342a2.98 2.98 0 0 1-1.113-4.094zm11.216 2.571L8.747 5.576l1.362-.776a.05.05 0 0 1 .048 0l3.265 1.86a3 3 0 0 1 1.173 1.207 2.96 2.96 0 0 1-.27 3.2 3.05 3.05 0 0 1-1.36.997V8.279a.52.52 0 0 0-.276-.445m1.36-2.015-.097-.057-3.226-1.855a.53.53 0 0 0-.53 0L6.249 6.153V4.598a.04.04 0 0 1 .019-.04L9.533 2.7a3.07 3.07 0 0 1 3.257.139c.474.325.843.778 1.066 1.303.223.526.289 1.103.191 1.664zM5.503 8.575 4.139 7.8a.05.05 0 0 1-.026-.037V4.049c0-.57.166-1.127.476-1.607s.752-.864 1.275-1.105a3.08 3.08 0 0 1 3.234.41l-.096.054-3.23 1.838a.53.53 0 0 0-.265.455zm.742-1.577 1.758-1 1.762 1v2l-1.755 1-1.762-1z"/></svg>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">OpenAI</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Универсальная модель от OpenAI для текста, кода и перевода.
-                    </p>
+        {% empty %}
+        <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel border-rose-500/20 border">
+            <div>
+                <div class="flex justify-between items-start mb-4"><span
+                        class="inline-flex items-center rounded-md bg-rose-400/10 px-2 py-1 text-xs font-semibold text-rose-400 ring-1 ring-inset ring-rose-400/20">Игры</span><span
+                        class="text-xs text-slate-500 flex items-center gap-1"><span
+                            class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>Рекомендованное</span>
                 </div>
+                <h3 class="text-lg font-bold text-white">Мир Minecraft &amp; CS2</h3>
+                <p class="mt-2 text-sm text-slate-400">Совместные игры, поиск напарников и обсуждение любимых серверов.
+                </p>
             </div>
-
-            <!-- Claude -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://cdn.simpleicons.org/anthropic/fdba74" class="w-4 h-4" alt="Anthropic">
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Claude</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Модель от Anthropic, известная качеством ответов и логикой.
-                    </p>
-                </div>
-            </div>
-
-            <!-- DeepSeek -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://cdn.simpleicons.org/deepseek/67e8f9" class="w-4 h-4" alt="DeepSeek">
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">DeepSeek</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Модель, отлично справляющаяся с точными науками и кодом.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Grok -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://cdn.simpleicons.org/x/cbd5e1" class="w-4 h-4" alt="xAI">
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Grok</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Ассистент от xAI с оригинальным характером и эрудицией.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Qwen -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://assets.routerai.ru/assets/icons/qwen-826a8925.png" class="w-4 h-4" alt="Qwen">
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Qwen</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Многоязычная модель от Alibaba для самых разных задач.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Groq -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-400"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Groq</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Чипы LPU для невероятно быстрого отклика в реальном времени.
-                    </p>
-                </div>
-            </div>
-
-            <!-- Cerebras -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-400"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Cerebras</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Сверхбыстрый генератор ответов на процессорах Cerebras CS-3.
-                    </p>
-                </div>
-            </div>
-
-            <!-- OpenRouter -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://cdn.simpleicons.org/openrouter/a855f7" class="w-4 h-4" alt="OpenRouter">
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">OpenRouter</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Единый API для доступа к множеству ИИ-моделей.
-                    </p>
-                </div>
-            </div>
-
+            <div class="mt-6"><a href="{% url 'register' %}"
+                    class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать
+                    аккаунт</a></div>
         </div>
+        <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel">
+            <div>
+                <div class="flex justify-between items-start mb-4"><span
+                        class="inline-flex items-center rounded-md bg-indigo-400/10 px-2 py-1 text-xs font-semibold text-indigo-400 ring-1 ring-inset ring-indigo-400/20">Общение</span><span
+                        class="text-xs text-slate-500 flex items-center gap-1"><span
+                            class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>Популярное</span></div>
+                <h3 class="text-lg font-bold text-white">Знакомства и общение</h3>
+                <p class="mt-2 text-sm text-slate-400">Найди новых друзей, общайся на любые темы и делись хорошим
+                    настроением.</p>
+            </div>
+            <div class="mt-6"><a href="{% url 'register' %}"
+                    class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать
+                    аккаунт</a></div>
+        </div>
+        <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel">
+            <div>
+                <div class="flex justify-between items-start mb-4"><span
+                        class="inline-flex items-center rounded-md bg-emerald-400/10 px-2 py-1 text-xs font-semibold text-emerald-400 ring-1 ring-inset ring-emerald-400/20">Фильмы</span><span
+                        class="text-xs text-slate-500 flex items-center gap-1"><span
+                            class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>Активное</span></div>
+                <h3 class="text-lg font-bold text-white">Клуб киноманов</h3>
+                <p class="mt-2 text-sm text-slate-400">Обсуждаем новинки кино, делимся рецензиями и советуем лучшие
+                    сериалы.</p>
+            </div>
+            <div class="mt-6"><a href="{% url 'register' %}"
+                    class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать
+                    аккаунт</a></div>
+        </div>
+        <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel">
+            <div>
+                <div class="flex justify-between items-start mb-4"><span
+                        class="inline-flex items-center rounded-md bg-amber-400/10 px-2 py-1 text-xs font-semibold text-amber-400 ring-1 ring-inset ring-amber-400/20">Музыка</span><span
+                        class="text-xs text-slate-500 flex items-center gap-1"><span
+                            class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>Новое</span></div>
+                <h3 class="text-lg font-bold text-white">Меломаны</h3>
+                <p class="mt-2 text-sm text-slate-400">Делимся плейлистами, обсуждаем новые альбомы и открываем для себя
+                    новых артистов.</p>
+            </div>
+            <div class="mt-6"><a href="{% url 'register' %}"
+                    class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать
+                    аккаунт</a></div>
+        </div>
+        <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel">
+            <div>
+                <div class="flex justify-between items-start mb-4"><span
+                        class="inline-flex items-center rounded-md bg-sky-400/10 px-2 py-1 text-xs font-semibold text-sky-400 ring-1 ring-inset ring-sky-400/20">Технологии</span><span
+                        class="text-xs text-slate-500 flex items-center gap-1"><span
+                            class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>Активное</span></div>
+                <h3 class="text-lg font-bold text-white">AI &amp; Разработка</h3>
+                <p class="mt-2 text-sm text-slate-400">Обсуждаем нейросети, программирование и последние тренды в мире
+                    технологий.</p>
+            </div>
+            <div class="mt-6"><a href="{% url 'register' %}"
+                    class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать
+                    аккаунт</a></div>
+        </div>
+        <div class="card-lift flex flex-col justify-between p-6 rounded-2xl glass-panel">
+            <div>
+                <div class="flex justify-between items-start mb-4"><span
+                        class="inline-flex items-center rounded-md bg-pink-400/10 px-2 py-1 text-xs font-semibold text-pink-400 ring-1 ring-inset ring-pink-400/20">Спорт</span><span
+                        class="text-xs text-slate-500 flex items-center gap-1"><span
+                            class="w-1.5 h-1.5 rounded-full bg-pink-500 animate-pulse"></span>Популярное</span></div>
+                <h3 class="text-lg font-bold text-white">Спортивный уголок</h3>
+                <p class="mt-2 text-sm text-slate-400">Обсуждаем футбол, UFC, NBA и другие соревнования с болельщиками
+                    со всего мира.</p>
+            </div>
+            <div class="mt-6"><a href="{% url 'register' %}"
+                    class="block text-center rounded-xl bg-slate-900 border border-slate-800 hover:bg-indigo-950/20 hover:border-indigo-500/30 py-2 text-xs font-semibold text-slate-300 transition">Создать
+                    аккаунт</a></div>
+        </div>
+        {% endfor %}
     </div>
+</div>
 
-    <!-- Image Generation Models List (Compact width) -->
-    <div class="mx-auto max-w-5xl px-4 sm:px-6 w-full mb-16 sr sr-delay-2">
-        <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-6 sm:mb-8">
-            Модели для генерации изображений
-        </h3>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
 
-            <!-- Krea -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-4 h-4 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-500/10 rounded-sm">K</span>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Krea</span>
-                        </div>
+<!-- Available Models List (Compact width) -->
+<div class="mx-auto max-w-4xl px-4 sm:px-6 w-full mb-16 sr sr-delay-2">
+    <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-6 sm:mb-8">
+        Доступные провайдеры на данный момент
+    </h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+
+        <!-- ChatGPT -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="w-4 h-4 text-[#c7d2fe]" viewBox="0 0 16 16">
+                            <path
+                                d="M14.949 6.547a3.94 3.94 0 0 0-.348-3.273 4.11 4.11 0 0 0-4.4-1.934A4.1 4.1 0 0 0 8.423.2 4.15 4.15 0 0 0 6.305.086a4.1 4.1 0 0 0-1.891.948 4.04 4.04 0 0 0-1.158 1.753 4.1 4.1 0 0 0-1.563.679A4 4 0 0 0 .554 4.72a3.99 3.99 0 0 0 .502 4.731 3.94 3.94 0 0 0 .346 3.274 4.11 4.11 0 0 0 4.402 1.933c.382.425.852.764 1.377.995.526.231 1.095.35 1.67.346 1.78.002 3.358-1.132 3.901-2.804a4.1 4.1 0 0 0 1.563-.68 4 4 0 0 0 1.14-1.253 3.99 3.99 0 0 0-.506-4.716m-6.097 8.406a3.05 3.05 0 0 1-1.945-.694l.096-.054 3.23-1.838a.53.53 0 0 0 .265-.455v-4.49l1.366.778q.02.011.025.035v3.722c-.003 1.653-1.361 2.992-3.037 2.996m-6.53-2.75a2.95 2.95 0 0 1-.36-2.01l.095.057L5.29 12.09a.53.53 0 0 0 .527 0l3.949-2.246v1.555a.05.05 0 0 1-.022.041L6.473 13.3c-1.454.826-3.311.335-4.15-1.098m-.85-6.94A3.02 3.02 0 0 1 3.07 3.949v3.785a.51.51 0 0 0 .262.451l3.93 2.237-1.366.779a.05.05 0 0 1-.048 0L2.585 9.342a2.98 2.98 0 0 1-1.113-4.094zm11.216 2.571L8.747 5.576l1.362-.776a.05.05 0 0 1 .048 0l3.265 1.86a3 3 0 0 1 1.173 1.207 2.96 2.96 0 0 1-.27 3.2 3.05 3.05 0 0 1-1.36.997V8.279a.52.52 0 0 0-.276-.445m1.36-2.015-.097-.057-3.226-1.855a.53.53 0 0 0-.53 0L6.249 6.153V4.598a.04.04 0 0 1 .019-.04L9.533 2.7a3.07 3.07 0 0 1 3.257.139c.474.325.843.778 1.066 1.303.223.526.289 1.103.191 1.664zM5.503 8.575 4.139 7.8a.05.05 0 0 1-.026-.037V4.049c0-.57.166-1.127.476-1.607s.752-.864 1.275-1.105a3.08 3.08 0 0 1 3.234.41l-.096.054-3.23 1.838a.53.53 0 0 0-.265.455zm.742-1.577 1.758-1 1.762 1v2l-1.755 1-1.762-1z" />
+                        </svg>
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">OpenAI</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Krea 2 Medium Turbo. Мощная генерация и image-to-image.
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Универсальная модель от OpenAI для текста, кода и перевода.
+                </p>
             </div>
+        </div>
 
-            <!-- Riverflow -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-4 h-4 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-500/10 rounded-sm">R</span>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Riverflow</span>
-                        </div>
+        <!-- Claude -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="https://cdn.simpleicons.org/anthropic/fdba74" class="w-4 h-4" alt="Anthropic">
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Claude</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Быстрая генерация изображений в высоком разрешении 2K.
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Модель от Anthropic, известная качеством ответов и логикой.
+                </p>
             </div>
+        </div>
 
-            <!-- Grok -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://cdn.simpleicons.org/x/cbd5e1" class="w-4 h-4" alt="xAI">
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Grok</span>
-                        </div>
+        <!-- DeepSeek -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="https://cdn.simpleicons.org/deepseek/67e8f9" class="w-4 h-4" alt="DeepSeek">
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">DeepSeek</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        SpaceXAI: Grok Imagine Image Quality (разрешение 1K).
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Модель, отлично справляющаяся с точными науками и кодом.
+                </p>
             </div>
+        </div>
 
-            <!-- FLUX -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="w-4 h-4 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-500/10 rounded-sm">F</span>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">FLUX.2 Pro</span>
-                        </div>
+        <!-- Grok -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="https://cdn.simpleicons.org/x/cbd5e1" class="w-4 h-4" alt="xAI">
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Grok</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Мощная фотореалистичная модель от Black Forest Labs.
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Ассистент от xAI с оригинальным характером и эрудицией.
+                </p>
             </div>
+        </div>
 
-            <!-- Qwen -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <img src="https://assets.routerai.ru/assets/icons/qwen-826a8925.png" alt="Qwen" class="w-4 h-4">
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Qwen Image</span>
-                        </div>
+        <!-- Qwen -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="https://assets.routerai.ru/assets/icons/qwen-826a8925.png" class="w-4 h-4" alt="Qwen">
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Qwen</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Продвинутая модель генерации изображений от Qwen (1K).
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Многоязычная модель от Alibaba для самых разных задач.
+                </p>
             </div>
+        </div>
 
-            <!-- Pollinations -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Pollinations</span>
-                        </div>
+        <!-- Groq -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-red-400">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                        </svg>
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Groq</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Бесплатная комьюнити-версия Flux с отличным качеством.
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Чипы LPU для невероятно быстрого отклика в реальном времени.
+                </p>
             </div>
+        </div>
 
-            <!-- AI Horde -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">AI Horde</span>
-                        </div>
+        <!-- Cerebras -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="text-emerald-400">
+                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                            <rect x="9" y="9" width="6" height="6" />
+                            <line x1="9" y1="1" x2="9" y2="4" />
+                            <line x1="15" y1="1" x2="15" y2="4" />
+                            <line x1="9" y1="20" x2="9" y2="23" />
+                            <line x1="15" y1="20" x2="15" y2="23" />
+                            <line x1="20" y1="9" x2="23" y2="9" />
+                            <line x1="20" y1="14" x2="23" y2="14" />
+                            <line x1="1" y1="9" x2="4" y2="9" />
+                            <line x1="1" y1="14" x2="4" y2="14" />
+                        </svg>
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Cerebras</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Децентрализованная сеть генерации без цензуры (Uncensored).
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Сверхбыстрый генератор ответов на процессорах Cerebras CS-3.
+                </p>
             </div>
+        </div>
 
-            <!-- HuggingFace -->
-            <div class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <div class="flex items-center gap-2">
-                            <svg class="w-4 h-4 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="2"/><circle cx="15" cy="9" r="2"/><path stroke-linecap="round" stroke-linejoin="round" d="M5 17c0-2 1.5-4 7-4s7 2 7 4"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/></svg>
-                            <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">HuggingFace</span>
-                        </div>
+        <!-- OpenRouter -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="https://cdn.simpleicons.org/openrouter/a855f7" class="w-4 h-4" alt="OpenRouter">
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">OpenRouter</span>
                     </div>
-                    <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
-                        Открытые модели сообщества: SDXL, Stable Diffusion и другие.
-                    </p>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Единый API для доступа к множеству ИИ-моделей.
+                </p>
             </div>
-
         </div>
 
     </div>
+</div>
 
-    <!-- FAQ Accordion Section -->
-    <div class="mx-auto max-w-3xl px-4 sm:px-6 w-full mb-4 sr sr-delay-3">
-        <h3 class="text-xl sm:text-2xl font-bold text-white text-center mb-8">Часто задаваемые вопросы</h3>
-        <div class="glass-panel rounded-3xl border border-slate-800 px-6 sm:px-8 py-2">
+<!-- Image Generation Models List (Compact width) -->
+<div class="mx-auto max-w-5xl px-4 sm:px-6 w-full mb-16 sr sr-delay-2">
+    <h3 class="text-lg sm:text-xl font-bold text-white text-center mb-6 sm:mb-8">
+        Модели для генерации изображений
+    </h3>
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
 
-            <!-- FAQ 1 -->
-            <div class="faq-item">
-                <button class="faq-trigger" aria-expanded="false">
-                    <span>Как настроить API-интеграцию?</span>
-                    <span class="faq-icon">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
-                    </span>
-                </button>
-                <div class="faq-body">
-                    <div class="faq-body-inner">
-                        <p>Подключение занимает пару минут:</p>
-                        <ol>
-                            <li>Перейдите в <strong>Личный кабинет</strong> и откройте вкладку управления нейросетями.</li>
-                            <li>Выберите нужного AI-провайдера и укажите ваш личный <strong>API-ключ</strong>.</li>
-                            <li>В настройках любой созданной вами комнаты отметьте галочками модели, которые вы хотите сделать доступными для участников.</li>
-                        </ol>
+        <!-- Krea -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="w-4 h-4 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-500/10 rounded-sm">K</span>
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Krea</span>
                     </div>
                 </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Krea 2 Medium Turbo. Мощная генерация и image-to-image.
+                </p>
             </div>
-
-            <!-- FAQ 2 -->
-            <div class="faq-item">
-                <button class="faq-trigger" aria-expanded="false">
-                    <span>Как общаться с моделями?</span>
-                    <span class="faq-icon">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
-                    </span>
-                </button>
-                <div class="faq-body">
-                    <div class="faq-body-inner">
-                        <p>После того как владелец комнаты подключил нейросеть, любой участник чата может обратиться к ней напрямую:</p>
-                        <ol>
-                            <li>Начните сообщение с упоминания провайдера через <strong>@</strong> (например, <code>@openrouter</code>, <code>@groq</code>, <code>@cerebras</code> или <code>@routerai</code>).</li>
-                            <li>Введите ваш вопрос или задачу после упоминания (например: <em>«@groq какая сегодня погода»</em>).</li>
-                            <li>Нейросеть мгновенно обработает ваш запрос и отправит ответ прямо в общий диалог комнаты.</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ 3 -->
-            <div class="faq-item">
-                <button class="faq-trigger" aria-expanded="false">
-                    <span>Можно ли использовать NextRoom без регистрации?</span>
-                    <span class="faq-icon">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
-                    </span>
-                </button>
-                <div class="faq-body">
-                    <div class="faq-body-inner">
-                        <p>Да. Вы можете просматривать открытые комнаты и общаться с их участниками. Регистрация нужна для создания собственных пространств, подключения ИИ-моделей и сохранения персональных настроек.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FAQ 4 -->
-            <div class="faq-item" style="border-bottom:none">
-                <button class="faq-trigger" aria-expanded="false">
-                    <span>Какие нейросети можно подключить?</span>
-                    <span class="faq-icon">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14"/></svg>
-                    </span>
-                </button>
-                <div class="faq-body">
-                    <div class="faq-body-inner">
-                        <p>В настоящий момент поддерживаются провайдеры: <code>@openrouter</code>, <code>@groq</code>, <code>@cerebras</code> и <code>@routerai</code>. Выберите нужного провайдера, и он обработает ваш запрос с помощью выбранной в настройках модели. Список постоянно расширяется.</p>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <!-- Riverflow -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="w-4 h-4 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-500/10 rounded-sm">R</span>
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Riverflow</span>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Быстрая генерация изображений в высоком разрешении 2K.
+                </p>
+            </div>
+        </div>
+
+        <!-- Grok -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="https://cdn.simpleicons.org/x/cbd5e1" class="w-4 h-4" alt="xAI">
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Grok</span>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    SpaceXAI: Grok Imagine Image Quality (разрешение 1K).
+                </p>
+            </div>
+        </div>
+
+        <!-- FLUX -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="w-4 h-4 flex items-center justify-center text-xs font-bold text-indigo-400 bg-indigo-500/10 rounded-sm">F</span>
+                        <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">FLUX.2
+                            Pro</span>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Мощная фотореалистичная модель от Black Forest Labs.
+                </p>
+            </div>
+        </div>
+
+        <!-- Qwen -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <img src="https://assets.routerai.ru/assets/icons/qwen-826a8925.png" alt="Qwen" class="w-4 h-4">
+                        <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">Qwen
+                            Image</span>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Продвинутая модель генерации изображений от Qwen (1K).
+                </p>
+            </div>
+        </div>
+
+        <!-- Pollinations -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                            </path>
+                        </svg>
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">Pollinations</span>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Бесплатная комьюнити-версия Flux с отличным качеством.
+                </p>
+            </div>
+        </div>
+
+        <!-- AI Horde -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                            </path>
+                        </svg>
+                        <span class="font-bold text-white text-sm" style="font-family: 'Tektur', sans-serif;">AI
+                            Horde</span>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Децентрализованная сеть генерации без цензуры (Uncensored).
+                </p>
+            </div>
+        </div>
+
+        <!-- HuggingFace -->
+        <div
+            class="card-lift glass-panel p-4 rounded-2xl border border-indigo-500/10 flex flex-col justify-between hover:border-indigo-500/30 transition duration-300 premium-card">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-yellow-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="9" cy="9" r="2" />
+                            <circle cx="15" cy="9" r="2" />
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 17c0-2 1.5-4 7-4s7 2 7 4" />
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" />
+                        </svg>
+                        <span class="font-bold text-white text-sm"
+                            style="font-family: 'Tektur', sans-serif;">HuggingFace</span>
+                    </div>
+                </div>
+                <p class="text-[11px] sm:text-xs text-slate-400 leading-normal">
+                    Открытые модели сообщества: SDXL, Stable Diffusion и другие.
+                </p>
+            </div>
+        </div>
+
     </div>
 
+</div>
 
+<!-- FAQ Accordion Section -->
+<div class="mx-auto max-w-3xl px-4 sm:px-6 w-full mb-4 sr sr-delay-3">
+    <h3 class="text-xl sm:text-2xl font-bold text-white text-center mb-8">Часто задаваемые вопросы</h3>
+    <div class="glass-panel rounded-3xl border border-slate-800 px-6 sm:px-8 py-2">
 
+        <!-- FAQ 1 -->
+        <div class="faq-item">
+            <button class="faq-trigger" aria-expanded="false">
+                <span>Как настроить API-интеграцию?</span>
+                <span class="faq-icon">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14" />
+                    </svg>
+                </span>
+            </button>
+            <div class="faq-body">
+                <div class="faq-body-inner">
+                    <p>Подключение занимает пару минут:</p>
+                    <ol>
+                        <li>Перейдите в <strong>Личный кабинет</strong> и откройте вкладку управления нейросетями.</li>
+                        <li>Выберите нужного AI-провайдера и укажите ваш личный <strong>API-ключ</strong>.</li>
+                        <li>В настройках любой созданной вами комнаты отметьте галочками модели, которые вы хотите
+                            сделать доступными для участников.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="faq-item">
+            <button class="faq-trigger" aria-expanded="false">
+                <span>Как общаться с моделями?</span>
+                <span class="faq-icon">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14" />
+                    </svg>
+                </span>
+            </button>
+            <div class="faq-body">
+                <div class="faq-body-inner">
+                    <p>После того как владелец комнаты подключил нейросеть, любой участник чата может обратиться к ней
+                        напрямую:</p>
+                    <ol>
+                        <li>Начните сообщение с упоминания провайдера через <strong>@</strong> (например,
+                            <code>@openrouter</code>, <code>@groq</code>, <code>@cerebras</code> или
+                            <code>@routerai</code>).
+                        </li>
+                        <li>Введите ваш вопрос или задачу после упоминания (например: <em>«@groq какая сегодня
+                                погода»</em>).</li>
+                        <li>Нейросеть мгновенно обработает ваш запрос и отправит ответ прямо в общий диалог комнаты.
+                        </li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="faq-item">
+            <button class="faq-trigger" aria-expanded="false">
+                <span>Можно ли использовать NextRoom без регистрации?</span>
+                <span class="faq-icon">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14" />
+                    </svg>
+                </span>
+            </button>
+            <div class="faq-body">
+                <div class="faq-body-inner">
+                    <p>Да. Вы можете просматривать открытые комнаты и общаться с их участниками. Регистрация нужна для
+                        создания собственных пространств, подключения ИИ-моделей и сохранения персональных настроек.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="faq-item" style="border-bottom:none">
+            <button class="faq-trigger" aria-expanded="false">
+                <span>Какие нейросети можно подключить?</span>
+                <span class="faq-icon">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 5v14M5 12h14" />
+                    </svg>
+                </span>
+            </button>
+            <div class="faq-body">
+                <div class="faq-body-inner">
+                    <p>В настоящий момент поддерживаются провайдеры: <code>@openrouter</code>, <code>@groq</code>,
+                        <code>@cerebras</code> и <code>@routerai</code>. Выберите нужного провайдера, и он обработает
+                        ваш запрос с помощью выбранной в настройках модели. Список постоянно расширяется.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- VPN Promo Modal -->
+<div id="vpn-promo-modal" style="display:none; position:fixed; inset:0; z-index:99999; align-items:center; justify-content:center; padding:16px; font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; opacity:0; transition:opacity 0.3s ease;">
+  <!-- Backdrop -->
+  <div onclick="closeVpnModal()" style="position:absolute; inset:0; background:rgba(3,7,18,0.82); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); cursor:pointer;"></div>
+  
+  <!-- Modal Card -->
+  <div style="position:relative; max-width:430px; width:100%; background:linear-gradient(160deg, rgba(17,24,39,0.97) 0%, rgba(10,15,30,0.98) 100%); border:1px solid rgba(56,189,248,0.28); box-shadow:0 25px 60px -15px rgba(0,0,0,0.85), 0 0 45px rgba(56,189,248,0.16); border-radius:24px; padding:32px 24px; text-align:center; color:#fff; transform:scale(0.95); transition:transform 0.3s cubic-bezier(0.16,1,0.3,1); box-sizing:border-box;">
+    
+    <!-- Top-Right Close Button -->
+    <button onclick="closeVpnModal()" aria-label="Закрыть" style="position:absolute; top:16px; right:16px; background:none; border:none; padding:4px; color:#64748b; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:color 0.2s, transform 0.2s;" onmouseover="this.style.color='#f8fafc'; this.style.transform='scale(1.15)'" onmouseout="this.style.color='#64748b'; this.style.transform='scale(1)'">
+      <svg style="width:12px; height:12px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <!-- Title -->
+    <h2 style="font-size:23px; margin:4px 0 20px 0; font-weight:800; letter-spacing:-0.4px; line-height:1.3; color:#f8fafc;">
+      Свободный и быстрый интернет<br>со скидкой <span style="background:linear-gradient(90deg,#38bdf8,#818cf8); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">-20%</span>
+    </h2>
+    
+    <!-- Feature List Cards -->
+    <div style="display:flex; flex-direction:column; gap:9px; margin-bottom:24px; text-align:left;">
+      
+      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+          <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+        </div>
+        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+          <strong style="color:#fff; font-weight:600;">Максимальная скорость</strong> и полная анонимность
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+          <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+        </div>
+        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+          <strong style="color:#fff; font-weight:600;">Пробный период 3 дня</strong> бесплатно
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+          <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+        </div>
+        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+          <strong style="color:#fff; font-weight:600;">Обход блокировок</strong> и «белых списков»
+        </div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px; padding:11px 14px; background:rgba(15,23,42,0.65); border:1px solid rgba(255,255,255,0.06); border-radius:14px; transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(56,189,248,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.06)'">
+        <div style="width:26px; height:26px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:rgba(56,189,248,0.15); border:1px solid rgba(56,189,248,0.35); border-radius:50%;">
+          <svg style="width:14px; height:14px; color:#38bdf8;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+        </div>
+        <div style="font-size:13.5px; color:#cbd5e1; line-height:1.4;">
+          <strong style="color:#fff; font-weight:600;">Выгодная подписка</strong> от 119 ₽/мес
+        </div>
+      </div>
+
+    </div>
+    
+    <!-- CTA Button -->
+    <a href="https://t.me/VPNcv2_bot?start=invite_5486734706" target="_blank" onclick="closeVpnModal()" style="display:block; width:100%; box-sizing:border-box; padding:14px 20px; font-size:15px; font-weight:700; color:#030712; background:linear-gradient(135deg,#38bdf8 0%,#6366f1 100%); border-radius:14px; text-decoration:none; box-shadow:0 10px 25px -5px rgba(56,189,248,0.45); transition:all 0.2s; cursor:pointer;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 14px 30px -5px rgba(56,189,248,0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(56,189,248,0.45)'">
+      Активировать скидку
+    </a>
+
+    <!-- Promo Code Info -->
+    <div style="margin-top:14px; font-size:12.5px; color:#94a3b8; display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:6px;">
+      <span>Активируйте скидку по промокоду:</span>
+      <span style="font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; font-weight:700; color:#38bdf8; background:rgba(56,189,248,0.12); border:1px solid rgba(56,189,248,0.35); padding:2px 8px; border-radius:6px; letter-spacing:0.5px; user-select:all;">FASTVPN</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    if (!sessionStorage.getItem('vpn_banner_dismissed')) {
+      setTimeout(function() {
+        var m = document.getElementById('vpn-promo-modal');
+        if (m) {
+          m.style.display = 'flex';
+          requestAnimationFrame(function() {
+            m.style.opacity = '1';
+            m.children[1].style.transform = 'scale(1)';
+          });
+        }
+      }, 700);
+    }
+  })();
+
+  function closeVpnModal() {
+    var m = document.getElementById('vpn-promo-modal');
+    if (m) {
+      m.style.opacity = '0';
+      m.children[1].style.transform = 'scale(0.95)';
+      setTimeout(function() {
+        m.style.display = 'none';
+      }, 300);
+    }
+    sessionStorage.setItem('vpn_banner_dismissed', 'true');
+  }
+</script>
 {% endblock %}

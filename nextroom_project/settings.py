@@ -23,23 +23,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
-
-if not os.environ.get('VERCEL') and not os.environ.get('DJANGO_DEBUG', 'False') == 'True' and not SECRET_KEY:
-    raise ImproperlyConfigured("DJANGO_SECRET_KEY must not be empty in production!")
-elif not SECRET_KEY:
-    SECRET_KEY = 'django-insecure-4oy4*jok7@v$c(#d=w8&pj+v90imq(v4zu*5u+wv40)@qwc4=n'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True' if not os.environ.get('VERCEL') else 'False') == 'True'
 if os.environ.get('VERCEL'):
     DEBUG = False
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+
+if not SECRET_KEY:
+    if not DEBUG and not os.environ.get('VERCEL'):
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must not be empty in production!")
+    SECRET_KEY = 'django-insecure-4oy4*jok7@v$c(#d=w8&pj+v90imq(v4zu*5u+wv40)@qwc4=n'
+
 # Security Settings
-SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = not DEBUG
 SESSION_COOKIE_HTTPONLY = True
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = not DEBUG
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -56,10 +56,15 @@ if not DEBUG:
     SECURE_HSTS_PRELOAD = True
 
 env_hosts = os.environ.get('ALLOWED_HOSTS')
-ALLOWED_HOSTS = env_hosts.split(',') if env_hosts else []
-# Always allow vercel subdomains in this environment to prevent DisallowedHost on deployments
-ALLOWED_HOSTS.append('.vercel.app')
-ALLOWED_HOSTS.append('nextroom.vercel.app')
+if env_hosts:
+    ALLOWED_HOSTS = [h.strip() for h in env_hosts.split(',') if h.strip()]
+else:
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '.vercel.app', 'nextroom.vercel.app', '*']
+
+# Always make sure local and vercel hosts are permitted
+for host in ['localhost', '127.0.0.1', '[::1]', '.vercel.app', 'nextroom.vercel.app']:
+    if host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
 
 
 # Application definition
